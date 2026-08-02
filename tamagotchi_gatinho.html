@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamagotchi Gatinho Fofinho</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #fdfbf7;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .device {
+      background-color: #ffb6c1;
+      width: 300px;
+      height: 400px;
+      border-radius: 150px 150px 150px 150px / 200px 200px 150px 150px;
+      box-shadow: inset -10px -10px 20px rgba(0,0,0,0.1), 10px 10px 20px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border: 4px solid #ff99a8;
+      position: relative;
+    }
+    .screen {
+      background-color: #e2f5dc;
+      width: 200px;
+      height: 200px;
+      border-radius: 20px;
+      margin-top: 40px;
+      box-shadow: inset 5px 5px 10px rgba(0,0,0,0.1);
+      border: 4px solid #a3b89e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .stats {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: #556;
+      text-transform: uppercase;
+    }
+    .cat-container {
+      margin-top: 20px;
+      animation: breathe 1.5s infinite alternate;
+    }
+    @keyframes breathe {
+      from { transform: scale(1) translateY(0); }
+      to { transform: scale(1.03) translateY(-4px); }
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      width: 180px;
+      margin-top: 45px;
+    }
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .btn {
+      background-color: #ff69b4;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      transition: transform 0.1s;
+    }
+    .btn:active {
+      transform: scale(0.9);
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    .label {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #a84768;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .status-msg {
+      position: absolute;
+      bottom: 10px;
+      font-size: 10px;
+      color: #556;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<div class="device">
+  <div class="screen">
+    <div class="stats">
+      <span>Fome: <span id="fome">50</span>%</span>
+      <span>Feliz: <span id="feliz">50</span>%</span>
+    </div>
+    
+    <div class="cat-container" id="cat">
+      <svg viewBox="0 0 100 100" width="110" height="110">
+        <!-- Rosto -->
+        <circle cx="50" cy="50" r="35" fill="#fcecd4" />
+        
+        <!-- Orelhas (Trás/Sombra leve) -->
+        <polygon points="12,25 18,3 35,20" fill="#fcecd4" />
+        <polygon points="88,25 82,3 65,20" fill="#fcecd4" />
+        
+        <!-- Interior das Orelhas -->
+        <polygon points="17,21 21,9 31,19" fill="#f4b8b8" />
+        <polygon points="83,21 79,9 69,19" fill="#f4b8b8" />
+        
+        <!-- Manchas do Gatinho -->
+        <path d="M 50 15 Q 40 25 35 15" fill="#e8c9a5" opacity="0.6"/>
+        <path d="M 50 15 Q 60 25 65 15" fill="#e8c9a5" opacity="0.6"/>
+        
+        <!-- Olhos (fofinhos, pretos com brilho) -->
+        <circle cx="36" cy="46" r="6" fill="#4a3b32" />
+        <circle cx="64" cy="46" r="6" fill="#4a3b32" />
+        <!-- Brilho dos olhos -->
+        <circle cx="38" cy="44" r="2.5" fill="#fff" />
+        <circle cx="66" cy="44" r="2.5" fill="#fff" />
+        
+        <!-- Bochechas rosadas -->
+        <ellipse cx="24" cy="56" rx="6" ry="4" fill="#f4b8b8" opacity="0.7" />
+        <ellipse cx="76" cy="56" rx="6" ry="4" fill="#f4b8b8" opacity="0.7" />
+        
+        <!-- Focinho -->
+        <polygon points="47,56 53,56 50,60" fill="#f4b8b8" />
+        
+        <!-- Boca -->
+        <path d="M 50 60 Q 46 66 42 61" stroke="#4a3b32" fill="none" stroke-width="2.5" stroke-linecap="round" />
+        <path d="M 50 60 Q 54 66 58 61" stroke="#4a3b32" fill="none" stroke-width="2.5" stroke-linecap="round" />
+        
+        <!-- Bigodes curtinhos e fofos -->
+        <line x1="12" y1="52" x2="25" y2="54" stroke="#8a7364" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="10" y1="58" x2="24" y2="57" stroke="#8a7364" stroke-width="1.5" stroke-linecap="round"/>
+        
+        <line x1="88" y1="52" x2="75" y2="54" stroke="#8a7364" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="90" y1="58" x2="76" y2="57" stroke="#8a7364" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    
+    <div class="status-msg" id="status-msg">Tudo miau-maravilhoso!</div>
+  </div>
+
+  <div class="buttons">
+    <div class="btn-container">
+      <button class="btn" onclick="feed()">A</button>
+      <div class="label">Comer</div>
+    </div>
+    <div class="btn-container">
+      <button class="btn" onclick="play()">B</button>
+      <div class="label">Brincar</div>
+    </div>
+    <div class="btn-container">
+      <button class="btn" onclick="sleep()">C</button>
+      <div class="label">Dormir</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let fome = 50;
+  let feliz = 80;
+  
+  const fomeEl = document.getElementById('fome');
+  const felizEl = document.getElementById('feliz');
+  const catEl = document.getElementById('cat');
+  const msgEl = document.getElementById('status-msg');
+
+  function updateStats() {
+    fomeEl.innerText = fome;
+    felizEl.innerText = feliz;
+    
+    if (fome > 80 || feliz < 30) {
+      catEl.style.animationDuration = '3s';
+      msgEl.innerText = fome > 80 ? 'Estou com fominha!' : 'Estou triste...';
+      msgEl.style.color = '#d64c4c';
+    } else {
+      catEl.style.animationDuration = '1.5s';
+      msgEl.innerText = 'Miau! Tô feliz!';
+      msgEl.style.color = '#556';
+    }
+  }
+
+  function feed() {
+    fome = Math.max(0, fome - 25);
+    feliz = Math.min(100, feliz + 10);
+    msgEl.innerText = 'Nham nham...';
+    updateStats();
+  }
+
+  function play() {
+    feliz = Math.min(100, feliz + 25);
+    fome = Math.min(100, fome + 15);
+    msgEl.innerText = 'Purrrr...';
+    updateStats();
+  }
+
+  function sleep() {
+    feliz = Math.min(100, feliz + 15);
+    fome = Math.min(100, fome + 10);
+    msgEl.innerText = 'Zzz... zzz...';
+    updateStats();
+  }
+
+  setInterval(() => {
+    fome = Math.min(100, fome + 5);
+    feliz = Math.max(0, feliz - 5);
+    updateStats();
+  }, 5000);
+</script>
+</body>
+</html>

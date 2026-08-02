@@ -9,21 +9,35 @@
   var AWAY_DECAY_PER_H = 4;
 
   var SHELLS = {
-    rosa: { fur: '#e33d6b', furLight: '#f7c9d6', furEar: '#ffe1ea' },
-    ocre: { fur: '#d49a2c', furLight: '#f7e2b4', furEar: '#ffe9b8' },
-    azul: { fur: '#1b6f7e', furLight: '#b8e6ef', furEar: '#d6f4fa' },
-    tuxedo: { fur: '#2a2621', furLight: '#f6efdc', furEar: '#d9d0bd' }
+    classic: { bezel: '#6b3fa0', accent: '#c9a0ff', bg: '#4a2a78' },
+    rosa: { bezel: '#e33d6b', accent: '#f28aa8', bg: '#7a1f3a' },
+    azul: { bezel: '#1b6f7e', accent: '#5ec4d6', bg: '#0c3a45' },
+    amarelo: { bezel: '#d49a2c', accent: '#ffe066', bg: '#6a4a10' }
   };
 
   var STAGES = [
-    { id: 'ovo', minAgeH: 0, label: 'Ovo' },
-    { id: 'bebe', minAgeH: 1, label: 'Bebê' },
-    { id: 'filhote', minAgeH: 8, label: 'Filhote' },
-    { id: 'cria', minAgeH: 36, label: 'Cria' },
-    { id: 'festa', minAgeH: 96, label: 'Festeira' },
-    { id: 'adulta', minAgeH: 168, label: 'Roda' },
-    { id: 'ancia', minAgeH: 288, label: 'Anciã' }
+    { id: 'ovo', minAgeH: 0, label: 'Ovo', sprite: 'ovo' },
+    { id: 'bebe', minAgeH: 1, label: 'Gatinho', sprite: 'bebe' },
+    { id: 'filhote', minAgeH: 8, label: 'Filhote', sprite: 'filhote' },
+    { id: 'cria', minAgeH: 36, label: 'Cria', sprite: 'cria' },
+    { id: 'festa', minAgeH: 96, label: 'Festeira', sprite: 'festa' },
+    { id: 'adulta', minAgeH: 168, label: 'Meow', sprite: 'adulta' },
+    { id: 'ancia', minAgeH: 288, label: 'Anciã', sprite: 'ancia' }
   ];
+
+  var CAT_SVG = {
+    ovo: '<svg class="cat-sprite stage-ovo" viewBox="0 0 80 80" aria-hidden="true"><ellipse cx="40" cy="44" rx="22" ry="28" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M40 16v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="40" cy="14" r="2.2" fill="currentColor"/></svg>',
+    bebe: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M28 28c0-10 24-10 24 0v8c0 14-6 24-12 24s-12-10-12-24z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 24 24 14M50 24l6-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="34" cy="34" r="2.2" fill="currentColor"/><circle cx="46" cy="34" r="2.2" fill="currentColor"/><path d="M36 42c2 2 6 2 8 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    filhote: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M26 30c0-12 28-12 28 0v10c0 16-7 26-14 26S26 56 26 40z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 22 22 10M50 22l8-12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="34" cy="36" r="2.4" fill="currentColor"/><circle cx="46" cy="36" r="2.4" fill="currentColor"/><path d="M36 44c2.5 2.5 7.5 2.5 10 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M18 38c-3-.5-5.5-2-7-4M62 38c3-.5 5.5-2 7-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    cria: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 32c0-14 32-14 32 0v12c0 18-8 28-16 28S24 62 24 44z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M28 20 18 6M52 20l10-14" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="33" cy="36" r="2.6" fill="currentColor"/><circle cx="47" cy="36" r="2.6" fill="currentColor"/><path d="M35 46c3 3 9 3 12 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 40c-4-.6-7-2.5-9-5M66 40c4-.6 7-2.5 9-5M15 48c-3.5.4-7 0-10-1M65 48c3.5.4 7 0 10-1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    festa: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M22 34c0-15 36-15 36 0v12c0 18-9 28-18 28S22 64 22 46z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M28 18 16 4M52 18l12-14" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="33" cy="36" r="2.6" fill="currentColor"/><circle cx="47" cy="36" r="2.6" fill="currentColor"/><path d="M34 48c4 3.5 10 3.5 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M40 8l2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1z" fill="currentColor" opacity=".85"/><path d="M12 40c-4-.5-8-2-10-5M68 40c4-.5 8-2 10-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    adulta: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M20 34c0-16 40-16 40 0v14c0 20-10 30-20 30S20 68 20 48z" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M28 16 14 2M52 16l14-14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="36" r="2.8" fill="currentColor"/><circle cx="48" cy="36" r="2.8" fill="currentColor"/><path d="M34 50c4 3.2 10 3.2 14 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M10 42c-4-.6-8-2.5-11-5.5M70 42c4-.6 8-2.5 11-5.5M11 50c-4 .5-8 0-12-1.2M69 50c4 .5 8 0 12-1.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    ancia: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M20 36c0-16 40-16 40 0v12c0 20-10 30-20 30S20 68 20 48z" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M28 18 16 4M52 18l12-14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M32 34c1.5 2 4 2 5.5 0M43 34c1.5 2 4 2 5.5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M34 50c4 2.5 10 2.5 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M28 12h24l-3 6H31z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="40" cy="9" r="2.5" fill="currentColor"/><path d="M10 44c-4-.5-8-2-11-5M70 44c4-.5 8-2 11-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    sleep: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 34c0-14 32-14 32 0v10c0 16-8 26-16 26S24 60 24 44z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 22 22 12M50 22l8-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M31 36c2 1.5 5 1.5 7 0M42 36c2 1.5 5 1.5 7 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M36 46c2.5 2 7.5 2 10 0" fill="none" stroke="currentColor" stroke-width="1.8"/><text x="58" y="22" fill="currentColor" font-size="10" font-family="sans-serif">z</text></svg>',
+    sick: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 34c0-14 32-14 32 0v10c0 16-8 26-16 26S24 60 24 44z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 22 22 12M50 22l8-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M31 34l5 5M36 34l-5 5M44 34l5 5M49 34l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M36 48c2  -1.5 8-1.5 10 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    gone: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 34c0-14 32-14 32 0v10c0 16-8 26-16 26S24 60 24 44z" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".45"/><path d="M30 22 22 12M50 22l8-10" stroke="currentColor" stroke-width="2" opacity=".45"/><path d="M32 36h6M42 36h6M36 48h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/></svg>'
+  };
+
 
   var CARD_CATALOG = [
     { id: 'c_ovo', name: 'Casca Rosa', rarity: 'comum', emoji: '🥚', how: 'Nascer' },
@@ -31,7 +45,7 @@
     { id: 'c_banho', name: 'Banho de Caneco', rarity: 'comum', emoji: '🧼', how: 'Limpar 3×' },
     { id: 'c_soneca', name: 'Soneca na Praça', rarity: 'comum', emoji: '😴', how: 'Dormir' },
     { id: 'c_mapa', name: 'Mapa do Centro', rarity: 'comum', emoji: '🗺️', how: 'Explorar mapa' },
-    { id: 'r_filhote', name: 'Filhote do Cortejo', rarity: 'raro', emoji: '🐤', how: 'Evoluir p/ Filhote' },
+    { id: 'r_filhote', name: 'Filhote do Cortejo', rarity: 'raro', emoji: '🐱', how: 'Evoluir p/ Filhote' },
     { id: 'r_convento', name: 'Luz do Convento', rarity: 'raro', emoji: '⛪', how: 'Evoluir p/ Cria' },
     { id: 'r_after', name: 'After SE', rarity: 'raro', emoji: '🌙', how: 'After 2×' },
     { id: 'r_scrap', name: 'Scrap de Rua', rarity: 'raro', emoji: '✉️', how: 'Scrap 3×' },
@@ -62,9 +76,9 @@
   function defaultState() {
     var now = Date.now();
     return {
-      started: false, name: 'Roda', bornAt: now, lastTick: now,
+      started: false, name: 'Meow', bornAt: now, lastTick: now,
       hunger: 85, happy: 85, energy: 85, hygiene: 85, health: 100,
-      shell: 'rosa', sleeping: false, sick: false, alive: true,
+      shell: 'classic', sleeping: false, sick: false, alive: true,
       careScore: 0, feedCount: 0, playCount: 0, cleanCount: 0,
       afterCount: 0, scrapCount: 0, stageId: 'ovo', evolutions: 0,
       cards: {}, log: []
@@ -87,8 +101,6 @@
       if (parsed.started) merged.started = true;
       if (parsed.bornAt) merged.bornAt = parsed.bornAt;
       if (parsed.name) merged.name = parsed.name;
-      var legacyShell = { classic: 'rosa', amarelo: 'ocre', stencil: 'tuxedo' };
-      if (!SHELLS[merged.shell]) merged.shell = legacyShell[merged.shell] || 'rosa';
       return merged;
     } catch (_) { return defaultState(); }
   }
@@ -338,14 +350,12 @@
   applyAwayDecay(state);
   save(state);
 
-  function catExpr(s) {
-    if (!s.alive) return 'dead';
-    if (s.sick) return 'sick';
-    if (s.sleeping) return 'sleep';
-    var m = mood(s);
-    if (m === 'happy') return 'happy';
-    if (m === 'sad') return 'sad';
-    return 'normal';
+  function spriteFace(s) {
+    if (!s.alive) return CAT_SVG.gone;
+    if (s.sleeping) return CAT_SVG.sleep;
+    if (s.sick) return CAT_SVG.sick;
+    var key = stageForAge(ageHours(s)).sprite;
+    return CAT_SVG[key] || CAT_SVG.bebe;
   }
   function mood(s) {
     if (!s.alive) return 'gone';
@@ -366,24 +376,11 @@
   }
   function flashEvolve() {
     if (reducedMotion()) return;
-    var stage = $('tama-cat-stage');
-    if (!stage) return;
-    stage.classList.remove('is-pop');
-    void stage.offsetWidth;
-    stage.classList.add('is-pop');
-  }
-  var blinkTimer = null;
-  function scheduleBlink() {
-    clearTimeout(blinkTimer);
-    var delay = 2400 + Math.random() * 2600;
-    blinkTimer = setTimeout(function () {
-      var stage = $('tama-cat-stage');
-      if (stage && !reducedMotion()) {
-        stage.classList.add('is-blink');
-        setTimeout(function () { stage.classList.remove('is-blink'); }, 140);
-      }
-      scheduleBlink();
-    }, delay);
+    var face = $('tama-face');
+    if (!face) return;
+    face.classList.remove('is-pop');
+    void face.offsetWidth;
+    face.classList.add('is-pop');
   }
 
   function setTab(name) {
@@ -431,17 +428,24 @@
     }
     checkEvolution(s);
 
-    var shell = SHELLS[s.shell] || SHELLS.rosa;
+    var shell = SHELLS[s.shell] || SHELLS.classic;
     var device = $('tama-device');
     if (device) {
-      device.style.setProperty('--fur', shell.fur);
-      device.style.setProperty('--fur-light', shell.furLight);
-      device.style.setProperty('--fur-ear', shell.furEar);
+      device.style.setProperty('--bezel', shell.bezel);
+      device.style.setProperty('--accent', shell.accent);
+      device.style.setProperty('--shell-bg', shell.bg);
     }
-    var catEl = $('tama-cat');
-    if (catEl) {
-      catEl.setAttribute('data-stage', (stageForAge(ageHours(s))).id);
-      catEl.setAttribute('data-expr', catExpr(s));
+    var face = $('tama-face');
+    if (face) {
+      face.innerHTML = spriteFace(s);
+      var m = mood(s);
+      var st = (!s.alive) ? 'gone' : (s.sleeping ? 'sleep' : stageForAge(ageHours(s)).id);
+      face.setAttribute('data-mood', m);
+      face.setAttribute('data-stage', st);
+      face.classList.toggle('is-sleep', m === 'sleep');
+      face.classList.toggle('is-sick', m === 'sick');
+      face.classList.toggle('is-happy', m === 'happy');
+      face.classList.toggle('is-sad', m === 'sad');
     }
     var name = $('tama-name');
     if (name) name.textContent = s.name || 'Roda';
@@ -579,8 +583,8 @@
         s.happy = clamp(s.happy + 14, 0, 100);
         s.scrapCount++; s.careScore++; break;
       case 'rename': {
-        var n = prompt('Nome (máx. 12):', s.name || 'Roda');
-        if (n) s.name = String(n).trim().slice(0, 12) || 'Roda';
+        var n = prompt('Nome (máx. 12):', s.name || 'Meow');
+        if (n) s.name = String(n).trim().slice(0, 12) || 'Meow';
         break;
       }
     }
@@ -588,8 +592,20 @@
     var evo = checkEvolution(s);
     save(s);
     render();
-    if (evo) flashEvolve();
-    else flashEvolve();
+    if (evo) {
+      flashEvolve();
+      sfx('evolve');
+    } else {
+      if (kind === 'feed') sfx('feed');
+      else if (kind === 'play' || kind === 'after' || kind === 'mapa' || kind === 'scrap') sfx('play');
+      else if (kind === 'sleep') sfx('sleep');
+      else if (kind === 'medicine' || kind === 'clean') sfx('pop');
+      else sfx('click');
+      if (!reducedMotion()) {
+        var face = $('tama-face');
+        if (face) { face.classList.remove('is-pop'); void face.offsetWidth; face.classList.add('is-pop'); }
+      }
+    }
   }
 
   function wire() {
@@ -612,7 +628,6 @@
     } catch (_) {}
     wire();
     render();
-    scheduleBlink();
     if (state.started) setTab('play');
     setInterval(function () {
       if (!state.started) return;

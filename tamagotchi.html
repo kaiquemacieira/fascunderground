@@ -69,24 +69,95 @@
     }
     .tabs button[aria-selected="true"] { background: var(--rosa); color: #fff; }
 
-    .device {
-      max-width: 20rem; margin: 0 auto; background: var(--shell-bg);
-      border: 3px solid var(--bezel); border-radius: 26px 26px 32px 32px; padding: 0.85rem;
-      box-shadow: 5px 7px 0 rgba(0,0,0,0.45);
-    }
     .screen {
-      background: #0a0908; border: 2px solid rgba(230,220,196,0.12); border-radius: 12px;
-      min-height: 11.5rem; padding: 0.75rem; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 0.2rem; position: relative; overflow: hidden;
+      background:
+        radial-gradient(ellipse 90% 60% at 50% 8%, rgba(255,255,255,0.05), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,0.32), rgba(0,0,0,0.14));
+      border: 1px solid rgba(230,220,196,0.1); border-radius: 20px;
+      min-height: 13.5rem; padding: 0.9rem 0.75rem 0.65rem; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0.18rem; position: relative; overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
     }
     .screen::before {
-      content: ''; position: absolute; inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 3px);
-      pointer-events: none;
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(circle at 22% 20%, rgba(227,61,107,0.16), transparent 42%),
+        radial-gradient(circle at 82% 78%, rgba(212,154,44,0.12), transparent 46%);
+      animation: glow-drift 9s ease-in-out infinite;
     }
-    .face { font-size: 3.6rem; line-height: 1; z-index: 1; filter: drop-shadow(0 3px 0 rgba(0,0,0,0.35)); }
-    .face.is-pop { animation: face-pop 0.4s cubic-bezier(0.34, 1.4, 0.64, 1); }
-    @keyframes face-pop { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
+    @keyframes glow-drift {
+      0%, 100% { opacity: 0.75; transform: translate(0,0); }
+      50% { opacity: 1; transform: translate(3px,-4px); }
+    }
+
+    /* —— Gatinho CRICRI —— */
+    .cat-stage { position: relative; z-index: 1; width: 9.2rem; height: 9.2rem; margin: 0 -0.1rem 0.15rem; }
+    .cat-stage.is-pop .cat-group { animation: cat-pop 0.5s cubic-bezier(0.34,1.4,0.64,1); }
+    .cat-stage svg { width: 100%; height: 100%; overflow: visible; }
+    .cat-group { transform-box: fill-box; transform-origin: 50% 65%; animation: cat-breathe 3.4s ease-in-out infinite; }
+    @keyframes cat-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03) translateY(-1px); } }
+    @keyframes cat-pop {
+      0% { transform: scale(1); } 35% { transform: scale(1.14) rotate(-2deg); }
+      60% { transform: scale(0.97) rotate(1deg); } 100% { transform: scale(1); }
+    }
+    .ear-l, .ear-r { transform-box: fill-box; }
+    .ear-l { transform-origin: 90% 100%; animation: ear-l-wiggle 4.6s ease-in-out infinite; }
+    .ear-r { transform-origin: 10% 100%; animation: ear-r-wiggle 5.3s ease-in-out infinite; }
+    @keyframes ear-l-wiggle { 0%, 86%, 100% { transform: rotate(0deg); } 90% { transform: rotate(-7deg); } 94% { transform: rotate(3deg); } }
+    @keyframes ear-r-wiggle { 0%, 82%, 100% { transform: rotate(0deg); } 87% { transform: rotate(7deg); } 92% { transform: rotate(-3deg); } }
+    .tail { transform-box: fill-box; transform-origin: 0% 100%; animation: tail-swish 2.8s ease-in-out infinite; }
+    @keyframes tail-swish { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(9deg); } }
+    .whiskers { transform-box: fill-box; transform-origin: 50% 50%; animation: whisker-idle 5.5s ease-in-out infinite; }
+    @keyframes whisker-idle { 0%, 90%, 100% { transform: rotate(0deg); } 94% { transform: rotate(2deg); } 97% { transform: rotate(-2deg); } }
+    .cat-eyes > [class^="expr-"], .cat-mouth > [class^="expr-"], .cat-accessory > g { display: none; }
+    .cat-eyes > .expr-normal, .cat-mouth > .expr-normal { display: block; }
+    #tama-cat[data-expr="happy"] .expr-happy,
+    #tama-cat[data-expr="sad"] .expr-sad,
+    #tama-cat[data-expr="sick"] .expr-sick,
+    #tama-cat[data-expr="sleep"] .expr-sleep,
+    #tama-cat[data-expr="dead"] .expr-dead { display: block; }
+    #tama-cat[data-expr="happy"] .expr-normal,
+    #tama-cat[data-expr="sad"] .expr-normal,
+    #tama-cat[data-expr="sick"] .expr-normal,
+    #tama-cat[data-expr="sleep"] .expr-normal,
+    #tama-cat[data-expr="dead"] .expr-normal { display: none; }
+    .eye-pupil { transform-box: fill-box; transform-origin: 50% 50%; }
+    .cat-stage.is-blink .expr-normal .eye-pupil,
+    .cat-stage.is-blink .expr-sad .eye-pupil { transform: scaleY(0.12); }
+    .blush { opacity: 0; transition: opacity 0.3s ease; }
+    #tama-cat[data-expr="happy"] .blush { opacity: 0.8; }
+    .sick-drop { display: none; }
+    #tama-cat[data-expr="sick"] .sick-drop { display: block; animation: drop-fall 1.6s ease-in-out infinite; }
+    @keyframes drop-fall { 0% { transform: translateY(0); opacity: 0.9; } 70% { transform: translateY(6px); opacity: 0.3; } 100% { transform: translateY(6px); opacity: 0; } }
+    .zzz { display: none; }
+    #tama-cat[data-expr="sleep"] .zzz { display: block; }
+    .zzz text { animation: zzz-float 2.6s ease-in infinite; opacity: 0; }
+    .zzz text:nth-child(2) { animation-delay: 0.5s; }
+    .zzz text:nth-child(3) { animation-delay: 1s; }
+    @keyframes zzz-float { 0% { opacity: 0; transform: translate(0,0) scale(0.7); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(10px,-22px) scale(1.15); } }
+    #tama-cat[data-expr="dead"] .cat-group { filter: grayscale(1) brightness(0.72); animation: none; }
+    .egg-shell { display: none; }
+    .cat-body-full { display: block; }
+    #tama-cat[data-stage="ovo"] .egg-shell { display: block; }
+    #tama-cat[data-stage="ovo"] .cat-body-full,
+    #tama-cat[data-stage="ovo"] .ear-l, #tama-cat[data-stage="ovo"] .ear-r,
+    #tama-cat[data-stage="ovo"] .tail, #tama-cat[data-stage="ovo"] .whiskers,
+    #tama-cat[data-stage="ovo"] .cat-mouth, #tama-cat[data-stage="ovo"] .cat-accessory,
+    #tama-cat[data-stage="ovo"] .cat-nose { display: none; }
+    #tama-cat[data-stage="ovo"] .cat-eyes { transform: translateY(6px) scale(0.85); }
+    #tama-cat[data-stage="ovo"] .cat-group { animation: egg-bob 2.4s ease-in-out infinite; }
+    @keyframes egg-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    #tama-cat[data-stage="bebe"] .acc-bow,
+    #tama-cat[data-stage="filhote"] .acc-bow { display: block; }
+    #tama-cat[data-stage="festa"] .acc-glasses,
+    #tama-cat[data-stage="festa"] .acc-confetti { display: block; }
+    #tama-cat[data-stage="adulta"] .acc-flower { display: block; }
+    #tama-cat[data-stage="ancia"] .acc-crown,
+    #tama-cat[data-stage="ancia"] .acc-sparkle { display: block; }
+    .acc-confetti rect, .acc-sparkle path { animation: twinkle 1.8s ease-in-out infinite; }
+    .acc-confetti rect:nth-child(2) { animation-delay: 0.3s; } .acc-confetti rect:nth-child(3) { animation-delay: 0.6s; }
+    .acc-sparkle path:nth-child(2) { animation-delay: 0.4s; } .acc-sparkle path:nth-child(3) { animation-delay: 0.8s; }
+    @keyframes twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.75); } 50% { opacity: 1; transform: scale(1.1); } }
     .name { z-index: 1; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
     .meta { z-index: 1; display: flex; gap: 0.5rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); }
     .status { z-index: 1; font-size: 0.72rem; text-align: center; color: var(--paper); max-width: 16rem; line-height: 1.3; margin-top: 0.15rem; }
@@ -216,102 +287,60 @@
     html[data-theme="light"] .photo-card { background: rgba(255,254,248,0.9); border-color: rgba(23,18,14,0.1); }
 
 
-    /* —— Tamagotchi clássico (estética ovo / LCD) —— */
+    /* —— Device moderno CRICRI (combina com o site) —— */
     .device {
-      --bezel: #6b3fa0;
-      --accent: #c9a0ff;
-      --shell-bg: #4a2a78;
+      --fur: #e33d6b; --fur-light: #f7c9d6; --fur-ear: #ffe1ea;
       position: relative;
-      max-width: 20rem;
+      max-width: 20.5rem;
       margin: 0 auto 1rem;
-      padding: 1.35rem 1.15rem 1.1rem;
-      border-radius: 52% 52% 46% 46% / 48% 48% 52% 52%;
+      padding: 1.1rem 1.05rem 1rem;
+      border-radius: 26px;
       background:
-        radial-gradient(ellipse 70% 50% at 50% 18%, rgba(255,255,255,0.18), transparent 55%),
-        linear-gradient(165deg, var(--accent) 0%, var(--bezel) 42%, var(--shell-bg) 100%);
-      border: 3px solid rgba(255,255,255,0.22);
+        linear-gradient(165deg, rgba(235,227,207,0.06), rgba(0,0,0,0.2)),
+        var(--ink);
+      border: 1px solid rgba(230,220,196,0.14);
       box-shadow:
-        0 12px 0 rgba(0,0,0,0.35),
-        inset 0 2px 0 rgba(255,255,255,0.25),
-        inset 0 -8px 20px rgba(0,0,0,0.25);
+        0 18px 46px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.07);
+      overflow: hidden;
     }
     .device::before {
-      content: 'TAMAGOTCHI';
-      display: block;
-      text-align: center;
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 0.62rem;
-      letter-spacing: 0.28em;
-      color: rgba(255,255,255,0.92);
-      text-shadow: 0 1px 0 rgba(0,0,0,0.25);
-      margin-bottom: 0.55rem;
+      content: '';
+      position: absolute; inset: -40% -20% auto -20%; height: 60%;
+      background: radial-gradient(ellipse 60% 100% at 50% 0%, color-mix(in srgb, var(--fur) 45%, transparent), transparent 70%);
+      pointer-events: none; z-index: 0; filter: blur(6px);
+      animation: shell-pulse 6s ease-in-out infinite;
     }
-    .screen {
-      background: #c5e8a8;
-      border: 4px solid #1a1a18;
-      border-radius: 12px;
-      min-height: 11.5rem;
-      padding: 0.65rem 0.55rem 0.55rem;
-      box-shadow:
-        inset 0 0 0 2px #8fbc6a,
-        inset 0 4px 12px rgba(0,0,0,0.12);
-      color: #1a2e12;
-      position: relative;
+    @keyframes shell-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.95; } }
+    .device-top {
+      position: relative; z-index: 1; display: flex; justify-content: center; align-items: center;
+      gap: 0.4rem; margin-bottom: 0.55rem;
     }
-    .screen-top {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; color: #2a4018; margin-bottom: 0.35rem;
+    .device-top span {
+      font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 0.6rem;
+      letter-spacing: 0.32em; text-transform: uppercase; color: var(--stone);
     }
-    .sprite-wrap {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 5.5rem; gap: 0.2rem;
-    }
-    .sprite {
-      font-size: 3.4rem; line-height: 1;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,0.15));
-      image-rendering: pixelated;
-    }
-    .sprite-name {
-      font-family: 'Oswald', sans-serif; font-weight: 700;
-      font-size: 0.95rem; letter-spacing: 0.04em; color: #1a2e12;
-    }
-    .sprite-meta { font-size: 0.65rem; color: #3a5520; font-weight: 600; }
-    .lcd-icons {
-      display: flex; justify-content: space-around; margin: 0.35rem 0 0.2rem;
-      font-size: 0.95rem; opacity: 0.85;
-    }
-    .btns-classic {
-      display: flex; justify-content: center; gap: 1.4rem; margin-top: 0.85rem;
-    }
-    .btns-classic button {
-      width: 2.4rem; height: 2.4rem; border-radius: 50%;
-      border: 2px solid rgba(0,0,0,0.25);
-      background: radial-gradient(circle at 35% 30%, #fff 0%, #e8e0f0 45%, #b0a0c8 100%);
-      box-shadow: 0 3px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.7);
-      cursor: pointer; font-size: 0; color: transparent;
-    }
-    .btns-classic button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
+    .device-top .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--fur); box-shadow: 0 0 8px var(--fur); }
+    .device > .screen { position: relative; z-index: 1; }
+
     .shell-picker {
-      display: flex; justify-content: center; gap: 0.55rem; margin: 0.85rem 0 0.25rem;
+      display: flex; justify-content: center; gap: 0.55rem; margin: 0.9rem 0 0.15rem; position: relative; z-index: 1;
     }
     .shell-picker button {
-      width: 1.55rem; height: 1.55rem; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.5); cursor: pointer;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+      width: 1.55rem; height: 1.55rem; border-radius: 50%; appearance: none;
+      border: 2px solid rgba(255,255,255,0.35); cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.3); transition: transform 0.15s ease;
     }
-    .shell-picker button[aria-pressed="true"] {
-      outline: 2px solid #fff; outline-offset: 2px;
-    }
-    .shell-picker [data-shell="classic"] { background: linear-gradient(135deg, #c9a0ff, #6b3fa0); }
+    .shell-picker button:hover { transform: translateY(-2px) scale(1.06); }
+    .shell-picker button[aria-pressed="true"] { outline: 2px solid #fff; outline-offset: 2px; }
     .shell-picker [data-shell="rosa"] { background: linear-gradient(135deg, #f28aa8, #e33d6b); }
+    .shell-picker [data-shell="ocre"] { background: linear-gradient(135deg, #ffe066, #d49a2c); }
     .shell-picker [data-shell="azul"] { background: linear-gradient(135deg, #5ec4d6, #1b4f5e); }
-    .shell-picker [data-shell="amarelo"] { background: linear-gradient(135deg, #ffe066, #d49a2c); }
+    .shell-picker [data-shell="tuxedo"] { background: linear-gradient(135deg, #6a6258, #1a1512); }
     .tama-page-bg {
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(107,63,160,0.35), transparent 55%),
-        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(227,61,107,0.12), transparent) !important;
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(227,61,107,0.22), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212,154,44,0.1), transparent) !important;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -478,8 +507,142 @@ button[data-action="reset"]:hover {
 
     <div data-panel="play">
       <div class="device" id="tama-device">
+        <div class="device-top"><span class="dot" aria-hidden="true"></span><span>CRICRI PET</span><span class="dot" aria-hidden="true"></span></div>
         <div class="screen" aria-live="polite">
-          <div class="face" id="tama-face">🥚</div>
+          <div class="cat-stage" id="tama-cat-stage">
+            <svg id="tama-cat" data-stage="ovo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gatinho de estimação">
+              <g class="cat-group">
+                <!-- casca de ovo (fase Ovo) -->
+                <g class="egg-shell">
+                  <ellipse cx="100" cy="118" rx="52" ry="62" fill="var(--fur-light)"/>
+                  <path d="M60,108 q14,10 8,24 q18,-4 24,10 q16,-8 28,4" fill="none" stroke="var(--fur)" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                </g>
+
+                <!-- cauda -->
+                <path class="tail" d="M156,178 q34,-8 26,-54 q-4,-16 -18,-13" fill="none" stroke="var(--fur)" stroke-width="15" stroke-linecap="round"/>
+
+                <!-- corpo -->
+                <g class="cat-body-full">
+                  <ellipse cx="100" cy="176" rx="58" ry="36" fill="var(--fur)"/>
+                  <ellipse cx="100" cy="184" rx="30" ry="21" fill="var(--fur-light)"/>
+                  <ellipse cx="73" cy="203" rx="15" ry="10" fill="var(--fur)"/>
+                  <ellipse cx="127" cy="203" rx="15" ry="10" fill="var(--fur)"/>
+                </g>
+
+                <!-- orelhas -->
+                <path class="ear-l" d="M52,62 L38,14 L82,46 Z" fill="var(--fur)"/>
+                <path class="ear-l" d="M55,55 L47,26 L72,47 Z" fill="var(--fur-ear)"/>
+                <path class="ear-r" d="M148,62 L162,14 L118,46 Z" fill="var(--fur)"/>
+                <path class="ear-r" d="M145,55 L153,26 L128,47 Z" fill="var(--fur-ear)"/>
+
+                <!-- cabeça -->
+                <circle cx="100" cy="95" r="54" fill="var(--fur)"/>
+
+                <!-- bigodinhos -->
+                <g class="whiskers" stroke="var(--paper)" stroke-width="2" stroke-linecap="round" opacity="0.85">
+                  <line x1="44" y1="96" x2="6" y2="90"/>
+                  <line x1="42" y1="106" x2="4" y2="106"/>
+                  <line x1="44" y1="115" x2="7" y2="122"/>
+                  <line x1="156" y1="96" x2="194" y2="90"/>
+                  <line x1="158" y1="106" x2="196" y2="106"/>
+                  <line x1="156" y1="115" x2="193" y2="122"/>
+                </g>
+
+                <!-- bochechas -->
+                <ellipse class="blush" cx="60" cy="106" rx="9" ry="5.5" fill="#ff7fa0" opacity="0.7"/>
+                <ellipse class="blush" cx="140" cy="106" rx="9" ry="5.5" fill="#ff7fa0" opacity="0.7"/>
+
+                <!-- olhinhos -->
+                <g class="cat-eyes" id="cat-eyes-group">
+                  <g class="expr-normal">
+                    <g class="eye-pupil"><ellipse cx="78" cy="92" rx="9" ry="11" fill="#221812"/><circle cx="75" cy="87" r="2.6" fill="#fff"/></g>
+                    <g class="eye-pupil"><ellipse cx="122" cy="92" rx="9" ry="11" fill="#221812"/><circle cx="119" cy="87" r="2.6" fill="#fff"/></g>
+                  </g>
+                  <g class="expr-happy">
+                    <path d="M67,93 q11,-16 22,0" fill="none" stroke="#221812" stroke-width="5.5" stroke-linecap="round"/>
+                    <path d="M111,93 q11,-16 22,0" fill="none" stroke="#221812" stroke-width="5.5" stroke-linecap="round"/>
+                  </g>
+                  <g class="expr-sad">
+                    <g class="eye-pupil"><ellipse cx="78" cy="96" rx="8" ry="9" fill="#221812"/></g>
+                    <g class="eye-pupil"><ellipse cx="122" cy="96" rx="8" ry="9" fill="#221812"/></g>
+                    <path d="M69,79 q9,-6 17,-2" fill="none" stroke="#221812" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M114,77 q8,-4 17,2" fill="none" stroke="#221812" stroke-width="3.5" stroke-linecap="round"/>
+                  </g>
+                  <g class="expr-sick">
+                    <path d="M70,84 l16,16 M86,84 l-16,16" stroke="#221812" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M114,84 l16,16 M130,84 l-16,16" stroke="#221812" stroke-width="4.5" stroke-linecap="round"/>
+                  </g>
+                  <g class="expr-sleep">
+                    <path d="M68,93 q10,7 20,0" fill="none" stroke="#221812" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M112,93 q10,7 20,0" fill="none" stroke="#221812" stroke-width="5" stroke-linecap="round"/>
+                  </g>
+                  <g class="expr-dead">
+                    <path d="M70,84 l16,16 M86,84 l-16,16" stroke="#4b453e" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M114,84 l16,16 M130,84 l-16,16" stroke="#4b453e" stroke-width="4.5" stroke-linecap="round"/>
+                  </g>
+                </g>
+
+                <!-- gotinha de mal-estar -->
+                <path class="sick-drop" d="M148,64 q7,10 0,15 q-7,-5 0,-15 Z" fill="#5ec4d6"/>
+
+                <!-- zzz de sono -->
+                <g class="zzz" font-family="Oswald, sans-serif" font-weight="700" fill="var(--paper)">
+                  <text x="140" y="60" font-size="14">z</text>
+                  <text x="152" y="46" font-size="18">Z</text>
+                  <text x="166" y="30" font-size="22">Z</text>
+                </g>
+
+                <!-- narizinho -->
+                <path class="cat-nose" d="M96,103 L104,103 L100,109 Z" fill="#ff7fa0"/>
+
+                <!-- boquinha -->
+                <g class="cat-mouth">
+                  <path class="expr-normal" d="M100,109 q0,6 -7,7 M100,109 q0,6 7,7" fill="none" stroke="#221812" stroke-width="2.6" stroke-linecap="round"/>
+                  <path class="expr-happy" d="M85,110 q15,16 30,0" fill="none" stroke="#221812" stroke-width="3" stroke-linecap="round"/>
+                  <path class="expr-sad" d="M88,116 q12,-9 24,0" fill="none" stroke="#221812" stroke-width="3" stroke-linecap="round"/>
+                  <path class="expr-sick" d="M88,112 q6,6 12,0 q6,6 12,0" fill="none" stroke="#221812" stroke-width="3" stroke-linecap="round"/>
+                  <circle class="expr-sleep" cx="100" cy="112" r="3.5" fill="#221812"/>
+                  <line class="expr-dead" x1="90" y1="112" x2="110" y2="112" stroke="#4b453e" stroke-width="3" stroke-linecap="round"/>
+                </g>
+
+                <!-- acessórios por fase -->
+                <g class="cat-accessory">
+                  <g class="acc-bow">
+                    <path d="M100,32 L86,20 L86,32 Z" fill="var(--rosa)"/>
+                    <path d="M100,32 L114,20 L114,32 Z" fill="var(--rosa)"/>
+                    <circle cx="100" cy="32" r="5" fill="var(--rosa-deep)"/>
+                  </g>
+                  <g class="acc-glasses">
+                    <rect x="62" y="82" width="34" height="18" rx="8" fill="rgba(12,10,8,0.88)"/>
+                    <rect x="104" y="82" width="34" height="18" rx="8" fill="rgba(12,10,8,0.88)"/>
+                    <line x1="96" y1="90" x2="104" y2="90" stroke="rgba(12,10,8,0.88)" stroke-width="4"/>
+                    <path d="M70,85 q10,-3 16,2" stroke="rgba(255,255,255,0.35)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  </g>
+                  <g class="acc-confetti">
+                    <rect x="24" y="40" width="6" height="6" fill="var(--ochre)"/>
+                    <rect x="170" y="50" width="6" height="6" fill="var(--rosa)"/>
+                    <rect x="30" y="70" width="6" height="6" fill="var(--azul-soft, #5ec4d6)"/>
+                  </g>
+                  <g class="acc-flower">
+                    <circle cx="46" cy="52" r="4" fill="var(--ochre)"/>
+                    <circle cx="38" cy="46" r="4.5" fill="var(--rosa-soft)"/>
+                    <circle cx="54" cy="46" r="4.5" fill="var(--rosa-soft)"/>
+                    <circle cx="38" cy="58" r="4.5" fill="var(--rosa-soft)"/>
+                    <circle cx="54" cy="58" r="4.5" fill="var(--rosa-soft)"/>
+                  </g>
+                  <g class="acc-crown">
+                    <path d="M76,26 L84,44 L100,30 L116,44 L124,26 L124,44 L76,44 Z" fill="var(--ochre)" stroke="var(--ochre-deep)" stroke-width="1.5"/>
+                    <circle cx="100" cy="26" r="3.4" fill="var(--rosa)"/>
+                  </g>
+                  <g class="acc-sparkle" fill="var(--ochre)">
+                    <path d="M28,90 l2,7 7,2 -7,2 -2,7 -2,-7 -7,-2 7,-2 Z"/>
+                    <path d="M176,70 l1.6,5.5 5.5,1.6 -5.5,1.6 -1.6,5.5 -1.6,-5.5 -5.5,-1.6 5.5,-1.6 Z"/>
+                    <path d="M172,120 l1.4,5 5,1.4 -5,1.4 -1.4,5 -1.4,-5 -5,-1.4 5,-1.4 Z"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </div>
           <div class="name" id="tama-name">Roda</div>
           <div class="meta">
             <span id="tama-stage">Ovo</span>
@@ -512,11 +675,11 @@ button[data-action="reset"]:hover {
         <button type="button" data-action="scrap">Scrap</button>
         <button type="button" data-action="rename">Nome</button>
         <button type="button" data-action="reset">Renascer</button>
-        <div class="shell-picker" role="group" aria-label="Cor do Tamagotchi">
-          <button type="button" data-shell="classic" aria-label="Roxo clássico" aria-pressed="true"></button>
-          <button type="button" data-shell="rosa" aria-label="Rosa" aria-pressed="false"></button>
+        <div class="shell-picker" role="group" aria-label="Cor do gatinho">
+          <button type="button" data-shell="rosa" aria-label="Rosa" aria-pressed="true"></button>
+          <button type="button" data-shell="ocre" aria-label="Ocre" aria-pressed="false"></button>
           <button type="button" data-shell="azul" aria-label="Azul" aria-pressed="false"></button>
-          <button type="button" data-shell="amarelo" aria-label="Amarelo" aria-pressed="false"></button>
+          <button type="button" data-shell="tuxedo" aria-label="Tuxedo" aria-pressed="false"></button>
         </div>
       </div>
     </div>
