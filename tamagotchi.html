@@ -326,7 +326,32 @@
       animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
-  </style>
+  
+    /* tama-footer-fix */
+    #site-footer-slot {
+      display: block;
+      width: 100%;
+      margin: 2rem 0 0;
+      padding: 0;
+      clear: both;
+    }
+    #site-footer-slot .cricri-footer {
+      margin: 0;
+      padding: 2.25rem 1.15rem 6.5rem;
+    }
+    body {
+      padding-bottom: 0;
+    }
+    main, .page, .wrap {
+      padding-bottom: 0.5rem;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 4000;
+    }
+
+    </style>
 
 <style id="tama-alert-style">
 /* ---- alertas / confirmação estilo atenção CRICRI ---- */
@@ -507,22 +532,19 @@ button[data-action="reset"]:hover {
 
   <div class="card-toast" id="card-toast" hidden></div>
 
+  <div class="tama-footer-spacer" style="height:1.5rem" aria-hidden="true"></div>
   <div id="site-footer-slot"></div>
-  <nav class="bottom-nav" aria-label="Navegação">
+    <nav class="bottom-nav" aria-label="Navegação">
     <a href="index.html">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
       Home
     </a>
     <a href="tamagotchi.html" class="active" aria-current="page">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/><path d="M9.5 14.5c1 1 4 1 5 0"/></svg>
-      Bicho
-    </a>
-    <a href="index.html#mapa">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-      Mapa
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><circle cx="9" cy="10" r="1.35" fill="currentColor"/><circle cx="15" cy="10" r="1.35" fill="currentColor"/><path d="M7 13.5c1.2 1.4 2.8 2.1 5 2.1s3.8-.7 5-2.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.5 11.5c-.8-.3-1.6-.9-2.2-1.6M19.5 11.5c.8-.3 1.6-.9 2.2-1.6M4.8 13.8c-.9.1-1.8.1-2.6-.1M19.2 13.8c.9.1 1.8.1 2.6-.1" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+      Meow
     </a>
     <a href="profile.html">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
       Perfil
     </a>
   </nav>

@@ -21,10 +21,10 @@ on conflict (slug) do update set
 insert into public.afters (title, spot_id, category, starts_at)
 select v.title, s.id, v.category, now() + v.offset_h * interval '1 hour'
 from (values
-  ('After no Bar do Zé',        'bar-do-ze',     'música',  6::int),
-  ('Roda fechada na Bica',      'roda-bica',     'música',  10),
-  ('Projeção no Largo',         'largo-matriz',  'arte',    26),
-  ('Quieta no Quintal',         'quintal-ana',   'encontro',30)
+  ('Abertura no Convento',           'convento-sao-francisco', 'música',  6::int),
+  ('Cortejo na Praça São Francisco', 'praca-sao-francisco',    'cultura popular', 10),
+  ('Projeção no Largo do Amparo',    'largo-amparo',           'arte',    26),
+  ('Noite na Matriz',                'igreja-matriz',          'música',  30)
 ) as v(title, slug, category, offset_h)
 join public.spots s on s.slug = v.slug
 where not exists (

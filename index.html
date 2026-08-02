@@ -3408,7 +3408,7 @@ html[data-a11y-theme="light"] #header-search-btn {
   <!-- HERO -->
   <main id="conteudo-principal" tabindex="-1">
   <section class="hero" id="hero">
-    <h1>SÃO CRISTÓVÃO<br>NÃO TEM MAPA.<br><span>TEM RODA.</span></h1>
+    <h1>SÃO CRISTÓVÃO<br>NÃO TEM MAPA.<br><span>TEM MURAL.</span></h1>
 
     <div class="fasc-countdown" id="fasc-countdown" data-target="2026-11-19T12:00:00-03:00" aria-live="polite">
       <div class="fasc-countdown-label">
@@ -3456,6 +3456,18 @@ html[data-a11y-theme="light"] #header-search-btn {
           <p class="feed-empty-title">O mural tá em branco</p>
           <p class="feed-empty-sub">Cola o primeiro cartaz — o que tá rolando agora na rua aparece aqui em tempo real.</p>
         </div>
+        <div class="mural-composer" id="mural-composer">
+          <label class="mural-composer-label" for="mural-post-body">Cola no mural</label>
+          <textarea id="mural-post-body" maxlength="140" rows="3" placeholder="O que tá rolando agora na rua? (máx. 140)"></textarea>
+          <div class="mural-composer-footer">
+            <span class="mural-composer-count" id="mural-post-count">0 / 140</span>
+            <div class="mural-composer-actions">
+              <button type="button" class="btn-post" id="mural-post-btn">Postar</button>
+            </div>
+          </div>
+          <p class="mural-composer-hint" id="mural-post-hint">Entra na conta pra colar cartaz. Precisa de nick no perfil.</p>
+          <p class="mural-composer-msg" id="mural-post-msg" role="status"></p>
+        </div>
         <div id="feed-list-agora" class="feed-list" aria-live="polite"></div>
       </div>
 
@@ -3500,22 +3512,29 @@ html[data-a11y-theme="light"] #header-search-btn {
       <span id="geo-status" class="geo-status pending">buscando…</span>
       <button type="button" class="heat-toggle" id="btn-heat-toggle" aria-pressed="false" title="Mapa de calor do público">Calor</button>
     </div>
-    <p class="map-sub">Spots, hospedagem, gastronomia e ônibus (SC ↔ Aracaju). 19–22/11/2026</p>
+    <p class="map-sub">Spots, eventos, hospedagem, gastronomia e ônibus (SC ↔ Aracaju). 19–22/11/2026</p>
     <div class="map-layers" id="map-layers" role="group" aria-label="Camadas do mapa">
       <button type="button" class="map-layer-chip is-on" data-map-layer="spots" aria-pressed="true">Spots</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="hospedagem" aria-pressed="true">Hospedagem</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="gastronomia" aria-pressed="true">Gastronomia</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="transporte" aria-pressed="true">Ônibus</button>
+      <button type="button" class="map-layer-chip is-on" data-map-layer="eventos" aria-pressed="true">Eventos</button>
       <button type="button" class="map-layer-chip" data-map-layer="fit" id="map-fit-all">Ver todos</button>
     </div>
     <div class="map-proximity" id="map-proximity" role="group" aria-label="Filtro por proximidade">
-      <span class="map-prox-label">Perto de mim</span>
-      <button type="button" class="map-prox-chip is-on" data-prox="0" aria-pressed="true">Todos</button>
-      <button type="button" class="map-prox-chip" data-prox="300" aria-pressed="false">300 m</button>
-      <button type="button" class="map-prox-chip" data-prox="500" aria-pressed="false">500 m</button>
-      <button type="button" class="map-prox-chip" data-prox="1000" aria-pressed="false">1 km</button>
-      <button type="button" class="map-prox-chip" data-prox="2000" aria-pressed="false">2 km</button>
-      <span class="map-prox-ref" id="map-prox-ref" aria-live="polite">ref: centro SC</span>
+      <div class="map-prox-row">
+        <span class="map-prox-label">Perto de mim</span>
+        <button type="button" class="map-prox-chip is-on" data-prox="0" aria-pressed="true" title="Mostrar tudo">Todos</button>
+        <button type="button" class="map-prox-chip" data-prox="200" aria-pressed="false" title="Raio a pé · quarteirões">200 m</button>
+        <button type="button" class="map-prox-chip" data-prox="400" aria-pressed="false" title="Centro histórico">400 m</button>
+        <button type="button" class="map-prox-chip" data-prox="800" aria-pressed="false" title="Caminhada curta">800 m</button>
+        <button type="button" class="map-prox-chip" data-prox="1500" aria-pressed="false" title="Até 1,5 km">1,5 km</button>
+        <button type="button" class="map-prox-chip map-prox-gps" id="map-prox-gps" aria-pressed="false" title="Ativar GNSS (GPS) por alguns segundos. O padrão é WiFi/rede.">GPS</button>
+      </div>
+      <div class="map-prox-meta">
+        <span class="map-prox-ref" id="map-prox-ref" aria-live="polite">ref: centro SC</span>
+        <span class="map-prox-count" id="map-prox-count" aria-live="polite"></span>
+      </div>
     </div>
     <label class="heat-optin-row" for="heat-optin">
       <input type="checkbox" id="heat-optin" name="heat-optin">
@@ -3527,6 +3546,7 @@ html[data-a11y-theme="light"] #header-search-btn {
       <li><span class="leg-dot leg-hosp"></span> Hospedagem</li>
       <li><span class="leg-dot leg-gastro"></span> Gastronomia</li>
       <li><span class="leg-dot leg-bus"></span> Ônibus / parada</li>
+      <li><span class="leg-dot leg-event"></span> Evento / programação</li>
       <li><span class="leg-dot leg-you"></span> Você</li>
     </ul>
     <div class="map-places-head">
@@ -3605,7 +3625,7 @@ html[data-a11y-theme="light"] #header-search-btn {
   <section class="support-section" id="suporte" aria-labelledby="support-title">
     <div class="support-inner">
       <header class="support-head">
-        <p class="support-kicker">Cuida da roda · cuida de você</p>
+        <p class="support-kicker">Cuida da rua · cuida de você</p>
         <h2 id="support-title">Suporte &amp; denúncia</h2>
         <p class="support-lead">
           Festival é festa e também é respeito. Se algo pesou, machucou ou passou do limite,
@@ -3615,7 +3635,11 @@ html[data-a11y-theme="light"] #header-search-btn {
 
       <div class="support-grid">
         <div class="support-card support-card--emergency">
-          <h3>Emergência agora</h3>
+          <button type="button" class="support-collapse-btn" data-collapse="support-emergency" aria-expanded="true" aria-controls="support-emergency-panel">
+            <span>Emergência agora · canais públicos</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="support-collapse-panel" id="support-emergency-panel">
           <ul class="support-phones">
             <li>
               <a href="tel:190" class="support-phone">
@@ -3655,10 +3679,15 @@ html[data-a11y-theme="light"] #header-search-btn {
             </li>
           </ul>
           <p class="support-note">Em risco imediato, ligue antes de preencher qualquer formulário.</p>
+          </div>
         </div>
 
         <div class="support-card support-card--form">
-          <h3>Canal de denúncia</h3>
+          <button type="button" class="support-collapse-btn" data-collapse="support-form" aria-expanded="true" aria-controls="support-form-panel">
+            <span>Canal de denúncia · formulário</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="support-collapse-panel" id="support-form-panel">
           <p class="support-form-intro">Relato pro time do CRICRI. Não publicamos isso no mural.</p>
           <form id="denuncia-form" class="denuncia-form" novalidate>
             <div class="denuncia-field">
@@ -3692,6 +3721,7 @@ html[data-a11y-theme="light"] #header-search-btn {
             <input type="text" name="website" id="denuncia-hp" class="denuncia-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
             <button type="submit" class="denuncia-submit" id="denuncia-submit">Enviar denúncia</button>
             <p class="denuncia-msg" id="denuncia-msg" role="status" aria-live="polite" hidden></p>
+          </div><!-- /support-form-panel -->
           </form>
         </div>
       </div>
@@ -3701,28 +3731,19 @@ html[data-a11y-theme="light"] #header-search-btn {
 
   <div id="site-footer-slot"></div>
 
-  <nav class="bottom-nav" aria-label="Navegação principal">
-    <button class="nav-item active" data-target="hero" aria-label="Home" aria-current="page">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
-    </button>
-    <button class="nav-item" data-route="tamagotchi.html" aria-label="Tamagotchi da Roda" title="Tamagotchi">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 14.5c1 1 4 1 5 0"/></svg>
-    </button>
-    <button class="nav-item" data-route="programacao.html" aria-label="Programação" title="Programação">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-    </button>
-    <button class="nav-item" data-target="feed" aria-label="Mural">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16"/><path d="M4 12h16"/><path d="M4 18.5h10"/></svg>
-    </button>
-    <button class="nav-item" data-target="marketplace" aria-label="Marketplace">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5 5.5 4h13L20 8.5"/><path d="M4 8.5v9.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V8.5"/><path d="M4 8.5h16"/><path d="M9.5 12a2.5 2.5 0 0 0 5 0"/></svg>
-    </button>
-    <button class="nav-item" data-target="mapa" aria-label="Mapa">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-    </button>
-    <button class="nav-item" data-route="profile.html" aria-label="Perfil">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
-    </button>
+    <nav class="bottom-nav" aria-label="Navegação">
+    <a href="index.html" class="active" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+      Home
+    </a>
+    <a href="tamagotchi.html">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><circle cx="9" cy="10" r="1.35" fill="currentColor"/><circle cx="15" cy="10" r="1.35" fill="currentColor"/><path d="M7 13.5c1.2 1.4 2.8 2.1 5 2.1s3.8-.7 5-2.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.5 11.5c-.8-.3-1.6-.9-2.2-1.6M19.5 11.5c.8-.3 1.6-.9 2.2-1.6M4.8 13.8c-.9.1-1.8.1-2.6-.1M19.2 13.8c.9.1 1.8.1 2.6-.1" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+      Meow
+    </a>
+    <a href="profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
+      Perfil
+    </a>
   </nav>
 
     <!-- busca fixa (fora do header — não compete com a11y) -->
@@ -3742,7 +3763,7 @@ html[data-a11y-theme="light"] #header-search-btn {
 
 <!-- a11y-portal -->
   <div class="a11y-wrap">
-      <button type="button" class="a11y-toggle" id="a11y-toggle" style="z-index:9999;pointer-events:auto"
+      <button type="button" class="a11y-toggle" id="a11y-toggle" style="pointer-events:auto"
         aria-expanded="false" aria-controls="a11y-panel"
         aria-label="Abrir opções de acessibilidade" title="Acessibilidade">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -4134,13 +4155,129 @@ html[data-a11y-theme="light"] #header-search-btn {
   </script>
 
   <!-- Supabase (dev) -->
+  
+<script>
+/* meow-chip press microinteraction no mural */
+(function () {
+  document.addEventListener('pointerdown', function (e) {
+    var chip = e.target.closest && e.target.closest('.meow-chip');
+    if (!chip) return;
+    chip.classList.add('is-press');
+  }, true);
+  document.addEventListener('pointerup', function (e) {
+    document.querySelectorAll('.meow-chip.is-press').forEach(function (c) {
+      c.classList.remove('is-press');
+    });
+  }, true);
+  document.addEventListener('pointercancel', function () {
+    document.querySelectorAll('.meow-chip.is-press').forEach(function (c) {
+      c.classList.remove('is-press');
+    });
+  }, true);
+})();
+</script>
+
+  
+<script>
+/* support collapse */
+(function () {
+  document.querySelectorAll('.support-collapse-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('aria-controls');
+      var panel = id && document.getElementById(id);
+      if (!panel) return;
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      panel.hidden = open;
+    });
+  });
+})();
+</script>
+<script>
+/* mural composer → Supabase posts (140 chars) */
+(function () {
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  var ta = document.getElementById('mural-post-body');
+  var ct = document.getElementById('mural-post-count');
+  var btn = document.getElementById('mural-post-btn');
+  var msg = document.getElementById('mural-post-msg');
+  var hint = document.getElementById('mural-post-hint');
+  if (!ta || !btn) return;
+
+  function setMsg(text, ok) {
+    if (!msg) return;
+    msg.textContent = text || '';
+    msg.className = 'mural-composer-msg' + (text ? (ok ? ' ok' : ' err') : '');
+  }
+  function syncCount() {
+    var n = (ta.value || '').length;
+    if (ct) {
+      ct.textContent = n + ' / 140';
+      ct.classList.toggle('is-warn', n > 120);
+    }
+  }
+  ta.addEventListener('input', syncCount);
+  syncCount();
+
+  async function ensureSession() {
+    if (!window.fascAuth || !window.fascAuth.user) return null;
+    try { return await window.fascAuth.user(); } catch (_) { return null; }
+  }
+
+  btn.addEventListener('click', async function () {
+    var body = (ta.value || '').trim().slice(0, 140);
+    if (!body) { setMsg('Escreve algo pra colar no mural.', false); return; }
+    if (!window.fascDb) { setMsg('Supabase offline — confere o config.', false); return; }
+    var user = await ensureSession();
+    if (!user) {
+      setMsg('Entra na conta (Perfil) pra postar.', false);
+      window.location.href = 'profile.html';
+      return;
+    }
+    btn.disabled = true;
+    setMsg('Colando…', true);
+    try {
+      var ins = await window.fascDb.from('posts').insert({
+        author_id: user.id,
+        content: body
+      }).select('id').single();
+      if (ins.error) throw ins.error;
+      ta.value = '';
+      syncCount();
+      setMsg('Cartaz colado no mural 🐾', true);
+      if (typeof window.__cricriLoadFeed === 'function') window.__cricriLoadFeed();
+    } catch (err) {
+      var m = (err && err.message) || 'Falha ao postar';
+      if (/author_id|schema|RLS|policy|row-level/i.test(m)) {
+        m = 'Schema/RLS: rode as migrations de posts e confirme login + perfil.';
+      }
+      setMsg(m, false);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  ensureSession().then(function (u) {
+    if (hint) {
+      hint.textContent = u
+        ? 'Até 140 caracteres · ao vivo no mural'
+        : 'Entra na conta pra colar cartaz. Precisa de nick no perfil.';
+    }
+  });
+})();
+</script>
+
   <script src="js/notif-bell.js"></script>
   <script src="js/footer.js"></script>
   <script type="module" src="js/denuncia.js"></script>
   <script src="js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/geo-offline.js"></script>
   <script src="js/spots-api.js"></script>
+  <script src="js/events-api.js"></script>
   <script src="js/auth-ui.js"></script>
   <script>
     if (!window.FASC_VAPID_PUBLIC_KEY && window.FASC_CONFIG && window.FASC_CONFIG.vapidPublicKey) {
@@ -4153,6 +4290,28 @@ html[data-a11y-theme="light"] #header-search-btn {
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <script src="js/gtfs-rt.js"></script>
   <script src="mock.js"></script>
+
+<script>
+/* map harden: invalidateSize when #mapa / resize */
+(function () {
+  function fix() {
+    try {
+      if (window.projanoMap && window.projanoMap.map) {
+        window.projanoMap.map.invalidateSize(true);
+      }
+    } catch (e) {}
+  }
+  window.addEventListener('load', function () { setTimeout(fix, 300); setTimeout(fix, 1000); });
+  window.addEventListener('resize', function () { clearTimeout(window.__mapFixT); window.__mapFixT = setTimeout(fix, 150); });
+  window.addEventListener('hashchange', function () {
+    if ((location.hash || '') === '#mapa') setTimeout(fix, 200);
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) setTimeout(fix, 200);
+  });
+})();
+</script>
+
   <script src="js/heat-map.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/a11y-motion.js"></script>
@@ -4350,6 +4509,7 @@ html[data-a11y-theme="light"] #header-search-btn {
       console.warn('[CRICRI feed] API:', e.message || e, '— mural fica vazio até o schema estar ok');
     }
   }
+  window.__cricriLoadFeed = loadFeed;
   function subscribeFeed() {
     var db = window.fascDb;
     if (!db || !db.channel) return;

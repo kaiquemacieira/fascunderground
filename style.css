@@ -578,7 +578,7 @@ html[data-a11y-motion="reduce"] .fest-status-dot {
   .header-search-btn {
     position: fixed !important;
     top: max(0.65rem, env(safe-area-inset-top));
-    right: calc(0.65rem + 48px + 0.5rem + 44px + 0.45rem + 44px + 0.5rem + env(safe-area-inset-right, 0px));
+    right: calc(0.65rem + 48px + 0.5rem + env(safe-area-inset-right, 0px));
     margin: 0 !important;
     z-index: 4990 !important;
     pointer-events: auto !important;
@@ -2983,7 +2983,7 @@ button.header-search-btn,
   position: fixed !important;
   top: max(0.65rem, env(safe-area-inset-top)) !important;
   /* a11y 48 + gap + tools (44+0.45+44) + gap */
-  right: calc(0.65rem + 48px + 0.5rem + 44px + 0.45rem + 44px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
+  right: calc(0.65rem + 48px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
   width: 48px !important;
   height: 48px !important;
   min-width: 48px !important;
@@ -3036,8 +3036,8 @@ html[data-a11y-theme="light"] #header-search-btn {
 #fasc-auth-root {
   position: fixed !important;
   top: max(0.65rem, env(safe-area-inset-top)) !important;
-  /* a11y + tools + search + gaps */
-  right: calc(0.65rem + 48px + 0.5rem + 44px + 0.45rem + 44px + 0.5rem + 48px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
+  /* à esquerda de: a11y + lupa */
+  right: calc(0.65rem + 48px + 0.5rem + 48px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
   z-index: 5100 !important;
   pointer-events: auto !important;
 }
@@ -5799,23 +5799,27 @@ html[data-theme="light"] .denuncia-field textarea {
   text-shadow: 0 0 12px rgba(227, 61, 107, 0.35);
 }
 
-/* ========== Notif bell + gear (global) ==========
-   Fica à ESQUERDA do botão ♿ (a11y), mesma linha, sem sobrepor.
-   a11y = 48px + gap 0.5rem a partir da borda direita.
+/* ========== Notif bell + gear (global)
+   Trilho vertical ABAIXO do ♿ — evita sobrepor lupa/auth/a11y.
 */
 .cricri-top-tools {
   position: fixed !important;
-  top: max(0.65rem, env(safe-area-inset-top)) !important;
-  /* a11y (48px) + gap (0.5rem) + safe-area */
-  right: calc(0.65rem + 48px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
+  top: calc(0.65rem + 48px + 0.5rem + env(safe-area-inset-top, 0px)) !important;
+  right: max(0.65rem, env(safe-area-inset-right, 0px)) !important;
   left: auto !important;
   z-index: 4995 !important;
   display: flex;
-  flex-direction: row-reverse; /* sino mais perto do a11y, engrenagem à esquerda */
-  gap: 0.45rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
   pointer-events: auto !important;
   margin: 0 !important;
+}
+.cricri-top-tools .cricri-notif-panel,
+.cricri-top-tools .cricri-gear-panel {
+  top: 0;
+  right: calc(100% + 0.45rem);
+  left: auto;
 }
 .cricri-tool-btn {
   width: 44px;
@@ -6032,4 +6036,469 @@ html[data-theme="light"] .cricri-notif-list strong { color: #17120e; }
 .meow-chip:active {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 rgba(0,0,0,.35);
+}
+
+
+/* ===== Footer pulse (rua) ===== */
+.cricri-footer-pulse {
+  max-width: 36rem;
+  margin: 0 auto 1.25rem;
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: #f2e8d2;
+  text-align: center;
+}
+.cricri-footer-meta strong { color: #e33d6b; }
+
+/* ===== Countdown centrado no desktop ===== */
+.fasc-countdown {
+  width: 100%;
+  max-width: 28rem;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center;
+}
+.fasc-countdown-label {
+  justify-content: center;
+  text-align: center;
+}
+.fasc-countdown-grid {
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero .fasc-countdown,
+#fasc-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-inline: auto;
+}
+@media (min-width: 900px) {
+  .fasc-countdown {
+    max-width: 32rem;
+  }
+  .fasc-countdown-grid {
+    gap: 0.75rem;
+  }
+}
+
+/* ===== Support / denúncia colapsável ===== */
+.support-phones {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.support-phones li { margin: 0; flex: 1 1 calc(50% - 0.5rem); min-width: 140px; }
+@media (min-width: 600px) {
+  .support-phones li { flex: 1 1 calc(33.33% - 0.5rem); }
+}
+.support-collapse-btn {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(230,220,196,0.12);
+  color: inherit;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0.65rem 0 0.75rem;
+  cursor: pointer;
+  margin: 0 0 0.75rem;
+}
+.support-collapse-btn:hover { color: #e33d6b; }
+.support-collapse-btn .chev {
+  width: 1.25rem; height: 1.25rem;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.support-collapse-btn[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+.support-collapse-panel[hidden] { display: none !important; }
+.support-card--emergency .support-collapse-panel,
+.support-card--form .support-collapse-panel {
+  padding-top: 0.15rem;
+}
+
+/* ===== Mural composer ===== */
+.mural-composer {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--ink, #17120e);
+  border: 1.5px solid rgba(230,220,196,0.14);
+  border-radius: 10px;
+  box-shadow: 3px 4px 0 rgba(0,0,0,0.35);
+}
+.mural-composer-label {
+  display: block;
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e33d6b;
+  margin-bottom: 0.45rem;
+}
+.mural-composer textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  border: 1.5px solid rgba(230,220,196,0.18);
+  border-radius: 8px;
+  background: #0c0a08;
+  color: #ebe3cf;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  padding: 0.65rem 0.75rem;
+  outline: none;
+}
+.mural-composer textarea:focus {
+  border-color: rgba(227,61,107,0.55);
+  box-shadow: 0 0 0 2px rgba(227,61,107,0.15);
+}
+.mural-composer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+.mural-composer-count {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: #8c8376;
+}
+.mural-composer-count.is-warn { color: #e07a5f; }
+.mural-composer-actions { display: flex; gap: 0.4rem; align-items: center; }
+.mural-composer .btn-post {
+  appearance: none;
+  border: 2px solid #17120e;
+  background: #e33d6b;
+  color: #fff;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 2px 3px 0 rgba(0,0,0,0.4);
+}
+.mural-composer .btn-post:disabled { opacity: 0.5; cursor: not-allowed; }
+.mural-composer-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: #8c8376;
+}
+.mural-composer-msg { margin: 0.35rem 0 0; font-size: 0.82rem; }
+.mural-composer-msg.ok { color: #8fbc6a; }
+.mural-composer-msg.err { color: #e07a5f; }
+
+/* ===== Map harden ===== */
+.map-section .map,
+#map.map {
+  min-height: 280px;
+  height: clamp(280px, 55vw, 420px);
+  width: 100%;
+  background: #1a1512;
+  z-index: 1;
+}
+
+
+/* ===== Eventos no mapa ===== */
+.event-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #d49a2c, #e33d6b);
+  border: 2px solid #f6efdc;
+  box-shadow: 0 0 0 2px rgba(212, 154, 44, 0.35), 0 2px 6px rgba(0,0,0,0.4);
+  transform: rotate(45deg);
+}
+.leg-event {
+  background: linear-gradient(135deg, #d49a2c, #e33d6b);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+.popup-cat.eventos {
+  background: rgba(212, 154, 44, 0.22);
+  color: #e0b45a;
+}
+.map-place-dot.eventos {
+  background: linear-gradient(135deg, #d49a2c, #e33d6b);
+  border-radius: 2px;
+}
+
+
+/* ===== Proximidade · config ===== */
+.map-proximity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0 0 0.85rem;
+}
+.map-prox-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+.map-prox-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.55rem;
+  min-height: 1.1em;
+}
+.map-prox-count {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.65rem;
+  color: #5ec4d6;
+}
+.map-prox-chip.map-prox-gps {
+  border-color: rgba(227, 61, 107, 0.45);
+  color: #f28aa8;
+}
+.map-prox-chip.map-prox-gps.is-on,
+.map-prox-chip.map-prox-gps[aria-pressed="true"] {
+  border-color: #e33d6b;
+  background: rgba(227, 61, 107, 0.18);
+  color: #fff;
+}
+@media (max-width: 480px) {
+  .map-prox-chip { padding: 0.28rem 0.5rem; font-size: 0.64rem; }
+}
+
+
+/* ===== Countdown centrado (desktop) ===== */
+/* countdown centering — sem quebrar o hero */
+#fasc-countdown,
+.fasc-countdown {
+  width: 100%;
+  max-width: 32rem;
+  margin: 1.25rem auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.fasc-countdown-label {
+  justify-content: center !important;
+  width: 100%;
+  text-align: center !important;
+}
+.fasc-countdown-grid {
+  display: flex !important;
+  justify-content: center !important;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0 auto !important;
+}
+.fasc-countdown-link {
+  align-self: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 900px) {
+  #fasc-countdown,
+  .fasc-countdown {
+    max-width: 36rem !important;
+  }
+  .fasc-countdown-grid {
+    gap: 0.85rem;
+  }
+}
+
+/* ===== Bottom nav · 3 itens ===== */
+.bottom-nav {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0 !important;
+}
+.bottom-nav a {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.45rem 0.25rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.bottom-nav a svg {
+  width: 22px;
+  height: 22px;
+}
+
+
+/* ========================================================================
+   CRICRI TOP CONTROLS — fonte única (não empilhar mais overrides)
+   Layout (desktop + mobile):
+
+        … [Entrar]  [🔍]  [♿]
+                         [🔔]
+                         [⚙]
+
+   Todos na mesma “camada” de interação; só o painel a11y sobe acima.
+   ======================================================================== */
+
+:root {
+  --cricri-fab-size: 44px;
+  --cricri-fab-gap: 0.45rem;
+  --cricri-fab-top: max(0.65rem, env(safe-area-inset-top, 0px));
+  --cricri-fab-right: max(0.65rem, env(safe-area-inset-right, 0px));
+}
+
+/* ♿ acessibilidade — canto superior direito */
+.a11y-wrap {
+  position: fixed !important;
+  top: var(--cricri-fab-top) !important;
+  right: var(--cricri-fab-right) !important;
+  left: auto !important;
+  bottom: auto !important;
+  z-index: 6000 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+  width: var(--cricri-fab-size) !important;
+  height: var(--cricri-fab-size) !important;
+}
+
+.a11y-wrap .a11y-toggle,
+#a11y-toggle {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  width: var(--cricri-fab-size) !important;
+  height: var(--cricri-fab-size) !important;
+  min-width: var(--cricri-fab-size) !important;
+  min-height: var(--cricri-fab-size) !important;
+  z-index: 1 !important; /* dentro do wrap; NÃO 9999 */
+  margin: 0 !important;
+}
+
+/* painel a11y abre abaixo/esquerda do botão */
+.a11y-wrap .a11y-panel,
+#a11y-panel {
+  z-index: 6001 !important;
+  right: 0 !important;
+  left: auto !important;
+  top: calc(100% + 0.4rem) !important;
+}
+
+/* 🔍 lupa — imediatamente à esquerda do ♿ */
+button.header-search-btn,
+#header-search-btn {
+  position: fixed !important;
+  top: var(--cricri-fab-top) !important;
+  right: calc(var(--cricri-fab-right) + var(--cricri-fab-size) + var(--cricri-fab-gap)) !important;
+  left: auto !important;
+  width: var(--cricri-fab-size) !important;
+  height: var(--cricri-fab-size) !important;
+  min-width: var(--cricri-fab-size) !important;
+  min-height: var(--cricri-fab-size) !important;
+  z-index: 5990 !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Entrar — à esquerda da lupa */
+#fasc-auth-root {
+  position: fixed !important;
+  top: var(--cricri-fab-top) !important;
+  right: calc(var(--cricri-fab-right) + (var(--cricri-fab-size) + var(--cricri-fab-gap)) * 2) !important;
+  left: auto !important;
+  z-index: 5980 !important;
+  pointer-events: auto !important;
+}
+
+/* 🔔 + ⚙ — coluna sob o ♿, mesma borda direita */
+#cricri-top-tools,
+.cricri-top-tools {
+  position: fixed !important;
+  top: calc(var(--cricri-fab-top) + var(--cricri-fab-size) + var(--cricri-fab-gap)) !important;
+  right: var(--cricri-fab-right) !important;
+  left: auto !important;
+  bottom: auto !important;
+  z-index: 5970 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: var(--cricri-fab-gap) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+#cricri-top-tools .cricri-tool-btn,
+.cricri-top-tools .cricri-tool-btn {
+  width: var(--cricri-fab-size) !important;
+  height: var(--cricri-fab-size) !important;
+  min-width: var(--cricri-fab-size) !important;
+  min-height: var(--cricri-fab-size) !important;
+  border-radius: 999px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+}
+
+/* painéis de sino/engrenagem abrem para a ESQUERDA */
+#cricri-top-tools .cricri-notif-panel,
+#cricri-top-tools .cricri-gear-panel,
+.cricri-top-tools .cricri-notif-panel,
+.cricri-top-tools .cricri-gear-panel {
+  position: absolute !important;
+  top: 0 !important;
+  right: calc(100% + 0.45rem) !important;
+  left: auto !important;
+  z-index: 5971 !important;
+}
+
+/* mobile estreito: auth desce para não espremer a lupa */
+@media (max-width: 380px) {
+  #fasc-auth-root {
+    top: calc(var(--cricri-fab-top) + (var(--cricri-fab-size) + var(--cricri-fab-gap)) * 3) !important;
+    right: var(--cricri-fab-right) !important;
+  }
+}
+
+/* Countdown — centro sem forçar flex no hero inteiro */
+.fasc-countdown-label {
+  justify-content: center;
+  text-align: center;
+}
+.fasc-countdown-grid {
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fasc-countdown-link {
+  display: inline-flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Bottom nav 3 colunas estável */
+.bottom-nav {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }

@@ -108,6 +108,7 @@
     }
     html[data-theme="light"] body,
     html[data-a11y-theme="light"] body {
+      padding-bottom: 5.5rem;
       background: var(--bg);
       color: var(--text);
     }
@@ -1495,6 +1496,168 @@
   font-size: 0.75rem; color: #f28aa8;
 }
 #send-card.meow-wrap { margin: 1.25rem 0 2rem; }
+
+/* ========== MEOW microinterações de envio ========== */
+.meow-cartaz.--send {
+  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, filter .3s ease;
+}
+.meow-cartaz.--send.is-sending {
+  filter: saturate(1.15) brightness(1.05);
+  transform: rotate(0deg) scale(0.985);
+}
+.meow-cartaz.--send.is-success {
+  animation: meow-stamp 0.7s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes meow-stamp {
+  0% { transform: rotate(-0.6deg) scale(1); }
+  35% { transform: rotate(1.5deg) scale(1.03); }
+  70% { transform: rotate(-0.4deg) scale(0.99); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.meow-bubble {
+  transition: box-shadow .2s ease, transform .2s ease, background .2s ease;
+}
+.meow-bubble.is-focused {
+  box-shadow: inset 0 0 0 1px rgba(23,18,14,.1), 3px 4px 0 rgba(0,0,0,.28), 0 0 0 3px rgba(246,239,220,.35);
+  transform: translateY(-1px);
+}
+.meow-bubble.is-shake {
+  animation: meow-shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes meow-shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(3px); }
+  30%, 50%, 70% { transform: translateX(-5px); }
+  40%, 60% { transform: translateX(5px); }
+}
+.meow-meta .anon {
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+.meow-meta .anon.is-secret {
+  background: rgba(23,18,14,.22);
+  transform: scale(1.02);
+}
+.meow-meta .anon.is-open {
+  background: rgba(27,79,94,.25);
+  color: #0a2a33;
+}
+#send-count {
+  transition: color .15s ease, transform .15s ease;
+  font-variant-numeric: tabular-nums;
+}
+#send-count.is-warn { color: #8b1a1a; font-weight: 700; }
+#send-count.is-pulse {
+  animation: meow-count-pop 0.28s cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes meow-count-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.meow-btn.--primary {
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s cubic-bezier(.2,0,0,1), box-shadow .15s ease, filter .15s ease, background .2s ease;
+}
+.meow-btn.--primary .paw {
+  display: inline-block;
+  transition: transform .2s cubic-bezier(.34,1.4,.64,1);
+}
+.meow-btn.--primary:hover .paw,
+.meow-btn.--primary:focus-visible .paw {
+  transform: rotate(-12deg) scale(1.15);
+}
+.meow-btn.--primary.is-press {
+  transform: translate(2px, 3px) scale(0.97);
+  box-shadow: 1px 1px 0 rgba(0,0,0,.5);
+}
+.meow-btn.--primary.is-loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+.meow-btn.--primary.is-loading .paw {
+  animation: meow-paw-bounce 0.55s ease infinite;
+}
+@keyframes meow-paw-bounce {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  40% { transform: translateY(-5px) rotate(-8deg); }
+  60% { transform: translateY(1px) rotate(4deg); }
+}
+.meow-btn.--primary.is-done {
+  background: #3a6e32;
+  border-color: #1e3a1a;
+}
+.meow-success-stamp {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+.meow-success-stamp.is-on {
+  animation: meow-success-in 0.85s cubic-bezier(.22,1,.36,1) both;
+}
+.meow-success-stamp span {
+  font-family: "Saira Stencil One", Oswald, Impact, sans-serif;
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  color: #f6efdc;
+  -webkit-text-stroke: 1px #17120e;
+  text-shadow: 3px 3px 0 #17120e, 0 0 24px rgba(227,61,107,.5);
+  transform: rotate(-8deg);
+  background: rgba(23,18,14,.55);
+  padding: 0.55rem 1rem;
+  border: 3px solid #f6efdc;
+  border-radius: 8px;
+  letter-spacing: 0.06em;
+}
+@keyframes meow-success-in {
+  0% { opacity: 0; transform: scale(1.4); }
+  40% { opacity: 1; transform: scale(0.92); }
+  70% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+.meow-paws {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 22px;
+  z-index: 2;
+}
+.meow-paws i {
+  position: absolute;
+  font-style: normal;
+  font-size: 1rem;
+  opacity: 0;
+  animation: meow-paw-fly 0.9s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes meow-paw-fly {
+  0% { opacity: 0; transform: translate(0, 8px) scale(0.6); }
+  25% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(var(--rot)); }
+}
+.meow-chip.is-press {
+  transform: translate(1px, 1px) scale(0.96);
+  box-shadow: 1px 1px 0 rgba(0,0,0,.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .meow-cartaz.--send.is-success,
+  .meow-bubble.is-shake,
+  .meow-btn.--primary.is-loading .paw,
+  .meow-success-stamp.is-on,
+  .meow-paws i,
+  #send-count.is-pulse {
+    animation: none !important;
+  }
+  .meow-cartaz.--send,
+  .meow-bubble,
+  .meow-btn.--primary {
+    transition: none !important;
+  }
+}
+
 .meow-identify {
   display: flex; align-items: center; gap: 0.4rem;
   margin-top: 0.55rem; font-size: 0.82rem; color: rgba(23,18,14,.7); font-weight: 500;
@@ -1648,15 +1811,20 @@
 /* top tools (perfil) — à esquerda do ♿ a11y */
 .cricri-top-tools {
   position: fixed !important;
-  top: max(0.65rem, env(safe-area-inset-top)) !important;
-  right: calc(0.65rem + 44px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
+  top: calc(0.65rem + 52px + env(safe-area-inset-top, 0px)) !important;
+  right: max(0.65rem, env(safe-area-inset-right, 0px)) !important;
   left: auto !important;
   z-index: 5500 !important;
   display: flex;
-  flex-direction: row-reverse;
-  gap: 0.45rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
   pointer-events: auto !important;
+}
+.cricri-top-tools .cricri-notif-panel,
+.cricri-top-tools .cricri-gear-panel {
+  top: 0;
+  right: calc(100% + 0.45rem);
 }
 .cricri-tool-btn {
   width: 44px; height: 44px; border-radius: 50%;
@@ -1748,6 +1916,7 @@
 }
 
 </style>
+
 </head>
 <body>
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -1941,7 +2110,9 @@
           <p class="meow-sub" id="send-sub">manda sem assinar</p>
         </div>
       </div>
-      <div class="meow-cartaz --send">
+      <div class="meow-cartaz --send" id="meow-send-cartaz">
+        <div class="meow-success-stamp" id="meow-success-stamp" aria-hidden="true"><span>MEOW ✓</span></div>
+        <div class="meow-paws" id="meow-paws" aria-hidden="true"></div>
         <h2 class="meow-title" id="send-title">manda um scrap<br>pra mim, sem nome!</h2>
         <form id="send-form">
           <div class="meow-bubble --placeholder">
@@ -1956,7 +2127,7 @@
             <input type="checkbox" id="send-identify" name="send-identify"> Mostrar que fui eu
           </label>
           <div class="meow-btn-stack">
-            <button type="submit" class="meow-btn --primary"><span aria-hidden="true">🐾</span> Meow</button>
+            <button type="submit" class="meow-btn --primary" id="btn-meow-send"><span class="paw" aria-hidden="true">🐾</span> <span class="meow-btn-label">Meow</span></button>
           </div>
           <p class="meow-hint">seu nome nunca chega se estiver anônimo</p>
         </form>
@@ -2845,20 +3016,107 @@ window.FASC_CONFIG = {
     } catch (_) {}
   }
 
-  /* meow char count */
-  (function(){
-    var ta = document.getElementById('send-body');
-    var ct = document.getElementById('send-count');
-    if (ta && ct) {
-      ta.addEventListener('input', function(){ ct.textContent = (ta.value.length || 0) + ' / 280'; });
+  /* meow microinterações de envio anônimo */
+  function meowReduced() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || document.documentElement.getAttribute('data-a11y-motion') === 'reduce';
+  }
+
+  function meowBurstPaws() {
+    var host = $('meow-paws');
+    if (!host || meowReduced()) return;
+    host.innerHTML = '';
+    var n = 7;
+    for (var i = 0; i < n; i++) {
+      var el = document.createElement('i');
+      el.textContent = '🐾';
+      var x = 20 + Math.random() * 60;
+      var y = 40 + Math.random() * 30;
+      el.style.left = x + '%';
+      el.style.top = y + '%';
+      el.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
+      el.style.setProperty('--dy', (-40 - Math.random() * 70) + 'px');
+      el.style.setProperty('--rot', ((Math.random() - 0.5) * 50) + 'deg');
+      el.style.animationDelay = (i * 0.04) + 's';
+      host.appendChild(el);
     }
-  })();
+    setTimeout(function () { host.innerHTML = ''; }, 1100);
+  }
+
+  function meowSuccessFx() {
+    var cartaz = $('meow-send-cartaz');
+    var stamp = $('meow-success-stamp');
+    var btn = $('btn-meow-send');
+    if (cartaz) {
+      cartaz.classList.remove('is-sending');
+      cartaz.classList.add('is-success');
+      setTimeout(function () { cartaz.classList.remove('is-success'); }, 800);
+    }
+    if (stamp && !meowReduced()) {
+      stamp.classList.add('is-on');
+      setTimeout(function () { stamp.classList.remove('is-on'); }, 900);
+    }
+    meowBurstPaws();
+    if (btn) {
+      btn.classList.remove('is-loading', 'is-press');
+      btn.classList.add('is-done');
+      var label = btn.querySelector('.meow-btn-label');
+      if (label) label.textContent = 'Enviado';
+      setTimeout(function () {
+        btn.classList.remove('is-done');
+        if (label) label.textContent = 'Meow';
+      }, 1600);
+    }
+    try {
+      if (navigator.vibrate) navigator.vibrate([12, 40, 18]);
+    } catch (_) {}
+  }
+
+  function meowWireTyping() {
+    var ta = $('send-body');
+    var ct = $('send-count');
+    var bubble = ta && ta.closest('.meow-bubble');
+    var anon = document.querySelector('#send-card .meow-meta .anon');
+    var identify = $('send-identify');
+    if (!ta) return;
+
+    function syncCount() {
+      if (!ct) return;
+      var n = ta.value.length || 0;
+      ct.textContent = n + ' / 280';
+      ct.classList.toggle('is-warn', n > 240);
+      ct.classList.remove('is-pulse');
+      void ct.offsetWidth;
+      if (n > 0 && !meowReduced()) ct.classList.add('is-pulse');
+    }
+    ta.addEventListener('input', syncCount);
+    ta.addEventListener('focus', function () {
+      if (bubble) bubble.classList.add('is-focused');
+    });
+    ta.addEventListener('blur', function () {
+      if (bubble) bubble.classList.remove('is-focused');
+    });
+
+    function syncAnon() {
+      if (!anon) return;
+      var open = identify && identify.checked;
+      anon.classList.toggle('is-open', !!open);
+      anon.classList.toggle('is-secret', !open);
+      anon.textContent = open ? '👁 identificado' : '🙈 100% anônimo';
+    }
+    if (identify) {
+      identify.addEventListener('change', syncAnon);
+      syncAnon();
+    }
+    syncCount();
+  }
 
   async function wireSend() {
     var params = new URLSearchParams(window.location.search);
     var handle = (params.get('u') || params.get('to') || '').replace(/^@/, '').trim();
     var card = $('send-card');
     if (!handle || !window.fascDb || !card) return;
+    meowWireTyping();
     try {
       var res = await Promise.race([
         window.fascDb.from('profiles').select('id,name,handle').eq('handle', handle).maybeSingle(),
@@ -2875,6 +3133,22 @@ window.FASC_CONFIG = {
       if (form) {
         form.onsubmit = async function (e) {
           e.preventDefault();
+          var btn = $('btn-meow-send');
+          var bubble = document.querySelector('#send-card .meow-bubble');
+          var cartaz = $('meow-send-cartaz');
+          var body = ($('send-body') && $('send-body').value.trim()) || '';
+
+          if (!body) {
+            if (bubble) {
+              bubble.classList.remove('is-shake');
+              void bubble.offsetWidth;
+              bubble.classList.add('is-shake');
+              setTimeout(function () { bubble.classList.remove('is-shake'); }, 500);
+            }
+            msg('send-msg', 'Escreve o scrap antes do Meow.', false);
+            return;
+          }
+
           if (!window.fascAuth) {
             msg('send-msg', 'Entre na sua conta para enviar.', false);
             return;
@@ -2884,8 +3158,16 @@ window.FASC_CONFIG = {
             msg('send-msg', 'Entre na sua conta para enviar.', false);
             return;
           }
-          var body = ($('send-body') && $('send-body').value.trim()) || '';
+
           var identify = $('send-identify') && $('send-identify').checked;
+          if (btn) {
+            btn.classList.add('is-press', 'is-loading');
+            var label = btn.querySelector('.meow-btn-label');
+            if (label) label.textContent = 'Miaando…';
+          }
+          if (cartaz) cartaz.classList.add('is-sending');
+          msg('send-msg', '', true);
+
           try {
             var ins = await window.fascDb.from('inbox_anon').insert({
               to_profile_id: target.id,
@@ -2895,8 +3177,32 @@ window.FASC_CONFIG = {
             });
             if (ins.error) throw ins.error;
             if ($('send-body')) $('send-body').value = '';
-            msg('send-msg', 'Meow enviado 🐾', true);
+            var ct = $('send-count');
+            if (ct) ct.textContent = '0 / 280';
+            meowSuccessFx();
+            msg('send-msg', 'Meow enviado 🐾 — a rua não viu quem foi.', true);
+            if (window.CricriNotifs && window.CricriNotifs.push) {
+              try {
+                window.CricriNotifs.push({
+                  ico: '🐾',
+                  title: 'Meow enviado',
+                  body: 'Scrap pra @' + (target.handle || 'alguém'),
+                  kind: 'scrap'
+                });
+              } catch (_) {}
+            }
           } catch (err) {
+            if (btn) {
+              btn.classList.remove('is-loading', 'is-press');
+              var lb = btn.querySelector('.meow-btn-label');
+              if (lb) lb.textContent = 'Meow';
+            }
+            if (cartaz) cartaz.classList.remove('is-sending');
+            if (bubble) {
+              bubble.classList.remove('is-shake');
+              void bubble.offsetWidth;
+              bubble.classList.add('is-shake');
+            }
             msg('send-msg', err.message || 'Falha', false);
           }
         };
@@ -3181,6 +3487,22 @@ window.FASC_CONFIG = {
   <script src="js/notif-bell.js"></script>
   <script src="js/footer.js"></script>
   <div id="site-footer-slot"></div>
+
+  <nav class="bottom-nav" aria-label="Navegação">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+      Home
+    </a>
+    <a href="tamagotchi.html">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><circle cx="9" cy="10" r="1.35" fill="currentColor"/><circle cx="15" cy="10" r="1.35" fill="currentColor"/><path d="M7 13.5c1.2 1.4 2.8 2.1 5 2.1s3.8-.7 5-2.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.5 11.5c-.8-.3-1.6-.9-2.2-1.6M19.5 11.5c.8-.3 1.6-.9 2.2-1.6M4.8 13.8c-.9.1-1.8.1-2.6-.1M19.2 13.8c.9.1 1.8.1 2.6-.1" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+      Meow
+    </a>
+    <a href="profile.html" class="active" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
+      Perfil
+    </a>
+  </nav>
+
 </body>
 
 </html>

@@ -1,8 +1,8 @@
 /* CRICRI Service Worker — push + background sync + offline shell */
 /* global self, clients, caches */
 
-const SW_VERSION = 'cricri-sw-v5';
-const CACHE = 'cricri-shell-v5';
+const SW_VERSION = 'cricri-sw-v6';
+const CACHE = 'cricri-shell-v6';
 const SHELL = [
   './',
   './index.html',
@@ -15,6 +15,9 @@ const SHELL = [
   './js/keyboard-nav.js',
   './js/touch-gestures.js',
   './js/footer.js',
+  './js/geo-offline.js',
+  './js/spots-api.js',
+  './js/events-api.js',
   './js/tamagotchi.js'
 ];
 

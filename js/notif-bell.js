@@ -34,11 +34,35 @@
     } catch (e) {}
   }
 
+  
+  /* CRICRI_TOP_TOOLS_LAYOUT — garante coluna sob o ♿ mesmo se CSS antigo conflitar */
+  function applyTopToolsLayout(wrap) {
+    if (!wrap) return;
+    wrap.style.cssText = [
+      'position:fixed',
+      'top:calc(0.65rem + 44px + 0.45rem + env(safe-area-inset-top, 0px))',
+      'right:max(0.65rem, env(safe-area-inset-right, 0px))',
+      'left:auto',
+      'z-index:5970',
+      'display:flex',
+      'flex-direction:column',
+      'align-items:flex-end',
+      'gap:0.45rem',
+      'margin:0',
+      'padding:0',
+      'pointer-events:auto'
+    ].join(';');
+  }
+
   function mount() {
-    if (document.getElementById('cricri-top-tools')) return;
+    if (document.getElementById('cricri-top-tools')) {
+      applyTopToolsLayout(document.getElementById('cricri-top-tools'));
+      return;
+    }
 
     var wrap = el('div', 'cricri-top-tools');
     wrap.id = 'cricri-top-tools';
+    applyTopToolsLayout(wrap);
     wrap.setAttribute('role', 'group');
     wrap.setAttribute('aria-label', 'Ferramentas e notificações');
 

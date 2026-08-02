@@ -144,7 +144,8 @@ console.log('Mock carregado');
     spots: L.layerGroup(),
     hospedagem: L.layerGroup(),
     gastronomia: L.layerGroup(),
-    transporte: L.layerGroup()
+    transporte: L.layerGroup(),
+    eventos: L.layerGroup()
   };
 
   // spots já no map: move markers/fences para o grupo spots
@@ -171,6 +172,61 @@ console.log('Mock carregado');
   });
   layerGroups.hospedagem.addTo(map);
   layerGroups.gastronomia.addTo(map);
+
+  // ---- EVENTOS (afters Supabase + fallback programação) ----
+  const eventIcon = L.divIcon({
+    className: 'projano-marker event',
+    html: '<div class="event-dot"></div>',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+  });
+
+  const eventMarkers = [];
+  let mapEvents = [];
+
+  async function loadMapEvents() {
+    try {
+      if (window.fascEvents && window.fascEvents.fetchEvents) {
+        mapEvents = await window.fascEvents.fetchEvents();
+      } else {
+        mapEvents = [];
+      }
+    } catch (e) {
+      console.warn('[map events]', e);
+      mapEvents = [];
+    }
+    // limpa camada
+    layerGroups.eventos.clearLayers();
+    eventMarkers.length = 0;
+    mapEvents.forEach(function (ev) {
+      if (ev.lat == null || ev.lng == null) return;
+      const when = ev.when_label || (window.fascEvents && window.fascEvents.formatWhen
+        ? window.fascEvents.formatWhen(ev.starts_at) : '');
+      const marker = L.marker([ev.lat, ev.lng], { icon: eventIcon })
+        .bindPopup(
+          '<span class="popup-cat eventos">Evento</span><br>' +
+          '<strong>' + (ev.title || 'Evento') + '</strong><br>' +
+          '<span style="opacity:0.88">' + (ev.category || '') +
+            (ev.place ? ' · ' + ev.place : '') + '</span><br>' +
+          '<span class="popup-meta">' + (when || 'horário a confirmar') +
+            ' · ' + (ev.status || 'programado') + ' · SC/SE</span>'
+        );
+      layerGroups.eventos.addLayer(marker);
+      eventMarkers.push({ marker: marker, data: ev });
+      try { markerById['ev-' + ev.id] = marker; } catch (_) {}
+    });
+    if (layerOn.eventos && !map.hasLayer(layerGroups.eventos)) {
+      map.addLayer(layerGroups.eventos);
+    }
+    if (typeof applyProximityFilter === 'function') applyProximityFilter();
+    console.info('[map events] markers:', eventMarkers.length);
+  }
+
+  // carrega eventos assim que possível (não bloqueia o resto do mapa)
+  loadMapEvents();
+  // revalida a cada 10 min
+  setInterval(loadMapEvents, 10 * 60 * 1000);
+
 
   // ---- Transporte público (São Cristóvão SE ↔ Aracaju) — dados orientativos front ----
   // Horários estimados (orientativos). freqMin = intervalo médio em minutos no pico.
@@ -657,8 +713,19 @@ console.log('Mock carregado');
 
 
   const CENTER_SC = { lat: -11.015, lng: -37.206 }; // centro histórico São Cristóvão SE
+  /* Proximidade · presets calibrados pro centro histórico (caminhável) */
+  const PROX_STORAGE_KEY = 'cricri_map_prox_m';
+  const PROX_PRESETS = [0, 200, 400, 800, 1500];
+  const PROX_MAX_GPS_AGE_MS = 180000; // 3 min
   let proxRadiusM = 0; // 0 = todos
-  let layerOn = { spots: true, hospedagem: true, gastronomia: true, transporte: true };
+  let proxCircle = null; // círculo visual do raio
+  let layerOn = { spots: true, hospedagem: true, gastronomia: true, transporte: true, eventos: true };
+
+  try {
+    var storedProx = parseInt(sessionStorage.getItem(PROX_STORAGE_KEY), 10);
+    if (PROX_PRESETS.indexOf(storedProx) !== -1) proxRadiusM = storedProx;
+  } catch (_) {}
+
 
   function haversineMLocal(a, b) {
     const R = 6371000;
@@ -673,10 +740,16 @@ console.log('Mock carregado');
   }
 
   function refPoint() {
-    // GPS do usuário se fresco (< 3 min); senão centro de SC
+    // Offline-aware: GPS fresco → cache PWA → centro SC
+    if (window.fascGeoOffline && typeof window.fascGeoOffline.resolve === 'function') {
+      const r = window.fascGeoOffline.resolve(lastPos);
+      return { lat: r.lat, lng: r.lng, source: r.source, quality: r.quality, accuracy: r.accuracy, time: r.time };
+    }
     if (typeof lastPos !== 'undefined' && lastPos && lastPos.lat != null) {
       const age = Date.now() - (lastPos.time || 0);
       if (age < 180000) return { lat: lastPos.lat, lng: lastPos.lng, source: 'gps' };
+      // offline/sem GPS: ainda usa lastPos se < 6h
+      if (age < 6 * 3600000) return { lat: lastPos.lat, lng: lastPos.lng, source: navigator.onLine === false ? 'offline' : 'cache' };
     }
     return { lat: CENTER_SC.lat, lng: CENTER_SC.lng, source: 'centro' };
   }
@@ -690,8 +763,86 @@ console.log('Mock carregado');
     const el = document.getElementById('map-prox-ref');
     if (!el) return;
     const r = refPoint();
-    el.textContent = r.source === 'gps' ? 'ref: sua posição' : 'ref: centro SC';
+    if (r.source === 'gps') el.textContent = 'ref: sua posição';
+    else if (r.source === 'offline') el.textContent = 'ref: última posição (offline)';
+    else if (r.source === 'cache') el.textContent = 'ref: última posição (cache)';
+    else el.textContent = 'ref: centro SC (ative GPS)';
   }
+
+  function updateProxCount() {
+    const el = document.getElementById('map-prox-count');
+    if (!el) return;
+    var n = 0;
+    try {
+      if (typeof collectVisiblePlaces === 'function') n = collectVisiblePlaces().length;
+    } catch (_) {}
+    if (!proxRadiusM) {
+      el.textContent = n ? (n + ' lugares') : '';
+    } else {
+      el.textContent = n ? (n + ' num raio de ' + (proxRadiusM >= 1000 ? (proxRadiusM / 1000).toString().replace('.', ',') + ' km' : proxRadiusM + ' m')) : 'nada neste raio';
+    }
+  }
+
+  function syncProxCircle() {
+    const ref = refPoint();
+    if (!proxRadiusM) {
+      if (proxCircle) {
+        try { map.removeLayer(proxCircle); } catch (_) {}
+        proxCircle = null;
+      }
+      return;
+    }
+    if (!proxCircle) {
+      proxCircle = L.circle([ref.lat, ref.lng], {
+        radius: proxRadiusM,
+        color: '#5ec4d6',
+        weight: 1.5,
+        dashArray: '6 8',
+        fillColor: '#5ec4d6',
+        fillOpacity: 0.06,
+        opacity: 0.55,
+        interactive: false
+      }).addTo(map);
+    } else {
+      proxCircle.setLatLng([ref.lat, ref.lng]);
+      proxCircle.setRadius(proxRadiusM);
+      if (!map.hasLayer(proxCircle)) proxCircle.addTo(map);
+    }
+  }
+
+  function setProximityRadius(m, opts) {
+    opts = opts || {};
+    m = parseInt(m, 10) || 0;
+    if (PROX_PRESETS.indexOf(m) === -1 && m !== 0) {
+      // aceita valor custom via API
+      m = Math.max(0, Math.min(5000, m));
+    }
+    proxRadiusM = m;
+    try { sessionStorage.setItem(PROX_STORAGE_KEY, String(m)); } catch (_) {}
+
+    document.querySelectorAll('[data-prox]').forEach(function (b) {
+      var v = parseInt(b.getAttribute('data-prox'), 10) || 0;
+      var active = v === m;
+      b.classList.toggle('is-on', active);
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    // se escolheu raio e não tem GPS fresco, pede localização
+    if (m > 0 && opts.requestGps !== false) {
+      var r = refPoint();
+      if (r.source !== 'gps' && window.projanoMap && typeof window.projanoMap.startWatching === 'function') {
+        try { window.projanoMap.startWatching(); } catch (_) {}
+      } else if (r.source !== 'gps' && typeof startWatching === 'function') {
+        try { startWatching(); } catch (_) {}
+      }
+    }
+
+    applyProximityFilter();
+    if (opts.fit !== false) {
+      try { fitAllVisible(); } catch (_) {}
+    }
+  }
+
 
   function applyProximityFilter() {
     const ref = refPoint();
@@ -745,6 +896,30 @@ console.log('Mock carregado');
         if (layerGroups[p.layer].hasLayer(item.marker)) layerGroups[p.layer].removeLayer(item.marker);
       }
     });
+    // Eventos
+    if (typeof eventMarkers !== 'undefined') {
+      eventMarkers.forEach(function (item) {
+        const p = item.data;
+        const dist = haversineMLocal(ref, { lat: p.lat, lng: p.lng });
+        const inRange = !maxM || dist <= maxM;
+        const show = layerOn.eventos && inRange;
+        const when = p.when_label || '';
+        if (show) {
+          if (!layerGroups.eventos.hasLayer(item.marker)) layerGroups.eventos.addLayer(item.marker);
+          item.marker.setPopupContent(
+            '<span class="popup-cat eventos">Evento</span><br>' +
+            '<strong>' + (p.title || 'Evento') + '</strong><br>' +
+            '<span style="opacity:0.88">' + (p.category || '') +
+              (p.place ? ' · ' + p.place : '') + '</span><br>' +
+            '<span class="popup-meta">' + formatDist(dist) + ' · ' + (when || 'horário a confirmar') +
+              ' · ' + (p.status || 'programado') + ' · SC/SE</span>'
+          );
+        } else {
+          if (layerGroups.eventos.hasLayer(item.marker)) layerGroups.eventos.removeLayer(item.marker);
+        }
+      });
+    }
+
     // traçado orientativo da rota SC → Campus
     if (typeof busRouteLine !== 'undefined') {
       if (layerOn.transporte && (!maxM || maxM >= 2000)) {
@@ -755,7 +930,7 @@ console.log('Mock carregado');
     }
 
     // garante grupos no mapa se camada ligada
-    ['spots', 'hospedagem', 'gastronomia', 'transporte'].forEach(function (name) {
+    ['spots', 'hospedagem', 'gastronomia', 'transporte', 'eventos'].forEach(function (name) {
       if (layerOn[name]) {
         if (!map.hasLayer(layerGroups[name])) map.addLayer(layerGroups[name]);
       } else if (map.hasLayer(layerGroups[name])) {
@@ -763,6 +938,8 @@ console.log('Mock carregado');
       }
     });
     if (typeof renderPlacesList === 'function') renderPlacesList();
+    try { syncProxCircle(); } catch (_) {}
+    try { updateProxCount(); } catch (_) {}
   }
 
   function setLayerVisible(name, on) {
@@ -786,6 +963,13 @@ console.log('Mock carregado');
       const d = haversineMLocal(ref, p);
       if (!maxM || d <= maxM) latlngs.push([p.lat, p.lng]);
     });
+    if (typeof eventMarkers !== 'undefined' && layerOn.eventos) {
+      eventMarkers.forEach(function (item) {
+        const p = item.data;
+        const d = haversineMLocal(ref, p);
+        if (!maxM || d <= maxM) latlngs.push([p.lat, p.lng]);
+      });
+    }
     if (latlngs.length) {
       map.fitBounds(latlngs, { padding: [36, 36], maxZoom: 16 });
     } else {
@@ -848,6 +1032,27 @@ console.log('Mock carregado');
         dist: dist
       });
     });
+
+    // Eventos
+    if (typeof eventMarkers !== 'undefined' && layerOn.eventos) {
+      eventMarkers.forEach(function (item) {
+        const p = item.data;
+        const dist = haversineMLocal(ref, { lat: p.lat, lng: p.lng });
+        if (maxM && dist > maxM) return;
+        const hay = ((p.title || '') + ' ' + (p.place || '') + ' ' + (p.category || '')).toLowerCase();
+        if (q && hay.indexOf(q) === -1) return;
+        items.push({
+          id: 'ev-' + p.id,
+          layer: 'eventos',
+          kind: 'eventos',
+          name: p.title || 'Evento',
+          meta: (p.when_label || '') + (p.place ? ' · ' + p.place : ''),
+          lat: p.lat,
+          lng: p.lng,
+          dist: dist
+        });
+      });
+    }
 
     items.sort(function (a, b) { return a.dist - b.dist; });
     return items;
@@ -967,40 +1172,65 @@ console.log('Mock carregado');
   document.querySelectorAll('[data-prox]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       const v = parseInt(btn.getAttribute('data-prox'), 10) || 0;
-      proxRadiusM = v;
-      document.querySelectorAll('[data-prox]').forEach(function (b) {
-        const active = b === btn;
-        b.classList.toggle('is-on', active);
-        b.setAttribute('aria-pressed', active ? 'true' : 'false');
-      });
-      applyProximityFilter();
-      fitAllVisible();
+      setProximityRadius(v, { fit: true, requestGps: true });
     });
   });
+
+  // botão GPS dedicado
+  var gpsBtn = document.getElementById('map-prox-gps');
+  if (gpsBtn) {
+    gpsBtn.addEventListener('click', function () {
+      gpsBtn.classList.add('is-on');
+      gpsBtn.setAttribute('aria-pressed', 'true');
+      if (typeof startWatching === 'function') {
+        try { startWatching({ precise: true }); } catch (_) {}
+      } else if (window.projanoMap && window.projanoMap.startWatching) {
+        try { window.projanoMap.startWatching(); } catch (_) {}
+      }
+      // se ainda em "Todos", sugere 400 m (raio do centro histórico)
+      if (!proxRadiusM) setProximityRadius(400, { fit: true, requestGps: false });
+      else setProximityRadius(proxRadiusM, { fit: true, requestGps: false });
+      var refEl = document.getElementById('map-prox-ref');
+      if (refEl) refEl.textContent = 'pedindo GPS…';
+    });
+  }
 
   // reaplicar quando GPS atualizar
   window.addEventListener('projano:position', function () {
     updateProxRefLabel();
-    applyProximityFilter(); // atualiza distâncias na lista sempre
+    applyProximityFilter();
+    var gpsBtn2 = document.getElementById('map-prox-gps');
+    if (gpsBtn2) {
+      gpsBtn2.classList.add('is-on');
+      gpsBtn2.setAttribute('aria-pressed', 'true');
+    }
   });
 
   // expõe API
   window.projanoMapLayers = {
     groups: layerGroups,
     pois: POIS,
+    events: eventMarkers,
+    reloadEvents: loadMapEvents,
     fitAll: fitAllVisible,
     setVisible: setLayerVisible,
     setProximity: function (m) {
-      proxRadiusM = m || 0;
-      applyProximityFilter();
+      setProximityRadius(m, { fit: true, requestGps: true });
     },
     getProximity: function () { return proxRadiusM; },
+    presets: PROX_PRESETS,
     applyFilter: applyProximityFilter,
     focusPlace: focusPlace,
     renderList: renderPlacesList
   };
 
-  // estado inicial
+  // estado inicial (restaura chip salvo)
+  document.querySelectorAll('[data-prox]').forEach(function (b) {
+    var v = parseInt(b.getAttribute('data-prox'), 10) || 0;
+    var active = v === proxRadiusM;
+    b.classList.toggle('is-on', active);
+    b.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
   applyProximityFilter();
   setTimeout(function () {
     try { fitAllVisible(); } catch (e) {}
@@ -1008,20 +1238,33 @@ console.log('Mock carregado');
 
 
   // ---- Perfis GPS ----
+  /* Geolocalização · WiFi/rede primeiro, GNSS só sob demanda
+   *
+   * No browser NÃO existe API para escanear SSIDs.
+   * enableHighAccuracy:false → o SO usa WiFi + celular (rápido, pouca bateria).
+   * enableHighAccuracy:true  → pede GNSS (GPS) quando disponível.
+   */
   const GEO_PROFILES = {
-    eco:  { enableHighAccuracy: false, timeout: 12000, maximumAge: 40000 },
-    mid:  { enableHighAccuracy: true,  timeout: 10000, maximumAge: 12000 },
-    high: { enableHighAccuracy: true,  timeout: 8000,  maximumAge: 2000 }
+    // WiFi / rede / celular — padrão do festival (centro denso)
+    eco:  { enableHighAccuracy: false, timeout: 12000, maximumAge: 45000 },
+    // Ainda rede; timeout um pouco mais apertado perto de zona
+    mid:  { enableHighAccuracy: false, timeout: 10000, maximumAge: 15000 },
+    // GNSS (GPS) — só burst: botão GPS, dentro da cerca, centerOnUser
+    high: { enableHighAccuracy: true,  timeout: 12000, maximumAge: 4000 }
   };
+  const GEO_MODE_LABEL = { eco: 'WiFi/rede', mid: 'rede', high: 'GPS' };
 
-  const APPROACH_BUFFER_M = 220;
-  const POOR_ACCURACY_M = 70;
-  const OUTLIER_JUMP_M = 180;
-  const MIN_UPDATE_MS = 7000;
-  const MIN_MOVE_M = 18;
-  const FENCE_CHECK_MS = 4000;
-  const SAMPLE_WINDOW = 5;
-  const PRECISE_BURST_MS = 25000;
+  const APPROACH_BUFFER_M = 180;
+  const POOR_ACCURACY_M = 80;
+  const OUTLIER_JUMP_M = 220;
+  const MIN_UPDATE_MS = 10000;   // menos repaint no mapa
+  const MIN_MOVE_M = 22;          // ignora micro-movimentos
+  const FENCE_CHECK_MS = 6000;    // geofence menos frequente
+  const SAMPLE_WINDOW = 4;
+  const PRECISE_BURST_MS = 18000;  // burst curto só no botão GPS / fence
+  const GPS_PAUSE_HIDDEN = true;  // para watch quando aba/mapa some
+  const GPS_TICK_MIN_MS = 4000; // mínimo entre eventos projano:position
+  let lastPosEventTs = 0;
 
   // ---- Bússola + fusão giroscópio ----
   // Filtro complementar: gyro (alta freq.) + magnetômetro (referência absoluta)
@@ -1058,6 +1301,22 @@ console.log('Mock carregado');
   let accuracyCircle = null;
   let watchId = null;
   let lastPos = null;
+  // PWA offline: restaura último fix salvo
+  try {
+    if (window.fascGeoOffline) {
+      var cachedGeo = window.fascGeoOffline.load();
+      if (cachedGeo && window.fascGeoOffline.classify(cachedGeo) !== 'expired') {
+        lastPos = {
+          lat: cachedGeo.lat,
+          lng: cachedGeo.lng,
+          accuracy: cachedGeo.accuracy || 80,
+          time: cachedGeo.time
+        };
+        console.info('[CRICRI geo] restaurado do cache', window.fascGeoOffline.classify(cachedGeo));
+      }
+    }
+  } catch (_) {}
+
   let lastRaw = null;
   let lastUiUpdate = 0;
   let followedOnce = false;
@@ -1112,11 +1371,15 @@ console.log('Mock carregado');
   }
 
   function desiredProfile(lat, lng, accuracy) {
+    // Padrão: WiFi/rede. GPS só em burst explícito ou dentro da geofence.
     if (Date.now() < preciseUntil) return 'high';
     const { dist, spot } = nearestSpotDistance(lat, lng);
     const approachLimit = (spot ? spot.radius : 100) + APPROACH_BUFFER_M;
-    if (spot && dist <= spot.radius + 40) return 'high';
+    // Dentro da zona do spot → GPS curto para geofence confiável
+    if (spot && dist <= spot.radius + 25) return 'high';
+    // Aproximando → mantém rede (mid), não sobe pra GNSS
     if (spot && dist <= approachLimit) return 'mid';
+    // Accuracy ruim em WiFi: ainda mid (rede), não force GPS sozinho
     if (accuracy != null && accuracy > POOR_ACCURACY_M) return 'mid';
     return 'eco';
   }
@@ -1142,8 +1405,13 @@ console.log('Mock carregado');
     if (accuracy == null) { hint.hidden = true; return; }
     hint.hidden = false;
     const acc = Math.round(accuracy);
-    const mode = profile === 'high' ? 'GPS' : profile === 'mid' ? 'misto' : 'rede';
+    const mode = (typeof GEO_MODE_LABEL !== 'undefined' && GEO_MODE_LABEL[profile])
+      ? GEO_MODE_LABEL[profile]
+      : (profile === 'high' ? 'GPS' : profile === 'mid' ? 'rede' : 'WiFi/rede');
     hint.textContent = `±${acc} m · ${mode}`;
+    hint.title = profile === 'high'
+      ? 'GNSS (GPS) ativo — maior precisão, mais bateria'
+      : 'Posição por WiFi/rede celular via sistema — sem escanear SSIDs no app';
     hint.classList.toggle('good', acc <= 35);
     hint.classList.toggle('ok', acc > 35 && acc <= 80);
     hint.classList.toggle('poor', acc > 80);
@@ -1310,11 +1578,17 @@ console.log('Mock carregado');
 
     lastPos = next;
     lastUiUpdate = now;
+    try {
+      if (window.fascGeoOffline) window.fascGeoOffline.save(next);
+    } catch (_) {}
 
     try {
-      window.dispatchEvent(new CustomEvent('projano:position', {
-        detail: { lat: next.lat, lng: next.lng, accuracy: next.accuracy, time: next.time }
-      }));
+      if (Date.now() - (lastPosEventTs || 0) >= (typeof GPS_TICK_MIN_MS !== 'undefined' ? GPS_TICK_MIN_MS : 4000)) {
+        lastPosEventTs = Date.now();
+        window.dispatchEvent(new CustomEvent('projano:position', {
+          detail: { lat: next.lat, lng: next.lng, accuracy: next.accuracy, time: next.time }
+        }));
+      }
     } catch (_) {}
 
     if (!userMarker) {
@@ -1396,7 +1670,8 @@ console.log('Mock carregado');
     }
 
     currentProfile = nextProfile;
-    setStatus('buscando…', 'pending');
+    var modeLabel = (GEO_MODE_LABEL && GEO_MODE_LABEL[nextProfile]) || nextProfile;
+    setStatus(nextProfile === 'high' ? 'buscando GPS…' : 'buscando WiFi/rede…', 'pending');
 
     navigator.geolocation.getCurrentPosition(
       (pos) => onPosition(pos, true),
@@ -1433,8 +1708,12 @@ console.log('Mock carregado');
   }
 
   function syncWatchState() {
+    // Performance: só liga GPS com mapa visível + aba ativa
     if (mapVisible && pageVisible) startWatching();
-    else stopWatching('pause');
+    else {
+      stopWatching('pause');
+      try { if (typeof stopCompass === 'function') stopCompass(); } catch (_) {}
+    }
   }
 
   function centerOnUser() {
@@ -1858,14 +2137,60 @@ console.log('Mock carregado');
   });
   map.addControl(new LocateControl());
 
+  
+  // Offline / online — atualiza rótulos sem religar GPS
+  window.addEventListener('cricri:connectivity', function () {
+    try { updateProxRefLabel(); } catch (_) {}
+    try {
+      if (navigator.onLine === false) {
+        var r = refPoint();
+        if (r.source === 'offline' || r.source === 'cache') setStatus('offline · cache', 'paused');
+        else setStatus('offline', 'paused');
+      } else if (watching) {
+        setStatus('ao vivo', 'live');
+      }
+    } catch (_) {}
+  });
+  window.addEventListener('offline', function () {
+    try {
+      var r = refPoint();
+      if (r.source === 'offline' || r.source === 'cache' || (lastPos && lastPos.lat != null)) {
+        setStatus('offline · última pos', 'paused');
+        // mantém marker na última posição
+        if (lastPos && userMarker) {
+          userMarker.setLatLng([lastPos.lat, lastPos.lng]);
+          userMarker.bindPopup('<strong>Última posição</strong><br><span style="opacity:.8">salva no aparelho (offline)</span>');
+        }
+      }
+    } catch (_) {}
+  });
+  window.addEventListener('online', function () {
+    try {
+      if (mapVisible && pageVisible) startWatching();
+    } catch (_) {}
+  });
+
+  // Se já tem cache e mapa abre offline, mostra marker
+  if (lastPos && lastPos.lat != null && !userMarker) {
+    try {
+      userMarker = L.marker([lastPos.lat, lastPos.lng], {
+        icon: buildUserIcon(null),
+        zIndexOffset: 1000
+      }).addTo(map).bindPopup('<strong>Última posição</strong><br><span style="opacity:.8">cache do aparelho</span>');
+    } catch (_) {}
+  }
+
   window.projanoMap = {
     map: map,
     flyTo: function (lat, lng, z) { map.setView([lat, lng], z || 16); },
     map,
     getPosition: () => lastPos,
+    getResolvedPosition: () => (window.fascGeoOffline ? window.fascGeoOffline.resolve(lastPos) : lastPos),
     getHeading: () => heading,
     getFusionMode: () => fusionMode,
     getProfile: () => currentProfile,
+    getLocationMode: () => (GEO_MODE_LABEL && GEO_MODE_LABEL[currentProfile]) || currentProfile,
+    preferNetwork: () => { preciseUntil = 0; startWatch('eco'); },
     centerOnUser,
     startWatching: () => startWatching(),
     stopWatching: () => stopWatching('pause'),
