@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FASC+ · Atualizações futuras — Performance & Estética</title>
+  <meta name="theme-color" content="#100e0c">
+  <style>
+    :root {
+      --void: #0c0a09;
+      --ink: #171412;
+      --paper: #e8dfd0;
+      --rosa: #d42f62;
+      --ochre: #c48a2a;
+      --stone: #8a8176;
+      --line: rgba(232, 223, 208, 0.12);
+      --card: #14110e;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--void);
+      color: var(--paper);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.15rem 5rem; }
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .brand {
+      color: var(--rosa);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      line-height: 1.15;
+      margin: 0.5rem 0 0.75rem;
+      letter-spacing: -0.02em;
+    }
+    h1 span { color: var(--rosa); }
+    .lead { color: var(--stone); margin: 0; font-size: 1.02rem; }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-top: 1.1rem;
+    }
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--stone);
+    }
+    .pill.on { border-color: rgba(212,47,98,0.45); color: var(--rosa); background: rgba(212,47,98,0.1); }
+
+    h2 {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ochre);
+      margin: 2.4rem 0 0.9rem;
+    }
+    h3 {
+      font-size: 1.05rem;
+      margin: 1.4rem 0 0.45rem;
+      letter-spacing: -0.01em;
+    }
+    p, li { color: #d4cbb8; }
+    ul { padding-left: 1.15rem; }
+    li { margin: 0.35rem 0; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.15rem 1.1rem;
+      margin: 0.85rem 0;
+    }
+    .card strong { color: #f0e6d0; }
+    .grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    @media (min-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 0.75rem 0 1rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.45rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--stone); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(212,47,98,0.15);
+      color: var(--rosa);
+    }
+    .tag.perf { background: rgba(53,102,44,0.2); color: #8fce9a; }
+    .tag.est { background: rgba(196,138,42,0.2); color: #e0b45a; }
+    .tag.mvp { background: rgba(230,220,196,0.12); color: #cfc5b4; }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--line);
+      color: var(--stone);
+      font-size: 0.85rem;
+    }
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 0.82em;
+      background: rgba(255,255,255,0.06);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    .north {
+      border-left: 3px solid var(--rosa);
+      padding-left: 0.9rem;
+      margin: 1rem 0 1.5rem;
+      color: #cfc5b4;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">FASC+</div>
+      <h1>Atualizações futuras para ser o app mais <span>rápido</span> e mais <span>bonito</span> do festival no Brasil</h1>
+      <p class="lead">
+        Roadmap de evolução pós-MVP (Feed + Mapa + Afters). Foco em performance real na rua
+        (4G instável, Android de entrada) e estética de cartaz/stencil que ninguém copia.
+      </p>
+      <div class="meta">
+        <span class="pill on">Festival 19–22/11/2026</span>
+        <span class="pill">Documento vivo · CTO</span>
+        <span class="pill">Gerado 02/08/2026</span>
+      </div>
+    </header>
+
+    <div class="north">
+      <strong>Norte:</strong> na mão de quem está no Largo da Matriz às 23h, com sol fraco na tela,
+      rede oscilando e uma mão só — o app tem que abrir, orientar e emocionar em menos de 2 segundos.
+    </div>
+
+    <!-- ========== PERFORMANCE ========== -->
+    <h2>1 · Performance (rua real)</h2>
+
+    <div class="card">
+      <h3>1.1 Orçamento de carga (targets)</h3>
+      <table>
+        <thead>
+          <tr><th>Métrica</th><th>Meta</th><th>Por quê</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>LCP (Largest Contentful Paint)</td><td>&lt; 1,8s no 4G</td><td>Hero + primeiro post legíveis na hora</td></tr>
+          <tr><td>INP (Interaction to Next Paint)</td><td>&lt; 200ms</td><td>Toque no scrap / nav sem lag</td></tr>
+          <tr><td>CLS</td><td>&lt; 0,05</td><td>Mapa e cards sem “pulo”</td></tr>
+          <tr><td>JS inicial (comprimido)</td><td>&lt; 90 KB</td><td>Android de entrada</td></tr>
+          <tr><td>CSS crítico</td><td>inline &lt; 14 KB</td><td>First paint sem bloquear</td></tr>
+          <tr><td>Time to Interactive (mapa)</td><td>&lt; 3s</td><td>Leaflet lazy após Feed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>1.2 Rede & assets <span class="tag perf">perf</span></h3>
+        <ul>
+          <li>Imagens em <strong>AVIF/WebP</strong> com presets já no repo (<code>encode-avif.sh</code>)</li>
+          <li><code>srcset</code> + <code>sizes</code> por contexto (avatar / feed / hero)</li>
+          <li>CDN com cache longo + <code>immutable</code> em hash de arquivo</li>
+          <li>Prefetch de rotas: <code>profile.html</code> no idle após login</li>
+          <li>Service Worker: cache do shell + último feed/spots (offline na rua)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>1.3 JavaScript <span class="tag perf">perf</span></h3>
+        <ul>
+          <li>Modularizar em ES modules (dívida técnica do status)</li>
+          <li>Code-split: mapa e marketplace só sob demanda</li>
+          <li>Virtualizar lista do feed se &gt; 40 posts</li>
+          <li>Debounce de geoloc + batch de writes Supabase</li>
+          <li>Remover mocks do caminho crítico em prod</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>1.4 Backend / dados <span class="tag perf">perf</span></h3>
+        <ul>
+          <li>Índices já no schema; revisar <code>explain</code> em posts + scraps</li>
+          <li>Realtime só em spots/afters — não no feed inteiro no dia 1</li>
+          <li>Edge functions leves para rate-limit da caixinha</li>
+          <li>Região <code>sa-east-1</code> (já alinhada)</li>
+          <li>Payload de posts: select mínimo + contagem de likes em view</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>1.5 Observabilidade <span class="tag perf">perf</span></h3>
+        <ul>
+          <li>Web Vitals → endpoint próprio ou GA4/Plausible</li>
+          <li>RUM por device (iPhone vs Android entrada)</li>
+          <li>Alertas se LCP p95 &gt; 3s no fim de semana do evento</li>
+          <li>Feature flags para desligar animações sob CPU alta</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== ESTÉTICA ========== -->
+    <h2>2 · Estética (identidade de rua)</h2>
+
+    <div class="card">
+      <h3>2.1 Sistema visual “cartaz vivo”</h3>
+      <ul>
+        <li>Design tokens fechados: cor, tipo fluida, sombra-cartaz, motion (já em andamento)</li>
+        <li>Presets de perfil (“stencil rosa”, “noite preta”, “ocre cartaz”) — fase 2 do PDF</li>
+        <li>Tipografia: manter Saira Stencil + Oswald; subset de fontes (só glyphs usados)</li>
+        <li>Fotografia do evento com tratamento film grain + contraste de rua</li>
+        <li>Modo claro que não “parece app genérico” — papel e ocre, não branco hospital</li>
+      </ul>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>2.2 Motion com propósito <span class="tag est">estética</span></h3>
+        <ul>
+          <li>Manter <code>fasc-motion</code> + CSS tokens; evitar libs pesadas</li>
+          <li>Scroll-driven só onde agrega (já explorado)</li>
+          <li>Respeitar always <code>prefers-reduced-motion</code></li>
+          <li>Transições de rota coerentes index ↔ profile</li>
+          <li>Microinterações em botões/inputs (já base)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>2.3 Som & háptica <span class="tag est">estética</span></h3>
+        <ul>
+          <li>Clicks sutis opt-in (UI sound pack curto, &lt; 30 KB)</li>
+          <li><code>navigator.vibrate</code> em confirmar after (opt-in)</li>
+          <li>Nada automático no load — silêncio é o padrão</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== PRODUTO ========== -->
+    <h2>3 · Produto (depois do MVP ship)</h2>
+
+    <table>
+      <thead>
+        <tr><th>Prioridade</th><th>Entrega</th><th>Nota</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag mvp">P0</span></td>
+          <td>Feed real + scraps + afters + auth estável</td>
+          <td>Bloqueia lançamento do evento</td>
+        </tr>
+        <tr>
+          <td><span class="tag mvp">P0</span></td>
+          <td>fasc-prod sem seed; RLS auditado</td>
+          <td>Segurança + LGPD geoloc</td>
+        </tr>
+        <tr>
+          <td><span class="tag">P1</span></td>
+          <td>PWA offline (feed/spots em cache)</td>
+          <td>4G cai na roda — app continua</td>
+        </tr>
+        <tr>
+          <td><span class="tag">P1</span></td>
+          <td>Caixinha anônima + handles</td>
+          <td>SQL pronto; polir UI</td>
+        </tr>
+        <tr>
+          <td><span class="tag">P2</span></td>
+          <td>Personalização de perfil (“meu cartaz”)</td>
+          <td>Estética diferenciadora</td>
+        </tr>
+        <tr>
+          <td><span class="tag">P2</span></td>
+          <td>Stories 24h geolocalizados</td>
+          <td>Só quem está a 200 m vê</td>
+        </tr>
+        <tr>
+          <td><span class="tag">P3</span></td>
+          <td>Marketplace / IA</td>
+          <td>Fora do lançamento do evento</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ========== CHECKLIST TÉCNICO ========== -->
+    <h2>4 · Checklist técnico “melhor do Brasil”</h2>
+
+    <div class="card">
+      <ul>
+        <li>☐ Lighthouse mobile ≥ 90 Performance / ≥ 95 Accessibility / ≥ 95 Best Practices</li>
+        <li>☐ a11y-check.py + axe no CI (já existe base)</li>
+        <li>☐ Teste em device real: Android 4–6 GB RAM + iPhone</li>
+        <li>☐ Teste com throttling Fast 3G e CPU 4× slowdown</li>
+        <li>☐ Mapa: tiles com cache; markers cluster se densos</li>
+        <li>☐ Zero <code>service_role</code> no client (princípio do PDF)</li>
+        <li>☐ Content-Security-Policy apertada em prod</li>
+        <li>☐ Fonts self-hosted com <code>font-display: swap</code> + subset</li>
+        <li>☐ Critical CSS extraído; resto async</li>
+        <li>☐ Error boundary visual (“a rua falhou, tenta de novo”) — sem tela branca</li>
+      </ul>
+    </div>
+
+    <!-- ========== SPRINTS ========== -->
+    <h2>5 · Sequência sugerida (sprints)</h2>
+
+    <div class="grid">
+      <div class="card">
+        <strong>Sprint A — Ship do evento</strong>
+        <p>Auth QA · Feed real · Scraps · Afters · fasc-prod · RLS · PWA mínima offline.</p>
+      </div>
+      <div class="card">
+        <strong>Sprint B — Velocidade</strong>
+        <p>Split do mapa · imagens AVIF · SW cache · Web Vitals · virtual list se precisar.</p>
+      </div>
+      <div class="card">
+        <strong>Sprint C — Beleza social</strong>
+        <p>Caixinha · handles · tema de perfil · polish motion · export de memórias (zine PDF).</p>
+      </div>
+    </div>
+
+    <h2>6 · O que já está no código (base sólida)</h2>
+    <div class="card">
+      <ul>
+        <li>Design system mobile-first (tokens, tipografia fluida, estética cartaz)</li>
+        <li>Painel de acessibilidade completo + CI a11y</li>
+        <li>Mapa Leaflet com geofence, bússola, spots no Supabase</li>
+        <li>Schema MVP + RLS + caixinha (<code>inbox_anon</code>)</li>
+        <li>Motion: CSS avançado + <code>js/fasc-motion.js</code> (API estilo Framer, vanilla)</li>
+        <li>Dark mode formal + microinterações de botões/inputs</li>
+        <li>Transições de rota e animações de página</li>
+      </ul>
+    </div>
+
+    <footer>
+      <p><strong>FASC+ — a rua é o servidor.</strong></p>
+      <p>
+        Este documento orienta decisões de produto e engenharia. Ship o MVP antes de abrir
+        a superfície social completa. Performance e estética não são fases finais — são
+        restrições de cada PR.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

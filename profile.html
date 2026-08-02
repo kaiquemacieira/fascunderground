@@ -1,0 +1,3186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Área do Usuário · CRICRI</title>
+  <meta name="theme-color" content="#0c0a08">
+  <meta name="view-transition" content="same-origin">
+  <script>
+  (function () {
+    try {
+      var s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+      var t = s.theme || 'default';
+      var html = document.documentElement;
+      if (t === 'light') {
+        html.setAttribute('data-theme', 'light');
+        html.setAttribute('data-a11y-theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        html.setAttribute('data-a11y-theme', 'dark');
+      }
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = t === 'light' ? '#f3ecdc' : '#0c0a08';
+    } catch (e) {}
+  })();
+  </script>
+  <style>
+    @view-transition {
+      navigation: auto;
+    }
+    @keyframes fasc-route-exit {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(-8px) scale(0.99); }
+    }
+    @keyframes fasc-route-enter-page {
+      from { opacity: 0; transform: translateY(12px) scale(0.985); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @supports (view-transition-name: none) {
+      ::view-transition-old(root) {
+        animation: fasc-route-exit 0.28s cubic-bezier(0.4, 0, 1, 1) both;
+      }
+      ::view-transition-new(root) {
+        animation: fasc-route-enter-page 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      .logo, .topbar .logo {
+        view-transition-name: fasc-brand;
+      }
+    }
+    .fasc-route-veil {
+      position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+      background: #0c0a09; opacity: 0;
+    }
+    .fasc-route-veil.is-covering {
+      pointer-events: auto;
+      animation: fasc-fade-in 0.22s ease forwards;
+    }
+    :root {
+      --ink: #17120e;
+      --cream: #f2e8d2;
+      --rosa: #e33d6b;
+      --stone: #8c8376;
+      --bg: #0c0a09;
+      --card: #171412;
+      --line: rgba(242,232,210,0.12);
+      --text: #e8dfd0;
+      color-scheme: dark;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+      --ease-press: cubic-bezier(0.2, 0, 0, 1);
+      --dur-instant: 80ms;
+      --dur-fast: 150ms;
+      --dur-base: 220ms;
+      --dur-med: 320ms;
+      --dur-slow: 480ms;
+      --t-ui: color var(--dur-fast) var(--ease-in-out-soft),
+             background-color var(--dur-base) var(--ease-in-out-soft),
+             border-color var(--dur-fast) var(--ease-in-out-soft),
+             box-shadow var(--dur-base) var(--ease-out-quart),
+             transform var(--dur-base) var(--ease-out-quart),
+             opacity var(--dur-base) var(--ease-in-out-soft);
+    }
+    /* Dark mode (padrão / explícito) */
+    html[data-theme="dark"],
+    html[data-a11y-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0a0908;
+      --card: #14110e;
+      --ink: #14110e;
+      --text: #f0e6d0;
+      --cream: #efe6d2;
+      --stone: #8a8176;
+      --line: rgba(240, 230, 208, 0.12);
+    }
+    /* Light mode */
+    html[data-theme="light"],
+    html[data-a11y-theme="light"] {
+      color-scheme: light;
+      --bg: #f3ecdc;
+      --card: #fffef8;
+      --ink: #17120e;
+      --text: #17120e;
+      --cream: #fffef8;
+      --stone: #5c564e;
+      --line: rgba(28, 21, 17, 0.14);
+    }
+    html[data-theme="light"] body,
+    html[data-a11y-theme="light"] body {
+      background: var(--bg);
+      color: var(--text);
+    }
+    html[data-theme="light"] .topbar {
+      background: rgba(243, 236, 220, 0.94);
+      border-bottom-color: var(--line);
+    }
+    html[data-theme="light"] .back { color: #17120e; }
+    html[data-theme="light"] .title { color: #5c564e; }
+    html[data-theme="light"] .hero {
+      background: linear-gradient(160deg, #f5d6e0 0%, #efe6d2 45%, #e8dfc8 100%);
+      border-color: rgba(28, 21, 17, 0.12);
+    }
+    html[data-theme="light"] .display-name { color: #17120e; }
+    html[data-theme="light"] .handle-line {
+      color: #9a2348;
+      background: linear-gradient(135deg, rgba(212,47,98,0.12), rgba(196,138,42,0.1));
+      border-color: rgba(212,47,98,0.35);
+      box-shadow: 0 2px 0 rgba(28,21,17,0.08), 0 6px 14px rgba(212,47,98,0.1);
+    }
+    html[data-theme="light"] .handle-line:hover {
+      color: #e33d6b;
+    }
+    html[data-theme="light"] .card {
+      background: #fffef8;
+      border-color: rgba(28, 21, 17, 0.12);
+      color: #17120e;
+    }
+    html[data-theme="light"] .card h2 { color: #5c564e; }
+    html[data-theme="light"] .lead,
+    html[data-theme="light"] .hint,
+    html[data-theme="light"] .label { color: #5c564e; }
+    html[data-theme="light"] .input {
+      background: #fff;
+      color: #17120e;
+      border-color: rgba(28, 21, 17, 0.2);
+    }
+    html[data-theme="light"] .input:hover {
+      background: #fffef8;
+      border-color: rgba(212, 47, 98, 0.4);
+    }
+    html[data-theme="light"] .input:focus {
+      background: #fff;
+    }
+    html[data-theme="light"] .btn-ghost {
+      color: #17120e;
+      border-color: rgba(28, 21, 17, 0.25);
+    }
+    html[data-theme="light"] .tab {
+      background: #fff;
+      color: #17120e;
+      border-color: rgba(28, 21, 17, 0.2);
+    }
+    html[data-theme="light"] .avatar-picker-toggle {
+      background: #fff;
+      color: #17120e;
+      border-color: rgba(28, 21, 17, 0.2);
+    }
+    html[data-theme="light"] .grid button {
+      background: #f3ecdc;
+    }
+    html.theme-anim body,
+    html.theme-anim .card,
+    html.theme-anim .hero,
+    html.theme-anim .topbar {
+      transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text, #e8dfd0);
+      line-height: 1.45;
+      min-height: 100dvh;
+    }
+    /* estado inicial: deslogado até o JS decidir */
+    body:not([data-auth]) #profile-wrap { display: none !important; }
+
+    /* Skip link WCAG 2.4.1 */
+    .skip-link {
+      position: absolute;
+      left: 0.75rem;
+      top: 0.75rem;
+      z-index: 10000;
+      padding: 0.55rem 0.9rem;
+      background: var(--rosa);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      border-radius: 8px;
+      transform: translateY(-120%);
+      transition: transform 0.2s ease;
+    }
+    .skip-link:focus,
+    .skip-link:focus-visible {
+      transform: translateY(0);
+      outline: 3px solid #d49a2c;
+      outline-offset: 2px;
+    }
+    #conteudo-principal:focus {
+      outline: none;
+    }
+    #conteudo-principal:focus-visible {
+      outline: 2px solid rgba(212, 47, 98, 0.45);
+      outline-offset: 4px;
+    }
+    .page { max-width: 440px; margin: 0 auto; padding: 0 0 5rem; }
+
+    /* ---- animações de entrada de página ---- */
+    @keyframes fasc-fade-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fasc-fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes fasc-scale-in {
+      from { opacity: 0; transform: scale(0.94); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fasc-banner-sweep {
+      from { opacity: 0.35; filter: saturate(0.6); transform: scaleX(0.97); }
+      to   { opacity: 1; filter: saturate(1); transform: scaleX(1); }
+    }
+
+    .topbar,
+    .title,
+    .card,
+    .hero {
+      opacity: 0;
+    }
+    body.is-ready .topbar {
+      animation: fasc-fade-in 0.45s ease both;
+    }
+    body.is-ready .title {
+      animation: fasc-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+    }
+    body.is-ready #login-card:not([hidden]) {
+      animation: fasc-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+    }
+    body[data-auth="in"] #login-card {
+      animation: none !important;
+    }
+    body.is-ready #send-card:not([hidden]) {
+      animation: fasc-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+    }
+
+    /* perfil logado: stagger hero → editar → caixinha */
+    #profile-wrap.is-entering .hero {
+      animation: fasc-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #profile-wrap.is-entering .hero-banner {
+      animation: fasc-banner-sweep 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+      transform-origin: left center;
+    }
+    #profile-wrap.is-entering .avatar-wrap {
+      animation: fasc-scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+    }
+    #profile-wrap.is-entering .display-name-row,
+    #profile-wrap.is-entering .handle-line,
+    #profile-wrap.is-entering .id-pill,
+    #profile-wrap.is-entering .bio-preview {
+      animation: fasc-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #profile-wrap.is-entering .display-name-row { animation-delay: 0.16s; }
+    #profile-wrap.is-entering .handle-line { animation-delay: 0.2s; }
+    #profile-wrap.is-entering .id-pill { animation-delay: 0.24s; }
+    #profile-wrap.is-entering .bio-preview { animation-delay: 0.28s; }
+
+    #profile-wrap.is-entering #edit-profile-card {
+      animation: fasc-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+    }
+    #profile-wrap.is-entering #inbox-card {
+      animation: fasc-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+    }
+
+    /* após a entrada, mantém visível (sem sobrescrever animação em curso) */
+    body.is-ready .topbar,
+    body.is-ready .title {
+      opacity: 1;
+    }
+    body.is-ready #login-card:not([hidden]),
+    body.is-ready #send-card:not([hidden]) {
+      opacity: 1;
+    }
+    #profile-wrap:not([hidden]):not(.is-entering) .hero,
+    #profile-wrap:not([hidden]):not(.is-entering) .card {
+      opacity: 1;
+    }
+    #profile-wrap.is-entering .hero,
+    #profile-wrap.is-entering .card {
+      /* opacity controlado pela keyframe */
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .topbar, .title, .card, .hero,
+      #profile-wrap.is-entering .hero,
+      #profile-wrap.is-entering .hero-banner,
+      #profile-wrap.is-entering .avatar-wrap,
+      #profile-wrap.is-entering .display-name-row,
+      #profile-wrap.is-entering .handle-line,
+      #profile-wrap.is-entering .id-pill,
+      #profile-wrap.is-entering .bio-preview,
+      #profile-wrap.is-entering #edit-profile-card,
+      #profile-wrap.is-entering #inbox-card {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+      }
+    }
+
+    /* top bar */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(12,10,9,0.92);
+      backdrop-filter: blur(10px);
+    }
+    .back { color: #e8dfd0; text-decoration: none; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+    .back:hover { color: var(--rosa); }
+    .logo { color: var(--rosa); font-weight: 800; letter-spacing: 0.08em; }
+
+    .title {
+      margin: 1.25rem 1.1rem 1rem;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #cfc5b4;
+    }
+    .title span { color: var(--rosa); }
+
+    /* social hero */
+    .hero {
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #2a1018 0%, #171412 45%, #12100e 100%);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+    }
+    .hero-banner {
+      height: 88px;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(212,47,98,0.35), transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(196,138,42,0.2), transparent 50%),
+        linear-gradient(90deg, #1a0c10, #0c0a08);
+    }
+    .hero-body { padding: 0 1.1rem 1.15rem; position: relative; }
+    .avatar-wrap {
+      width: 88px; height: 88px;
+      margin-top: -44px;
+      border-radius: 50%;
+      border: 3px solid #171412;
+      background: #17120e;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .display-name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin: 0.65rem 0 0.15rem;
+      flex-wrap: wrap;
+    }
+    .display-name {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .btn-edit-profile {
+      appearance: none;
+      border: 1px solid rgba(230, 220, 196, 0.28);
+      background: rgba(230, 220, 196, 0.08);
+      color: #e8dfd0;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.7rem 0.35rem 0.55rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      min-height: 32px;
+      line-height: 1;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    .btn-edit-profile:hover,
+    .btn-edit-profile:focus-visible {
+      border-color: var(--rosa);
+      color: var(--rosa);
+      background: rgba(212, 47, 98, 0.12);
+      outline: none;
+    }
+    .btn-edit-profile svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    .handle-line {
+      margin: 0.2rem 0 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #f0c4d0;
+      text-decoration: none;
+      padding: 0.28rem 0.7rem 0.28rem 0.55rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(212,47,98,0.22), rgba(196,138,42,0.12));
+      border: 1px solid rgba(212,47,98,0.4);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 6px 16px rgba(212,47,98,0.12);
+      transition:
+        transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.22s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+      max-width: 100%;
+      word-break: break-all;
+    }
+    .handle-line::before {
+      content: '@';
+      color: var(--rosa);
+      font-weight: 800;
+      opacity: 0.95;
+    }
+    .handle-line:hover,
+    .handle-line:focus-visible {
+      transform: translateY(-2px) scale(1.02);
+      border-color: rgba(212,47,98,0.75);
+      color: #fff;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.3), 0 10px 24px rgba(212,47,98,0.28);
+      outline: none;
+    }
+    .handle-line:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+    }
+    .id-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(16,14,12,0.55);
+      border: 1px solid rgba(230,220,196,0.18);
+      color: #cfc5b4;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 0.7rem;
+      word-break: break-all;
+      max-width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+    .id-pill:hover {
+      border-color: rgba(212,47,98,0.45);
+      box-shadow: 0 4px 14px rgba(212,47,98,0.18);
+      transform: translateY(-1px);
+    }
+    .id-pill strong {
+      color: var(--rosa);
+      font-family: system-ui, sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .display-name {
+      text-shadow: 0 2px 12px rgba(212,47,98,0.15);
+      transition: transform 0.2s ease, text-shadow 0.2s ease;
+    }
+    .hero:hover .display-name {
+      text-shadow: 0 4px 18px rgba(212,47,98,0.28);
+    }
+    /* conexões */
+    .conn-list {
+      list-style: none;
+      margin: 0.75rem 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .conn-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid var(--line);
+      transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .conn-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(212,47,98,0.4);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+    }
+    .conn-avatar {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(145deg, rgba(212,47,98,0.35), rgba(196,138,42,0.2));
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+    }
+    .conn-meta { min-width: 0; flex: 1; }
+    .conn-meta strong {
+      display: block;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .conn-nick {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #f0c4d0;
+      text-decoration: none;
+      transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .conn-nick:hover {
+      color: var(--rosa);
+      transform: translateX(2px);
+    }
+    .conn-nick::before { content: '@'; color: var(--rosa); }
+    .conn-remove {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--stone);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.55rem;
+      cursor: pointer;
+      min-height: 36px;
+      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    }
+    .conn-remove:hover {
+      border-color: #b03a22;
+      color: #f08a7a;
+      background: rgba(176,58,34,0.12);
+    }
+    .conn-empty {
+      margin: 0.5rem 0 0;
+      font-size: 0.85rem;
+      color: var(--stone);
+    }
+    .bio-preview {
+      margin: 0.75rem 0 0;
+      font-size: 0.92rem;
+      color: #cfc5b4;
+      min-height: 1.2em;
+    }
+
+    .card {
+      margin: 0 1rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.1rem 1.05rem 1.15rem;
+    }
+    .card h2 {
+      margin: 0 0 0.35rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a89f90;
+      font-weight: 700;
+    }
+    .lead { margin: 0 0 0.9rem; font-size: 0.85rem; color: var(--stone); }
+
+    .label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #a89f90;
+      margin: 0.7rem 0 0.35rem;
+    }
+    .label .req { color: var(--rosa); }
+    .label .opt { color: var(--stone); font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 0.75rem; }
+    .input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #0c0a08;
+      color: #e8dfd0;
+      caret-color: var(--rosa);
+      transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .input:hover {
+      border-color: rgba(212, 47, 98, 0.35);
+      background: #14110f;
+    }
+    .input:focus {
+      outline: none;
+      border-color: var(--rosa);
+      background: #161310;
+      animation:
+        fasc-input-focus-ring 0.45s cubic-bezier(0.22, 1, 0.36, 1) both,
+        fasc-input-focus-lift 0.2s ease both;
+    }
+    .input:not(:placeholder-shown):not(:focus) {
+      border-color: rgba(230, 220, 196, 0.28);
+    }
+    .input.is-invalid,
+    .input:invalid:not(:placeholder-shown):not(:focus) {
+      border-color: #b03a22;
+      box-shadow: 0 0 0 2px rgba(176, 58, 34, 0.18);
+      animation: fasc-input-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    .input.is-valid:not(:focus) {
+      border-color: rgba(125, 206, 142, 0.55);
+      animation: fasc-input-valid-pop 0.45s ease both;
+    }
+    @keyframes fasc-input-focus-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(212, 47, 98, 0.35); }
+      70%  { box-shadow: 0 0 0 6px rgba(212, 47, 98, 0); }
+      100% { box-shadow: 0 0 0 3px rgba(212, 47, 98, 0.2); }
+    }
+    @keyframes fasc-input-focus-lift {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-1px); }
+    }
+    @keyframes fasc-input-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(2px); }
+    }
+    @keyframes fasc-input-valid-pop {
+      0%   { box-shadow: 0 0 0 0 rgba(125, 206, 142, 0.35); }
+      70%  { box-shadow: 0 0 0 5px rgba(125, 206, 142, 0); }
+      100% { box-shadow: 0 0 0 1px rgba(125, 206, 142, 0.15); }
+    }
+    @keyframes fasc-label-nudge {
+      from { transform: translateY(2px); opacity: 0.75; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .label {
+      transition: color 0.18s ease;
+      display: inline-block;
+    }
+    .label:has(+ .input:focus),
+    .label:has(+ textarea.input:focus) {
+      color: var(--rosa);
+      animation: fasc-label-nudge 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .hint { margin: 0.3rem 0 0; font-size: 0.78rem; color: var(--stone); transition: color 0.18s ease; }
+    .input:focus + .hint,
+    .input:focus ~ .hint {
+      color: #a89f90;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .input { transition: none !important; transform: none !important; animation: none !important; }
+      .label:has(+ .input:focus) { animation: none !important; }
+    }
+
+    /* Avatar picker colapsável + transição suave */
+    .avatar-picker {
+      margin: 0.35rem 0 0.15rem;
+    }
+    .avatar-picker-toggle {
+      appearance: none;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      border: 1px solid var(--line);
+      background: #0c0a08;
+      color: #e8dfd0;
+      border-radius: 12px;
+      padding: 0.55rem 0.75rem;
+      cursor: pointer;
+      min-height: 48px;
+      font-family: inherit;
+      text-align: left;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .avatar-picker-toggle:hover,
+    .avatar-picker-toggle:focus-visible {
+      border-color: var(--rosa);
+      outline: none;
+    }
+    .avatar-picker[data-open="true"] .avatar-picker-toggle {
+      border-color: rgba(212, 47, 98, 0.55);
+      box-shadow: 0 0 0 1px rgba(212, 47, 98, 0.18);
+    }
+    .avatar-picker-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+    .avatar-picker-preview {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(212, 47, 98, 0.12);
+      border: 1.5px solid rgba(212, 47, 98, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: transform 0.22s ease, border-color 0.2s ease;
+    }
+    .avatar-picker[data-open="true"] .avatar-picker-preview {
+      transform: scale(1.06);
+      border-color: var(--rosa);
+    }
+    .avatar-picker-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+    }
+    .avatar-picker-meta strong {
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .avatar-picker-meta span {
+      font-size: 0.72rem;
+      color: var(--stone);
+    }
+    .avatar-picker-chevron {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: 0.7;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+    }
+    .avatar-picker[data-open="true"] .avatar-picker-chevron {
+      transform: rotate(180deg);
+      opacity: 1;
+    }
+    /* altura animada via grid-template-rows + fade */
+    .avatar-picker-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      margin-top: 0;
+      transition:
+        grid-template-rows 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.26s ease,
+        margin-top 0.28s ease;
+      pointer-events: none;
+    }
+    .avatar-picker[data-open="true"] .avatar-picker-panel {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: 0.45rem;
+      pointer-events: auto;
+    }
+    .avatar-picker-panel-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.35rem;
+      margin: 0;
+    }
+    .grid button {
+      appearance: none;
+      border: 2px solid transparent;
+      background: #0c0a08;
+      border-radius: 10px;
+      font-size: 1.4rem;
+      line-height: 1;
+      min-height: 48px;
+      cursor: pointer;
+      padding: 0.35rem 0;
+      transition:
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease;
+    }
+    .avatar-picker[data-open="true"] .grid button {
+      animation: avatar-pop 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .avatar-picker[data-open="true"] .grid button:nth-child(1)  { animation-delay: 0.02s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(2)  { animation-delay: 0.03s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(3)  { animation-delay: 0.04s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(4)  { animation-delay: 0.05s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(5)  { animation-delay: 0.06s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(6)  { animation-delay: 0.07s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(7)  { animation-delay: 0.08s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(8)  { animation-delay: 0.09s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(9)  { animation-delay: 0.10s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(10) { animation-delay: 0.11s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(11) { animation-delay: 0.12s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(12) { animation-delay: 0.13s; }
+    .avatar-picker[data-open="true"] .grid button:nth-child(n+13) { animation-delay: 0.15s; }
+    @keyframes avatar-pop {
+      from { opacity: 0; transform: scale(0.86) translateY(5px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .grid button:hover { transform: scale(1.06); }
+    .grid button[aria-pressed="true"] {
+      border-color: var(--rosa);
+      background: rgba(212,47,98,0.15);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .avatar-picker-panel,
+      .avatar-picker-chevron,
+      .avatar-picker-preview,
+      .avatar-picker-toggle,
+      .grid button {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.1rem; }
+    .btn {
+      appearance: none; border: none; border-radius: 999px;
+      font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+      font-size: 0.78rem; padding: 0.7rem 1.15rem; cursor: pointer; min-height: 44px;
+      position: relative; overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition:
+        transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.16s ease,
+        filter 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--rosa); color: #fff;
+      box-shadow: 0 4px 14px rgba(212, 47, 98, 0.35);
+    }
+    .btn-ghost { background: transparent; color: #e8dfd0; border: 1px solid var(--line); }
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 18px rgba(212, 47, 98, 0.45);
+    }
+    .btn:active,
+    .btn.is-pressed {
+      transform: translateY(1px) scale(0.97);
+      filter: brightness(0.96);
+      transition-duration: 0.06s;
+    }
+    .btn:focus-visible {
+      outline: 3px solid #d49a2c;
+      outline-offset: 2px;
+    }
+    .btn:disabled { opacity: 0.55; cursor: wait; transform: none !important; pointer-events: none; }
+    .btn .fasc-ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: scale(0);
+      animation: fasc-ripple 0.55s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes fasc-ripple {
+      to { transform: scale(2.6); opacity: 0; }
+    }
+
+    .msg { margin: 0.7rem 0 0; font-size: 0.85rem; min-height: 1.15em; }
+    .msg.ok { color: #7dce8e; }
+    .msg.err { color: #f08a7a; }
+
+    .tabs { display: flex; gap: 0.35rem; margin: 0 0 0.9rem; }
+    .tab {
+      flex: 1; appearance: none; border: 1px solid var(--line); background: #0c0a08;
+      color: #e8dfd0; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 0.55rem; border-radius: 999px; cursor: pointer; min-height: 44px;
+      transition: transform 0.14s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab:hover { transform: translateY(-1px); }
+    .tab:active { transform: scale(0.96); transition-duration: 0.06s; }
+    .tab[aria-selected="true"] { background: var(--rosa); border-color: var(--rosa); color: #fff; transform: none; }
+    .btn-edit-profile:active { transform: scale(0.96); }
+
+    /* Card Editar perfil — colapsável + transição suave */
+    .edit-card {
+      padding-top: 0.85rem;
+      padding-bottom: 0.85rem;
+      transition:
+        padding 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.3s ease,
+        box-shadow 0.35s ease;
+    }
+    .edit-card[data-open="true"] {
+      padding-bottom: 1.15rem;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+      border-color: rgba(212, 47, 98, 0.25);
+    }
+    .edit-card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .edit-card-toggle {
+      appearance: none;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      border: none;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      padding: 0.35rem 0.15rem;
+      margin: -0.1rem;
+      border-radius: 10px;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s ease;
+    }
+    .edit-card-toggle:hover { background: rgba(255, 255, 255, 0.03); }
+    .edit-card-toggle:active { background: rgba(212, 47, 98, 0.08); }
+    .edit-card-toggle-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 0;
+    }
+    .edit-card-toggle-text strong {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a89f90;
+      font-weight: 700;
+      transition: color 0.25s ease;
+    }
+    .edit-card[data-open="true"] .edit-card-toggle-text strong { color: var(--rosa); }
+    .edit-card-toggle-sub {
+      font-size: 0.8rem;
+      color: var(--stone);
+      transition: color 0.25s ease, opacity 0.25s ease;
+    }
+    .edit-card[data-open="true"] .edit-card-toggle-sub {
+      color: var(--rosa);
+      opacity: 0.9;
+    }
+    .edit-card-chevron {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      opacity: 0.7;
+      transition:
+        transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1),
+        opacity 0.25s ease,
+        color 0.25s ease;
+    }
+    .edit-card[data-open="true"] .edit-card-chevron {
+      transform: rotate(180deg);
+      opacity: 1;
+      color: var(--rosa);
+    }
+    .edit-card-logout-mini {
+      flex-shrink: 0;
+      padding: 0.45rem 0.85rem !important;
+      min-height: 40px !important;
+      font-size: 0.72rem !important;
+      transition:
+        opacity 0.28s ease,
+        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        max-width 0.3s ease !important;
+      max-width: 6rem;
+      opacity: 1;
+    }
+    .edit-card[data-open="true"] .edit-card-logout-mini {
+      opacity: 0;
+      transform: scale(0.9);
+      max-width: 0;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      margin: 0 !important;
+      border-width: 0 !important;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .edit-card-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      margin-top: 0;
+      /* só propriedades compostáveis + 1 layout (rows) */
+      transition:
+        grid-template-rows 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.28s ease,
+        margin-top 0.3s ease;
+      pointer-events: none;
+      contain: layout style;
+    }
+    .edit-card.is-animating .edit-card-body {
+      will-change: grid-template-rows, opacity;
+    }
+    .edit-card[data-open="true"] .edit-card-body {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: 0.75rem;
+      pointer-events: auto;
+    }
+    .edit-card-body-inner {
+      overflow: hidden;
+      min-height: 0;
+      /* GPU: só transform + opacity */
+      opacity: 0.01;
+      transform: translate3d(0, -8px, 0);
+      transition:
+        opacity 0.28s ease,
+        transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .edit-card[data-open="true"] .edit-card-body-inner {
+      overflow: visible;
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .edit-card,
+      .edit-card-body,
+      .edit-card-body-inner,
+      .edit-card-chevron,
+      .edit-card-logout-mini {
+        transition: none !important;
+      }
+      .edit-card[data-open="true"] .edit-card-body-inner > * {
+        animation: none !important;
+      }
+    }
+    .divider {
+      display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0 0.75rem;
+      color: var(--stone); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+    [hidden] { display: none !important; }
+
+    .a11y-wrap {
+      position: fixed; top: max(0.65rem, env(safe-area-inset-top));
+      right: max(0.65rem, env(safe-area-inset-right)); z-index: 6000;
+    }
+    .a11y-toggle {
+      width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--card); color: #e8dfd0; cursor: pointer; font-size: 1.1rem;
+    }
+    .a11y-drawer {
+      position: absolute; top: calc(100% + 0.45rem); right: 0;
+      width: min(90vw, 300px); background: var(--card); border: 1px solid var(--line);
+      border-radius: 12px; padding: 0.9rem; z-index: 6001;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    }
+    .a11y-close {
+      position: absolute; top: 0.35rem; right: 0.35rem;
+      appearance: none; border: 1px solid var(--line); background: #0c0a08; color: #e8dfd0;
+      border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      padding: 0.35rem 0.55rem; cursor: pointer; min-height: 36px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.65rem; }
+    .chip {
+      appearance: none; border: 1px solid var(--line); background: #0c0a08; color: #e8dfd0;
+      border-radius: 999px; font-size: 0.72rem; font-weight: 600; padding: 0.4rem 0.65rem;
+      cursor: pointer; min-height: 36px;
+    }
+    .chip[aria-pressed="true"] { background: var(--rosa); border-color: var(--rosa); color: #fff; }
+    .block-title { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #a89f90; margin: 0.45rem 0 0.35rem; }
+
+    .inbox-item {
+      border: 1px solid var(--line); border-radius: 12px; padding: 0.75rem;
+      margin-bottom: 0.55rem; background: #0c0a08;
+    }
+    .inbox-meta { font-size: 0.72rem; color: var(--stone); margin-bottom: 0.3rem; }
+    code { font-size: 0.78rem; background: #0c0a08; padding: 0.15rem 0.4rem; border-radius: 4px; word-break: break-all; }
+
+    /* Login legível — mas NUNCA junto com perfil logado */
+    #login-card {
+      background: #f2e8d2 !important;
+      color: #17120e !important;
+      border: 2px solid #17120e !important;
+      box-shadow: 4px 5px 0 rgba(0,0,0,0.4) !important;
+    }
+    #login-card[hidden],
+    body[data-auth="in"] #login-card {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      opacity: 0 !important;
+    }
+    body[data-auth="out"] #profile-wrap,
+    #profile-wrap[hidden] {
+      display: none !important;
+    }
+    body[data-auth="in"] #profile-wrap {
+      display: block !important;
+    }
+    #login-card h2,
+    #login-card .lead,
+    #login-card .label {
+      color: #17120e !important;
+    }
+    #login-card .lead { color: #5c564e !important; }
+    #login-card .input {
+      background: #fffef8 !important;
+      color: #17120e !important;
+      border: 1.5px solid rgba(28,21,17,0.25) !important;
+    }
+    #login-card .tab {
+      background: #fff !important;
+      color: #17120e !important;
+      border-color: rgba(28,21,17,0.25) !important;
+    }
+    #login-card .tab[aria-selected="true"] {
+      background: #e33d6b !important;
+      color: #fff !important;
+      border-color: #e33d6b !important;
+    }
+    #login-card .btn-ghost {
+      background: #fff !important;
+      color: #17120e !important;
+      border: 1.5px solid rgba(28,21,17,0.3) !important;
+    }
+    #profile-wrap:not([hidden]) { display: block !important; }
+
+  
+/* ---- CRICRI profile layout refresh ---- */
+.profile-dashboard {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem 6rem;
+}
+@media (min-width: 800px) {
+  .profile-dashboard {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: start;
+  }
+  .profile-dashboard > .profile-span-2 { grid-column: 1 / -1; }
+}
+.profile-dashboard .card {
+  margin: 0;
+  border-radius: 14px;
+  border: 1.5px solid rgba(230,220,196,0.12);
+  background: rgba(28,21,17,0.55);
+  padding: 1rem 1rem 1.1rem;
+  box-shadow: 3px 4px 0 rgba(0,0,0,0.35);
+}
+#profile-hero.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background:
+    linear-gradient(145deg, rgba(227,61,107,0.12), transparent 50%),
+    rgba(28,21,17,0.65);
+  border-color: rgba(227,61,107,0.28);
+}
+.profile-hero-top {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+}
+.profile-hero-top .avatar-wrap {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  display: grid; place-items: center;
+  font-size: 2rem;
+  background: rgba(227,61,107,0.15);
+  border: 2px solid rgba(227,61,107,0.4);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.profile-hero-meta h1 {
+  margin: 0 0 0.2rem;
+  font-size: 1.25rem;
+  font-family: Oswald, system-ui, sans-serif;
+  letter-spacing: 0.04em;
+}
+.profile-hero-meta .handle {
+  color: #e33d6b;
+  font-family: Space Mono, ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+.profile-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+.profile-hero-actions .btn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.72rem;
+}
+.profile-hero-bio {
+  margin: 0;
+  color: #b8ae9e;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+#edit-card-body[aria-hidden="true"] { display: none; }
+#edit-card-body[aria-hidden="false"] {
+  display: block;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(230,220,196,0.12);
+}
+/* friends online */
+.friends-online-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+.friends-online-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 0.55rem;
+}
+.friend-chip {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.55rem 0.35rem 0.35rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(230,220,196,0.14);
+  background: rgba(12,10,9,0.45);
+  font-size: 0.8rem;
+  color: #ebe3cf;
+  text-decoration: none;
+}
+.friend-chip .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #5ec46a;
+  box-shadow: 0 0 8px rgba(94,196,106,0.6);
+}
+.friend-chip.is-away .dot { background: #d49a2c; box-shadow: none; }
+.friend-chip.is-off .dot { background: #666; box-shadow: none; }
+.friends-empty { margin: 0; color: #8c8376; font-size: 0.85rem; }
+/* connections compact */
+.conn-add-row {
+  display: flex; gap: 0.45rem; flex-wrap: wrap; align-items: stretch;
+}
+.conn-add-row .input { flex: 1 1 160px; }
+.conn-add-row .btn { flex: 0 0 auto; }
+/* notification bell FAB */
+.notif-bell-wrap {
+  position: fixed;
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: calc(0.75rem + 44px + 0.5rem + env(safe-area-inset-right, 0px));
+  z-index: 5200;
+}
+.notif-bell {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(227,61,107,0.5);
+  background: linear-gradient(145deg, #2a221c, #1a1512);
+  color: #f2e8d2;
+  display: grid; place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 14px rgba(227,61,107,0.2);
+  position: relative;
+}
+.notif-bell:hover { border-color: #e33d6b; }
+.notif-bell svg { width: 22px; height: 22px; }
+.notif-bell .badge {
+  position: absolute; top: -2px; right: -2px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 999px;
+  background: #e33d6b; color: #fff;
+  font-size: 0.65rem; font-weight: 700;
+  display: grid; place-items: center;
+  font-family: Space Mono, ui-monospace, monospace;
+}
+.notif-panel {
+  position: absolute; top: 54px; right: 0;
+  width: min(300px, calc(100vw - 1.5rem));
+  background: #1c1511; color: #ebe3cf;
+  border: 1.5px solid rgba(227,61,107,0.35);
+  border-radius: 12px;
+  padding: 0.75rem;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+}
+.notif-panel[hidden] { display: none !important; }
+.notif-panel h2 {
+  margin: 0 0 0.5rem;
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.notif-panel .hint { font-size: 0.78rem; color: #9a9184; margin: 0 0 0.65rem; }
+.notif-panel .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.notif-panel .btn { font-size: 0.72rem; padding: 0.45rem 0.65rem; }
+#push-card { display: none !important; }
+
+/* ========== MEOW caixinha ========== */
+.meow-wrap {
+  --meow-rosa: #e33d6b;
+  --meow-terra: #c4472a;
+  --meow-ochre: #d49a2c;
+  --meow-laranja: #e07d1f;
+  --meow-azul: #1b4f5e;
+  --meow-azul-soft: #3d8a9c;
+  --meow-ink: #17120e;
+  --meow-cream: #f6efdc;
+  --meow-paper: #ebe3cf;
+  --meow-shadow: 4px 5px 0 rgba(0,0,0,.45);
+}
+#inbox-card.meow-wrap,
+#send-card.meow-wrap {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.meow-brand {
+  display: flex; align-items: center; gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+.meow-brand .cat-badge {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(150deg, #c4472a, #e07d1f 55%, #d49a2c);
+  border: 2px solid #17120e;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.45);
+  display: grid; place-items: center; flex: 0 0 auto;
+}
+.meow-brand .meow-logo {
+  font-family: "Saira Stencil One", Oswald, Impact, sans-serif;
+  font-size: 1.55rem; letter-spacing: 0.04em; color: #f6efdc;
+  -webkit-text-stroke: 1px #17120e;
+  text-shadow: 2px 2px 0 #b01f4c, 3px 3px 0 #17120e;
+  margin: 0; line-height: 1;
+}
+.meow-brand .meow-sub {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #8c8376; margin: 0.15rem 0 0;
+}
+.meow-cartaz {
+  border-radius: 22px;
+  padding: 1.25rem 1.15rem 1.35rem;
+  position: relative;
+  border: 2px solid #17120e;
+  box-shadow: 5px 6px 0 rgba(0,0,0,.45);
+  transform: rotate(-0.6deg);
+  margin-bottom: 1rem;
+}
+.meow-cartaz.--inbox {
+  background: linear-gradient(160deg, #d49a2c 0%, #e07d1f 45%, #e33d6b 100%);
+}
+.meow-cartaz.--send {
+  background: linear-gradient(160deg, #e33d6b 0%, #c4472a 48%, #e07d1f 100%);
+}
+.meow-cartaz::before,
+.meow-cartaz::after {
+  content: ""; position: absolute; width: 48px; height: 16px;
+  background: repeating-linear-gradient(45deg, rgba(246,239,220,.85) 0 6px, rgba(212,154,44,.55) 6px 12px);
+  border: 1px solid rgba(0,0,0,.25);
+  box-shadow: 1px 2px 3px rgba(0,0,0,.3);
+}
+.meow-cartaz::before { top: -8px; left: 12px; transform: rotate(-8deg); }
+.meow-cartaz::after { top: -8px; right: 10px; transform: rotate(7deg); }
+.meow-cartaz h2,
+.meow-cartaz .meow-title {
+  font-family: "Saira Stencil One", Oswald, Impact, sans-serif;
+  font-size: clamp(1.15rem, 3.5vw, 1.4rem);
+  line-height: 1.1; color: #f6efdc; text-align: center;
+  margin: 0.15rem 0 0.95rem;
+  -webkit-text-stroke: 0.5px #17120e;
+  text-shadow: 2px 2px 0 rgba(0,0,0,.35);
+}
+.meow-bubble {
+  background: #ebe3cf; color: #17120e;
+  border-radius: 14px; padding: 0.95rem 1rem;
+  font-weight: 600; font-size: 0.95rem; line-height: 1.4;
+  box-shadow: inset 0 0 0 1px rgba(23,18,14,.06), 3px 4px 0 rgba(0,0,0,.25);
+  min-height: 64px;
+}
+.meow-bubble.--placeholder { color: rgba(23,18,14,.42); font-weight: 500; }
+.meow-bubble textarea {
+  width: 100%; border: 0; background: transparent; resize: vertical;
+  font: inherit; color: inherit; min-height: 72px; outline: none;
+}
+.meow-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 0.65rem;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.68rem; letter-spacing: 0.04em; color: rgba(23,18,14,.55);
+}
+.meow-meta .anon {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: rgba(23,18,14,.14); padding: 0.18rem 0.5rem;
+  border-radius: 999px; color: #17120e; font-weight: 700;
+}
+.meow-btn {
+  width: 100%;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  font-size: 0.88rem; padding: 0.85rem 1.1rem;
+  border-radius: 999px; border: 2px solid #17120e; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  box-shadow: 4px 5px 0 rgba(0,0,0,.45);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.meow-btn:hover { transform: translate(-1px,-2px); box-shadow: 5px 7px 0 rgba(0,0,0,.5); filter: brightness(1.05); }
+.meow-btn:active { transform: translate(1px,2px); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
+.meow-btn.--primary { background: #17120e; color: #f6efdc; }
+.meow-btn.--reply { background: #1b4f5e; color: #f6efdc; }
+.meow-btn.--reply:hover { background: #3d8a9c; }
+.meow-btn.--ghost {
+  background: rgba(23,18,14,.14); color: #17120e;
+  border: 2px dashed rgba(23,18,14,.45); box-shadow: none; font-size: 0.78rem;
+}
+.meow-btn.--ghost:hover { background: rgba(23,18,14,.22); transform: none; box-shadow: none; }
+.meow-btn-stack { margin-top: 0.95rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.meow-hint {
+  text-align: center; margin-top: 0.7rem;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.65rem; letter-spacing: 0.06em; color: rgba(23,18,14,.55);
+}
+.meow-item-list { display: flex; flex-direction: column; gap: 0.85rem; }
+.meow-answer {
+  margin-top: 0.55rem; padding: 0.55rem 0.65rem;
+  background: rgba(23,18,14,.12); border-left: 3px solid #17120e;
+  border-radius: 0 8px 8px 0; color: #17120e; font-size: 0.88rem;
+}
+.meow-reply-box { margin-top: 0.55rem; display: none; }
+.meow-reply-box.is-open { display: block; }
+.meow-reply-box input {
+  width: 100%; border: 2px solid #17120e; border-radius: 10px;
+  padding: 0.55rem 0.7rem; font-size: 0.88rem; margin-bottom: 0.45rem;
+  background: #f6efdc; color: #17120e;
+}
+.meow-empty {
+  text-align: center; color: rgba(23,18,14,.6); font-size: 0.88rem;
+  padding: 0.5rem 0.25rem; margin: 0;
+}
+.meow-share {
+  margin-top: 0.75rem; text-align: center;
+  font-size: 0.78rem; color: #cfc5b4;
+}
+.meow-share code {
+  background: rgba(255,255,255,.08); padding: 0.15rem 0.4rem; border-radius: 4px;
+  font-size: 0.75rem; color: #f28aa8;
+}
+#send-card.meow-wrap { margin: 1.25rem 0 2rem; }
+.meow-identify {
+  display: flex; align-items: center; gap: 0.4rem;
+  margin-top: 0.55rem; font-size: 0.82rem; color: rgba(23,18,14,.7); font-weight: 500;
+}
+
+
+/* ===== footer no perfil (espelha style.css) ===== */
+.cricri-footer {
+  position: relative;
+  margin: 2.5rem 0 0;
+  padding: 2.5rem 1.15rem 5.5rem;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(180deg, transparent 0%, rgba(227,61,107,0.04) 28%, rgba(12,10,9,0.92) 72%, #0a0807 100%);
+  border-top: 1px solid rgba(230,220,196,0.08);
+}
+.cricri-footer-glow { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.cricri-footer-glow::before,
+.cricri-footer-glow::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  border-radius: 50%; filter: blur(40px);
+}
+.cricri-footer-glow::before {
+  top: -20%; width: min(520px, 90vw); height: 180px;
+  background: radial-gradient(ellipse at center, rgba(227,61,107,0.32) 0%, rgba(227,61,107,0.12) 35%, transparent 70%);
+}
+.cricri-footer-glow::after {
+  top: 8%; width: min(280px, 50vw); height: 100px;
+  background: radial-gradient(ellipse at center, rgba(212,154,44,0.14) 0%, transparent 70%);
+}
+.cricri-footer-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; text-align: center; }
+.cricri-footer-brand { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; margin-bottom: 1rem; }
+.cricri-footer-mark {
+  font-family: "Saira Stencil One", Oswald, system-ui, sans-serif;
+  font-size: clamp(1.7rem, 6vw, 2.3rem); letter-spacing: 0.14em; color: #f2e8d2;
+  text-shadow: 0 0 8px rgba(227,61,107,0.45), 0 0 28px rgba(227,61,107,0.35);
+}
+.cricri-footer-tag { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8176; }
+.cricri-footer-text { font-size: 0.85rem; line-height: 1.5; color: #b8ae9e; margin: 0 0 1rem; }
+.cricri-footer-text strong { color: #e8dfd0; }
+.cricri-footer-official {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  padding: 0.75rem 1.1rem; border-radius: 12px; text-decoration: none;
+  border: 1px solid rgba(227,61,107,0.35); background: rgba(227,61,107,0.08); color: #e8dfd0;
+  margin-bottom: 1rem;
+}
+.cricri-footer-official-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: #e33d6b; }
+.cricri-footer-official-url { font-size: 0.8rem; }
+.cricri-footer-official-arrow { color: #e33d6b; }
+.cricri-footer-dev {
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  margin: 1rem 0; padding: 0.85rem 1rem; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(212,47,98,0.12), rgba(196,138,42,0.08));
+  border: 1px solid rgba(212,47,98,0.28);
+}
+.cricri-footer-dev-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8176; font-family: Oswald, system-ui, sans-serif; }
+.cricri-footer-dev-name {
+  font-family: "Saira Stencil One", Oswald, system-ui, sans-serif;
+  font-size: 1.05rem; letter-spacing: 0.08em; color: #e33d6b;
+  text-shadow: 0 0 12px rgba(227,61,107,0.35);
+}
+.cricri-footer-a11y {
+  display: flex; gap: 0.75rem; align-items: flex-start; text-align: left;
+  margin: 1rem auto; max-width: 420px; padding: 0.85rem 1rem; border-radius: 12px;
+  background: rgba(94,196,214,0.08); border: 1px solid rgba(94,196,214,0.28);
+}
+.cricri-footer-a11y-badge {
+  flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px;
+  display: grid; place-items: center; font-size: 1.1rem;
+  background: rgba(94,196,214,0.2); border: 1.5px solid rgba(94,196,214,0.5);
+}
+.cricri-footer-a11y-text { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; line-height: 1.45; color: #b8ae9e; }
+.cricri-footer-a11y-text strong {
+  font-family: Oswald, system-ui, sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.08em; text-transform: uppercase; color: #7ec8d6;
+}
+.cricri-footer-meta {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem 0.5rem;
+  font-size: 0.75rem; color: #8a8176; margin-top: 0.75rem;
+}
+.cricri-footer-dot { opacity: 0.45; }
+
+/* ===== caixinha design UP ===== */
+#inbox-card.inbox-up {
+  position: relative;
+  border: 1.5px solid rgba(227,61,107,0.4);
+  background:
+    linear-gradient(165deg, rgba(227,61,107,0.12) 0%, #171412 38%, #14110e 100%);
+  box-shadow: 0 0 0 1px rgba(227,61,107,0.08), 0 12px 32px rgba(0,0,0,0.35), 0 0 40px rgba(227,61,107,0.08);
+  overflow: hidden;
+}
+#inbox-card.inbox-up::before {
+  content: "";
+  position: absolute; top: -40%; right: -20%;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(227,61,107,0.22), transparent 70%);
+  pointer-events: none;
+}
+#inbox-card.inbox-up h2 {
+  display: flex; align-items: center; gap: 0.5rem;
+  color: #e33d6b !important;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+}
+#inbox-card.inbox-up h2 .inbox-badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 999px;
+  background: rgba(227,61,107,0.2); color: #f2a0b8; border: 1px solid rgba(227,61,107,0.35);
+}
+#inbox-card.inbox-up .lead { color: #cfc5b4; }
+.inbox-share-row {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center;
+  margin: 0.75rem 0 0.5rem;
+}
+.inbox-share-row .btn {
+  font-size: 0.78rem; padding: 0.45rem 0.75rem;
+}
+
+/* ===== conexões no hero ===== */
+.hero-conn {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(242,232,210,0.1);
+}
+.hero-conn-title {
+  margin: 0 0 0.45rem;
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c48a2a;
+}
+.hero-conn .conn-add-row { margin-bottom: 0.4rem; }
+.hero-conn .conn-list {
+  max-height: 140px; overflow-y: auto;
+  margin: 0.35rem 0 0; padding: 0; list-style: none;
+}
+.hero-conn .conn-empty { font-size: 0.78rem; margin: 0.35rem 0 0; color: #8c8376; }
+.hero-actions-row {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center;
+  margin-top: 0.65rem;
+}
+.hero-actions-row .btn-logout-hero {
+  font-size: 0.75rem; padding: 0.4rem 0.7rem;
+  border-radius: 999px; border: 1px solid rgba(242,232,210,0.2);
+  background: transparent; color: #8c8376; cursor: pointer;
+}
+.hero-actions-row .btn-logout-hero:hover { color: #e33d6b; border-color: rgba(227,61,107,0.4); }
+
+/* top tools (perfil) — à esquerda do ♿ a11y */
+.cricri-top-tools {
+  position: fixed !important;
+  top: max(0.65rem, env(safe-area-inset-top)) !important;
+  right: calc(0.65rem + 44px + 0.5rem + env(safe-area-inset-right, 0px)) !important;
+  left: auto !important;
+  z-index: 5500 !important;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.45rem;
+  align-items: center;
+  pointer-events: auto !important;
+}
+.cricri-tool-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2px solid rgba(227,61,107,0.45);
+  background: linear-gradient(145deg, #2a221c, #1a1512);
+  color: #f2e8d2; display: grid; place-items: center; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 12px rgba(227,61,107,0.18);
+  position: relative;
+}
+.cricri-tool-btn:hover { border-color: #e33d6b; }
+.cricri-tool-btn svg { width: 20px; height: 20px; pointer-events: none; }
+.cricri-tool-btn .badge {
+  position: absolute; top: -3px; right: -3px;
+  min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px;
+  background: #e33d6b; color: #fff; font-size: 0.62rem; font-weight: 700;
+  display: grid; place-items: center;
+  font-family: Space Mono, ui-monospace, monospace;
+  box-shadow: 0 0 0 2px #0c0a09;
+}
+.cricri-tool-btn .badge[hidden] { display: none !important; }
+.cricri-notif-panel, .cricri-gear-panel {
+  position: absolute; top: 52px; right: 0;
+  width: min(310px, calc(100vw - 1.25rem));
+  background: #1c1511; color: #ebe3cf;
+  border: 1.5px solid rgba(227,61,107,0.35);
+  border-radius: 14px; padding: 0.85rem;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5); z-index: 5310;
+}
+.cricri-notif-panel[hidden], .cricri-gear-panel[hidden] { display: none !important; }
+.cricri-notif-panel h2, .cricri-gear-panel h2 {
+  margin: 0 0 0.45rem; font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #e33d6b;
+}
+.cricri-notif-panel .hint, .cricri-gear-panel .hint {
+  font-size: 0.76rem; color: #9a9184; margin: 0 0 0.65rem; line-height: 1.4;
+}
+.cricri-notif-list { list-style: none; margin: 0; padding: 0; max-height: 220px; overflow-y: auto; }
+.cricri-notif-list li {
+  display: flex; gap: 0.55rem; align-items: flex-start;
+  padding: 0.55rem 0.4rem; border-bottom: 1px solid rgba(235,227,207,0.08);
+  font-size: 0.8rem; line-height: 1.35;
+}
+.cricri-notif-list .ico {
+  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px;
+  display: grid; place-items: center; background: rgba(227,61,107,0.15); font-size: 0.9rem;
+}
+.cricri-notif-list strong { display: block; color: #f2e8d2; font-size: 0.78rem; }
+.cricri-notif-list span { color: #9a9184; font-size: 0.72rem; }
+.cricri-notif-empty { text-align: center; color: #8a8176; font-size: 0.8rem; padding: 0.75rem 0.25rem; margin: 0; }
+.cricri-gear-panel .gear-links { display: flex; flex-direction: column; gap: 0.35rem; }
+.cricri-gear-panel a, .cricri-gear-panel button.gear-link {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.55rem 0.65rem; border-radius: 10px;
+  border: 1px solid rgba(235,227,207,0.1); background: rgba(0,0,0,0.25);
+  color: #ebe3cf; text-decoration: none; font-size: 0.82rem; font-family: inherit;
+  cursor: pointer; text-align: left; width: 100%;
+}
+.cricri-gear-panel a:hover, .cricri-gear-panel button.gear-link:hover {
+  border-color: rgba(227,61,107,0.45); background: rgba(227,61,107,0.1);
+}
+.cricri-gear-panel .gear-ico { width: 22px; text-align: center; flex: 0 0 auto; }
+
+/* edit card sem cabeçalho duplicado */
+.edit-card.edit-card-slim .edit-card-body {
+  /* always visible structure when opened via hero button */
+}
+.edit-card.edit-card-slim[data-open="false"] {
+  display: none !important;
+}
+.edit-card.edit-card-slim[data-open="true"] {
+  display: block !important;
+  padding: 1rem 1.1rem 1.15rem;
+}
+.edit-card.edit-card-slim[data-open="true"] .edit-card-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 0;
+  pointer-events: auto;
+}
+.edit-card.edit-card-slim[data-open="true"] .edit-card-body-inner {
+  overflow: visible;
+  opacity: 1;
+  transform: none;
+}
+
+.edit-card.edit-card-slim[data-open="true"] {
+  display: block;
+  border-color: rgba(227,61,107,0.35);
+}
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
+
+  <div class="a11y-wrap" id="a11y-wrap">
+    <button type="button" class="a11y-toggle" id="a11y-toggle" aria-expanded="false" aria-controls="a11y-drawer" aria-label="Acessibilidade">♿</button>
+    <div class="a11y-drawer" id="a11y-drawer" hidden role="dialog" aria-label="Painel de acessibilidade">
+      <button type="button" class="a11y-close" id="a11y-close">Fechar</button>
+      <strong style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em">Acessibilidade</strong>
+      <span class="block-title" id="a11y-text-label">Texto</span>
+      <div class="chips" role="group" aria-labelledby="a11y-text-label">
+        <button type="button" class="chip" data-k="text" data-v="md" aria-pressed="true">A</button>
+        <button type="button" class="chip" data-k="text" data-v="lg">A+</button>
+        <button type="button" class="chip" data-k="text" data-v="xl">A++</button>
+      </div>
+      <span class="block-title" id="a11y-theme-label">Tema</span>
+      <div class="chips" role="group" aria-labelledby="a11y-theme-label">
+        <button type="button" class="chip" data-k="theme" data-v="default" aria-pressed="true">Padrão</button>
+        <button type="button" class="chip" data-k="theme" data-v="light">Claro</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <header class="topbar">
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar tema" title="Tema" style="margin-right:0.5rem;width:2.2rem;height:2.2rem;border-radius:999px;border:1.5px solid rgba(235,227,207,0.22);background:rgba(0,0,0,0.28);color:inherit;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;vertical-align:middle"><svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg></button>
+    <a class="back" href="index.html">← CRICRI</a>
+      <span class="logo" aria-hidden="true">CRICRI</span>
+    </header>
+
+    <main id="conteudo-principal" tabindex="-1">
+    <h1 class="title">Área do Usuário <span>CRICRI</span></h1>
+
+    <!-- LOGIN -->
+    <p id="js-fallback" style="margin:0 1rem 1rem;padding:0.75rem;background:#e33d6b;color:#fff;border-radius:8px;font-size:0.9rem;display:none" role="alert">
+      Se esta mensagem aparece, o JavaScript não carregou. Confira se a pasta <b>js/</b> está junto do profile.html.
+    </p>
+    <section class="card" id="login-card" aria-labelledby="login-heading">
+      <h2 id="login-heading">Conta</h2>
+      <p class="lead">Crie uma vez, confirme o e-mail, depois entre com senha — ou Google.</p>
+      <div class="tabs">
+        <button type="button" class="tab" id="tab-login" aria-selected="true">Entrar</button>
+        <button type="button" class="tab" id="tab-signup" aria-selected="false">Criar conta</button>
+      </div>
+      <form id="auth-form">
+        <div id="name-wrap" hidden>
+          <label class="label" for="name">Nome</label>
+          <input class="input" id="name" type="text" maxlength="80" autocomplete="name" placeholder="Como te chamam na rua">
+        </div>
+        <label class="label" for="email">E-mail</label>
+        <input class="input" id="email" type="email" required autocomplete="email" placeholder="seu@email.com">
+        <label class="label" for="password">Senha</label>
+        <input class="input" id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="mín. 6 caracteres">
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="auth-submit">Entrar</button>
+        </div>
+      </form>
+      <div class="divider"><span>ou</span></div>
+      <button type="button" class="btn btn-ghost" id="btn-google" style="width:100%">Continuar com Google</button>
+      <p class="msg" id="auth-msg" role="status"></p>
+    </section>
+
+    <!-- PERFIL SOCIAL -->
+    <div id="profile-wrap" hidden>
+      <section class="hero" id="profile-hero" aria-label="Seu perfil">
+        <div class="hero-banner" aria-hidden="true"></div>
+        <div class="hero-body">
+          <div class="avatar-wrap" id="avatar">🔥</div>
+          <div class="display-name-row">
+            <h1 class="display-name" id="display-name">Seu nome</h1>
+            <button type="button" class="btn-edit-profile" id="btn-edit-profile" aria-controls="edit-profile-card" aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+              </svg>
+              Editar perfil
+            </button>
+          </div>
+          <p class="handle-line" id="handle-line">@nick</p>
+          <div class="id-pill" id="uid-pill" title="Seu ID único no CRICRI">
+            <strong>ID</strong>
+            <span id="uid">—</span>
+          </div>
+          <p class="bio-preview" id="bio-preview"></p>
+          <div class="hero-actions-row">
+            <button type="button" class="btn-logout-hero" id="btn-logout-mini" title="Sair da conta">Sair</button>
+          </div>
+
+          <!-- Conexões junto da foto -->
+          <div class="hero-conn" id="connections-card">
+            <p class="hero-conn-title">Conexões</p>
+            <div class="conn-add-row">
+              <input class="input" id="conn-query" type="text" maxlength="80" placeholder="@nick ou UUID" autocomplete="off" aria-label="Nick ou ID para conectar">
+              <button type="button" class="btn btn-primary" id="btn-conn-add">Add</button>
+            </div>
+            <p class="msg" id="conn-msg" role="status"></p>
+            <ul class="conn-list" id="conn-list" aria-live="polite"></ul>
+            <p class="conn-empty" id="conn-empty">Nenhuma conexão ainda — adiciona pelo @nick.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card edit-card edit-card-slim" id="edit-profile-card" data-open="false" hidden>
+        <div class="edit-card-body" id="edit-card-body" aria-hidden="true">
+          <div class="edit-card-body-inner">
+            <p class="lead">Só o <b>nick</b> é obrigatório. Avatar ou foto são opcionais.</p>
+
+            <label class="label" id="avatar-label">Avatar (emoji)</label>
+            <div class="avatar-picker" id="avatar-picker" data-open="false">
+              <button type="button" class="avatar-picker-toggle" id="avatar-picker-toggle" aria-expanded="false" aria-controls="avatar-picker-panel">
+                <span class="avatar-picker-toggle-left">
+                  <span class="avatar-picker-preview" id="avatar-picker-preview" aria-hidden="true">🎨</span>
+                  <span class="avatar-picker-meta">
+                    <strong>Escolher avatar</strong>
+                    <span id="avatar-picker-hint">Toque para ver os emojis</span>
+                  </span>
+                </span>
+                <svg class="avatar-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+              <div class="avatar-picker-panel" id="avatar-picker-panel" role="group" aria-labelledby="avatar-label">
+                <div class="avatar-picker-panel-inner">
+                  <div class="grid" id="avatar-grid"></div>
+                </div>
+              </div>
+            </div>
+
+            <label class="label" for="pname">Nome de exibição</label>
+            <input class="input" id="pname" type="text" maxlength="80" placeholder="Nome na rua">
+
+            <label class="label" for="phandle">Nick <span class="req">*</span></label>
+            <input class="input" id="phandle" type="text" maxlength="40" required placeholder="seu.nick" autocomplete="username">
+            <p class="hint">Único no CRICRI. Usado no link da caixinha: profile.html?u=seu.nick</p>
+
+            <label class="label" for="pbio">Bio <span class="opt">(opcional)</span></label>
+            <input class="input" id="pbio" type="text" maxlength="160" placeholder="Uma linha de manifesto">
+
+            <label class="label" for="pphoto">Foto por link <span class="opt">(opcional)</span></label>
+            <input class="input" id="pphoto" type="url" placeholder="https://…">
+            <p class="hint">Endereço de uma imagem na internet. Se preencher, substitui o emoji. Não é obrigatório.</p>
+
+            <div class="actions">
+              <button type="button" class="btn btn-primary" id="btn-save">Salvar</button>
+              <button type="button" class="btn btn-ghost" id="btn-logout">Sair</button>
+            </div>
+            <p class="msg" id="profile-msg" role="status"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="meow-wrap" id="inbox-card">
+        <div class="meow-brand">
+          <div class="cat-badge" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 100 100"><path d="M20 34 L32 10 L42 32 Z" fill="#17120e"/><path d="M80 34 L68 10 L58 32 Z" fill="#17120e"/><circle cx="38" cy="52" r="4.2" fill="#17120e"/><circle cx="62" cy="52" r="4.2" fill="#17120e"/><path d="M46 66 Q50 71 54 66" stroke="#17120e" stroke-width="3.4" fill="none" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <p class="meow-logo">MEOW</p>
+            <p class="meow-sub">caixinha · scraps anônimos</p>
+          </div>
+        </div>
+        <div class="meow-cartaz --inbox">
+          <h2 class="meow-title">chegou scrap<br>pra você! 🐾</h2>
+          <div class="meow-item-list" id="inbox-list"></div>
+          <p class="msg" id="inbox-msg" role="status" style="color:#17120e;margin-top:0.5rem"></p>
+        </div>
+        <p class="meow-share" id="share-hint" hidden></p>
+        <div id="inbox-share-row" class="inbox-share-row"></div>
+      </section>
+
+      <section class="card" id="push-card" hidden>
+        <h2>Notificações</h2>
+        <p class="lead">Receba avisos de recados e novidades no navegador (mesmo com a aba fechada, se o SO permitir).</p>
+        <p class="hint" id="push-status">Verificando…</p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="btn-push-enable">Ativar notificações</button>
+          <button type="button" class="btn btn-ghost" id="btn-push-disable" hidden>Desativar</button>
+        </div>
+        <p class="msg" id="push-msg" role="status"></p>
+        <p class="hint">Precisa de HTTPS (ou localhost) e da chave pública VAPID em <code>window.FASC_VAPID_PUBLIC_KEY</code>. Veja <code>docs/PUSH.md</code>.</p>
+      </section>
+
+    </div>
+
+    <section class="meow-wrap" id="send-card" hidden>
+      <div class="meow-brand">
+        <div class="cat-badge" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 100 100"><path d="M20 34 L32 10 L42 32 Z" fill="#17120e"/><path d="M80 34 L68 10 L58 32 Z" fill="#17120e"/><circle cx="38" cy="52" r="4.2" fill="#17120e"/><circle cx="62" cy="52" r="4.2" fill="#17120e"/><path d="M46 66 Q50 71 54 66" stroke="#17120e" stroke-width="3.4" fill="none" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <p class="meow-logo">MEOW</p>
+          <p class="meow-sub" id="send-sub">manda sem assinar</p>
+        </div>
+      </div>
+      <div class="meow-cartaz --send">
+        <h2 class="meow-title" id="send-title">manda um scrap<br>pra mim, sem nome!</h2>
+        <form id="send-form">
+          <div class="meow-bubble --placeholder">
+            <label class="sr-only" for="send-body">Mensagem</label>
+            <textarea id="send-body" maxlength="280" required rows="3" placeholder="Solta o verbo… ninguém vai saber que foi você"></textarea>
+          </div>
+          <div class="meow-meta">
+            <span class="anon">🙈 100% anônimo</span>
+            <span id="send-count">0 / 280</span>
+          </div>
+          <label class="meow-identify" for="send-identify">
+            <input type="checkbox" id="send-identify" name="send-identify"> Mostrar que fui eu
+          </label>
+          <div class="meow-btn-stack">
+            <button type="submit" class="meow-btn --primary"><span aria-hidden="true">🐾</span> Meow</button>
+          </div>
+          <p class="meow-hint">seu nome nunca chega se estiver anônimo</p>
+        </form>
+        <p class="msg" id="send-msg" role="status" style="color:#17120e;margin-top:0.5rem"></p>
+      </div>
+    </section>
+    </main>
+  </div>
+
+  
+  <!-- JS embutido: não depende de carregar arquivos da pasta js/ -->
+  <script>
+// CRICRI — config pública (anon/publishable key é segura no front)
+// NUNCA coloque service_role aqui.
+window.FASC_CONFIG = {
+  supabaseUrl: 'https://bcnbwshwehofncfkdnra.supabase.co',
+  supabaseAnonKey: 'sb_publishable_k0iCZgl6qweP16tW3uiGYA_HTJYO1iK',
+  env: 'dev',
+  vapidPublicKey: ''
+};
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"
+    onerror="console.error('CDN Supabase falhou'); window.__fascCdnFailed=true;"></script>
+  <script>
+// CRICRI — client Supabase (vanilla)
+(function () {
+  const cfg = window.FASC_CONFIG || {};
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    console.error('[CRICRI] FASC_CONFIG ausente');
+    window.fascAuth = null;
+    return;
+  }
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    console.error('[CRICRI] supabase-js não carregou (CDN)');
+    window.fascAuth = null;
+    return;
+  }
+
+  const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  window.fascDb = client;
+
+  function profileRedirect() {
+    return window.location.origin.replace(/\/$/, '') + '/profile.html';
+  }
+
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise(function (_, reject) {
+        setTimeout(function () {
+          reject(new Error((label || 'operação') + ' demorou demais'));
+        }, ms);
+      })
+    ]);
+  }
+
+  window.fascAuth = {
+    withTimeout: withTimeout,
+    async session() {
+      try {
+        var res = await withTimeout(client.auth.getSession(), 2500, 'sessão');
+        if (res.error) console.warn('[CRICRI auth]', res.error.message);
+        return (res.data && res.data.session) || null;
+      } catch (e) {
+        console.warn('[CRICRI auth] session:', e.message || e);
+        return null;
+      }
+    },
+    async user() {
+      var s = await this.session();
+      return s ? s.user : null;
+    },
+    async signUp(email, password, name) {
+      var res = await client.auth.signUp({
+        email: String(email || '').trim(),
+        password: String(password || ''),
+        options: {
+          emailRedirectTo: profileRedirect(),
+          data: { name: name || 'novo usuário' }
+        }
+      });
+      if (res.error) throw res.error;
+      return res.data;
+    },
+    async signIn(email, password) {
+      var res = await client.auth.signInWithPassword({
+        email: String(email || '').trim(),
+        password: String(password || '')
+      });
+      if (res.error) throw res.error;
+      return res.data;
+    },
+    async signInWithGoogle() {
+      var res = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: profileRedirect() }
+      });
+      if (res.error) throw res.error;
+      return res.data;
+    },
+    async signOut() {
+      var res = await client.auth.signOut();
+      if (res.error) throw res.error;
+    },
+    onChange: function (cb) {
+      var out = client.auth.onAuthStateChange(function (event, session) {
+        try { cb(event, session); } catch (e) { console.warn(e); }
+      });
+      return out.data && out.data.subscription;
+    }
+  };
+
+  console.info('[CRICRI] Supabase client pronto ·', cfg.env || 'dev');
+})();
+
+  </script>
+  <script>
+// CRICRI profile app — auth e-mail/senha + Google + perfil + caixinha
+(function () {
+  var AVATARS = ["🎨","🔥","🤙","🌀","💀","🖤","🧿","🧱","🕶️","🧃","🐸","🐯","🐉","⚡","🌙","💣","🎯","📡","🏙️","🎭","🔊","✨","🪩","🌶️"];
+  var selectedAvatar = '🎨';
+  var mode = 'login'; // login | signup
+  var authBound = false;
+
+  function $(id) { return document.getElementById(id); }
+  function msg(id, text, ok) {
+    var el = $(id);
+    if (!el) return;
+    el.textContent = text || '';
+    el.className = 'msg' + (text ? (ok ? ' ok' : ' err') : '');
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
+    });
+  }
+
+  // ---- a11y FAB ----
+  function wireA11y() {
+    var toggle = $('a11y-toggle');
+    var drawer = $('a11y-drawer');
+    var wrap = $('a11y-wrap');
+    if (!toggle || !drawer || !wrap) return;
+    function open() { drawer.hidden = false; toggle.setAttribute('aria-expanded', 'true'); }
+    function close() { drawer.hidden = true; toggle.setAttribute('aria-expanded', 'false'); }
+    toggle.onclick = function (e) { e.stopPropagation(); drawer.hidden ? open() : close(); };
+    var closeBtn = $('a11y-close');
+    if (closeBtn) closeBtn.onclick = function (e) { e.stopPropagation(); close(); };
+    document.addEventListener('click', function (e) {
+      if (!drawer.hidden && wrap && !wrap.contains(e.target)) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+    // chips
+    wrap.addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      var k = chip.getAttribute('data-k');
+      var v = chip.getAttribute('data-v');
+      if (!k) return;
+      wrap.querySelectorAll('.chip[data-k="' + k + '"]').forEach(function (c) {
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+      var h = document.documentElement;
+      if (v === 'default' || v === 'md') h.removeAttribute('data-a11y-' + k);
+      else h.setAttribute('data-a11y-' + k, v);
+      if (k === 'text') {
+        h.style.fontSize = v === 'lg' ? '112%' : v === 'xl' ? '125%' : '';
+      }
+      if (k === 'theme') {
+        var root = document.documentElement;
+        root.classList.add('theme-anim');
+        if (v === 'light' || v === 'dark') {
+          root.setAttribute('data-theme', v);
+          root.setAttribute('data-a11y-theme', v);
+        } else {
+          root.setAttribute('data-theme', 'dark');
+          root.setAttribute('data-a11y-theme', 'dark');
+        }
+        document.body.style.background = '';
+        document.body.style.color = '';
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = v === 'light' ? '#f3ecdc' : '#0c0a08';
+        try {
+          var st = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+          st.theme = v === 'default' ? 'default' : v;
+          localStorage.setItem('fasc-a11y-v1', JSON.stringify(st));
+        } catch (err) {}
+        setTimeout(function () { root.classList.remove('theme-anim'); }, 400);
+      }
+      if (k === 'contrast' && v === 'high') {
+        document.body.style.background = '#000'; document.body.style.color = '#fff';
+      } else if (k === 'contrast') {
+        /* leave theme to handle */
+      }
+    });
+  }
+
+  // ---- avatars (colapsável) ----
+  function setAvatarPickerOpen(open) {
+    var picker = $('avatar-picker');
+    var toggle = $('avatar-picker-toggle');
+    var panel = $('avatar-picker-panel');
+    if (!picker || !toggle || !panel) return;
+    picker.setAttribute('data-open', open ? 'true' : 'false');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    // não usa [hidden]: a animação de altura/opacity depende do data-open
+    panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    var hint = $('avatar-picker-hint');
+    if (hint) {
+      hint.textContent = open ? 'Toque num emoji para escolher' : 'Toque para ver os emojis';
+    }
+  }
+
+  function syncAvatarPickerPreview() {
+    var prev = $('avatar-picker-preview');
+    if (prev) prev.textContent = selectedAvatar || '🎨';
+  }
+
+  function renderAvatars() {
+    var grid = $('avatar-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    AVATARS.forEach(function (em) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = em;
+      b.setAttribute('aria-label', 'Avatar ' + em);
+      b.setAttribute('aria-pressed', em === selectedAvatar ? 'true' : 'false');
+      b.onclick = function () {
+        selectedAvatar = em;
+        if ($('pphoto')) $('pphoto').value = '';
+        updateAvatar();
+        syncAvatarPickerPreview();
+        grid.querySelectorAll('button').forEach(function (x) {
+          x.setAttribute('aria-pressed', x.textContent === selectedAvatar ? 'true' : 'false');
+        });
+        // fecha após escolher — libera a tela
+        setAvatarPickerOpen(false);
+      };
+      grid.appendChild(b);
+    });
+    syncAvatarPickerPreview();
+  }
+
+  function wireAvatarPicker() {
+    var toggle = $('avatar-picker-toggle');
+    if (!toggle || toggle.dataset.bound === '1') return;
+    toggle.dataset.bound = '1';
+    toggle.onclick = function () {
+      var open = toggle.getAttribute('aria-expanded') === 'true';
+      setAvatarPickerOpen(!open);
+    };
+    setAvatarPickerOpen(false);
+  }
+
+
+  function isUuid(s) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s || '');
+  }
+
+  function normalizeConnQuery(raw) {
+    var q = (raw || '').trim();
+    if (q.charAt(0) === '@') q = q.slice(1);
+    return q.trim();
+  }
+
+  async function resolveProfile(query) {
+    if (!window.fascDb) throw new Error('Supabase não carregou');
+    var q = normalizeConnQuery(query);
+    if (!q) throw new Error('Informe um ID ou nick');
+    if (isUuid(q)) {
+      var byId = await window.fascDb.from('profiles').select('id,name,handle,photo_url').eq('id', q).maybeSingle();
+      if (byId.error) throw byId.error;
+      if (!byId.data || !byId.data.id) throw new Error('Nenhum perfil com esse ID');
+      return byId.data;
+    }
+    var handle = q.toLowerCase().replace(/[^a-z0-9._]/gi, '');
+    if (!handle) throw new Error('Nick inválido');
+    var byHandle = await window.fascDb.from('profiles').select('id,name,handle,photo_url').eq('handle', handle).maybeSingle();
+    if (byHandle.error) throw byHandle.error;
+    if (!byHandle.data || !byHandle.data.id) throw new Error('Nick não encontrado: @' + handle);
+    return byHandle.data;
+  }
+
+  function renderConnections(rows) {
+    var list = $('conn-list');
+    var empty = $('conn-empty');
+    if (!list) return;
+    list.innerHTML = '';
+    if (!rows || !rows.length) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+    rows.forEach(function (row) {
+      var p = row.profile || {};
+      var li = document.createElement('li');
+      li.className = 'conn-item';
+      var handle = p.handle || '';
+      var name = p.name || handle || 'Usuário';
+      var avatar = p.photo_url
+        ? '<img src="' + escapeHtml(p.photo_url) + '" alt="" width="40" height="40" style="width:100%;height:100%;object-fit:cover;border-radius:10px">'
+        : '👤';
+      var href = handle ? ('profile.html?u=' + encodeURIComponent(handle)) : ('profile.html?id=' + encodeURIComponent(p.id || row.to_id));
+      li.innerHTML =
+        '<div class="conn-avatar">' + avatar + '</div>' +
+        '<div class="conn-meta">' +
+          '<strong>' + escapeHtml(name) + '</strong>' +
+          (handle ? '<a class="conn-nick" href="' + href + '">' + escapeHtml(handle) + '</a>' : '<span class="conn-nick" style="opacity:.7">sem nick</span>') +
+        '</div>' +
+        '<button type="button" class="conn-remove" data-conn-id="' + escapeHtml(row.id) + '">Remover</button>';
+      list.appendChild(li);
+    });
+  }
+
+  async function loadConnections() {
+    if (!window.fascDb || !window.fascAuth) return;
+    var user = await window.fascAuth.user();
+    if (!user || !user.id) return;
+    try {
+      var res = await window.fascDb
+        .from('connections')
+        .select('id,to_id,created_at')
+        .eq('from_id', user.id)
+        .order('created_at', { ascending: false });
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      // enrich with profiles
+      var ids = rows.map(function (r) { return r.to_id; }).filter(Boolean);
+      var map = {};
+      if (ids.length) {
+        var pr = await window.fascDb.from('profiles').select('id,name,handle,photo_url').in('id', ids);
+        if (!pr.error && pr.data) {
+          pr.data.forEach(function (p) { map[p.id] = p; });
+        }
+      }
+      rows.forEach(function (r) { r.profile = map[r.to_id] || { id: r.to_id }; });
+      renderConnections(rows);
+    } catch (err) {
+      console.warn('[CRICRI connections]', err);
+      var m = (err && err.message) || '';
+      if (/relation.*connections.*does not exist|could not find the table/i.test(m)) {
+        msg('conn-msg', 'Rode o SQL STEP_E_connections no Supabase.', false);
+      } else {
+        msg('conn-msg', m || 'Erro ao carregar conexões', false);
+      }
+    }
+  }
+
+  function wireConnections() {
+    var btn = $('btn-conn-add');
+    var input = $('conn-query');
+    var list = $('conn-list');
+    if (btn && btn.dataset.bound !== '1') {
+      btn.dataset.bound = '1';
+      btn.onclick = async function () {
+        if (!window.fascAuth || !window.fascAuth.user) {
+          msg('conn-msg', 'Entre na conta para adicionar.', false);
+          return;
+        }
+        var user = await window.fascAuth.user();
+        if (!user || !user.id) {
+          msg('conn-msg', 'Entre na conta para adicionar.', false);
+          return;
+        }
+        var q = input ? input.value : '';
+        btn.disabled = true;
+        msg('conn-msg', 'Buscando…', true);
+        try {
+          var profile = await resolveProfile(q);
+          if (!profile || !profile.id) throw new Error('Perfil sem ID — tente de novo');
+          if (profile.id === user.id) throw new Error('Você não pode adicionar a si mesmo');
+          var ins = await window.fascDb.from('connections').insert({
+            from_id: user.id,
+            to_id: profile.id
+          }).select('id').maybeSingle();
+          if (ins.error) {
+            if (/duplicate|unique/i.test(ins.error.message || '')) {
+              msg('conn-msg', 'Essa pessoa já está nas suas conexões.', true);
+            } else if (/relation.*connections|schema cache/i.test(ins.error.message || '')) {
+              throw new Error('Tabela connections ausente — rode STEP_E_connections.sql no Supabase');
+            } else {
+              throw ins.error;
+            }
+          } else {
+            msg('conn-msg', 'Conexão adicionada: @' + (profile.handle || profile.id.slice(0, 8)), true);
+            if (input) input.value = '';
+          }
+          await loadConnections();
+        } catch (err) {
+          msg('conn-msg', (err && err.message) || 'Não foi possível adicionar', false);
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    }
+    if (input && input.dataset.bound !== '1') {
+      input.dataset.bound = '1';
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (btn) btn.click();
+        }
+      });
+    }
+    if (list && list.dataset.bound !== '1') {
+      list.dataset.bound = '1';
+      list.addEventListener('click', async function (e) {
+        var rm = e.target.closest && e.target.closest('.conn-remove');
+        if (!rm) return;
+        var id = rm.getAttribute('data-conn-id');
+        if (!id || !window.fascDb) return;
+        rm.disabled = true;
+        try {
+          var del = await window.fascDb.from('connections').delete().eq('id', id);
+          if (del.error) throw del.error;
+          msg('conn-msg', 'Removido.', true);
+          await loadConnections();
+        } catch (err) {
+          msg('conn-msg', (err && err.message) || 'Erro ao remover', false);
+          rm.disabled = false;
+        }
+      });
+    }
+    // copiar ID no pill
+    var pill = $('uid-pill');
+    if (pill && pill.dataset.bound !== '1') {
+      pill.dataset.bound = '1';
+      pill.title = 'Toque para copiar o ID';
+      pill.setAttribute('role', 'button');
+      pill.tabIndex = 0;
+      function copyId() {
+        var uid = $('uid');
+        var t = uid ? uid.textContent : '';
+        if (!t || t === '—') return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(function () {
+            msg('profile-msg', 'ID copiado.', true);
+          }).catch(function () {});
+        }
+      }
+      pill.addEventListener('click', copyId);
+      pill.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyId(); }
+      });
+    }
+  }
+
+
+  function setEditCardOpen(open) {
+    var card = $('edit-profile-card');
+    var body = $('edit-card-body');
+    var heroBtn = $('btn-edit-profile');
+    if (!card) return;
+    var wasOpen = card.getAttribute('data-open') === 'true';
+    if (wasOpen === !!open) return;
+    card.classList.add('is-animating');
+    window.clearTimeout(card._animTimer);
+    card._animTimer = window.setTimeout(function () {
+      card.classList.remove('is-animating');
+    }, 420);
+    card.setAttribute('data-open', open ? 'true' : 'false');
+    if (open) {
+      card.hidden = false;
+      card.removeAttribute('hidden');
+    } else {
+      card.hidden = true;
+      card.setAttribute('hidden', '');
+    }
+    if (body) body.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (heroBtn) {
+      heroBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      heroBtn.style.opacity = '0';
+      heroBtn.style.transform = 'scale(0.96)';
+      window.setTimeout(function () {
+        heroBtn.innerHTML = open
+          ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg> Fechar'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Editar perfil';
+        heroBtn.style.opacity = '1';
+        heroBtn.style.transform = 'scale(1)';
+      }, 140);
+    }
+    if (open) {
+      var ap = $('avatar-picker');
+      if (ap) ap.setAttribute('data-open', 'false');
+      var apt = $('avatar-picker-toggle');
+      if (apt) apt.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function wireEditProfileBtn() {
+    var card = $('edit-profile-card');
+    var heroBtn = $('btn-edit-profile');
+    if (!card) return;
+
+    function openAndFocus() {
+      setEditCardOpen(true);
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function () {
+        var name = $('pname');
+        var handle = $('phandle');
+        if (name) name.focus();
+        else if (handle) handle.focus();
+      }, 320);
+    }
+
+    if (heroBtn && heroBtn.dataset.bound !== '1') {
+      heroBtn.dataset.bound = '1';
+      heroBtn.setAttribute('aria-controls', 'edit-profile-card');
+      heroBtn.setAttribute('aria-expanded', 'false');
+      heroBtn.onclick = function () {
+        var open = card.getAttribute('data-open') === 'true';
+        if (open) setEditCardOpen(false);
+        else openAndFocus();
+      };
+    }
+    setEditCardOpen(false);
+
+    var mini = $('btn-logout-mini');
+    var full = $('btn-logout');
+    if (mini && full && mini.dataset.bound !== '1') {
+      mini.dataset.bound = '1';
+      mini.onclick = function () { full.click(); };
+    }
+  }
+
+  function updateAvatar() {
+    var box = $('avatar');
+    if (!box) return;
+    var url = ($('pphoto') && $('pphoto').value.trim()) || '';
+    if (url) {
+      box.innerHTML = '';
+      var img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Foto';
+      img.onerror = function () { box.textContent = selectedAvatar; };
+      box.appendChild(img);
+    } else {
+      box.textContent = selectedAvatar;
+    }
+  }
+
+  // ---- session UI ----
+
+  function syncHero() {
+    var name = ($('pname') && $('pname').value.trim()) || 'Seu nome';
+    var handle = ($('phandle') && $('phandle').value.trim().replace(/^@/, '')) || 'nick';
+    var bio = ($('pbio') && $('pbio').value.trim()) || '';
+    if ($('display-name')) $('display-name').textContent = name;
+    if ($('handle-line')) $('handle-line').textContent = handle;
+    if ($('bio-preview')) $('bio-preview').textContent = bio;
+    updateAvatar();
+  }
+
+  function showLoggedOut() {
+    document.body.setAttribute('data-auth', 'out');
+    var login = $('login-card');
+    if (login) {
+      login.hidden = false;
+      login.removeAttribute('hidden');
+      login.style.removeProperty('display');
+    }
+    var wrap = $('profile-wrap');
+    if (wrap) {
+      wrap.hidden = true;
+      wrap.setAttribute('hidden', '');
+      wrap.classList.remove('is-entering');
+    }
+    if ($('inbox-card')) {
+      $('inbox-card').hidden = true;
+      $('inbox-card').setAttribute('hidden', '');
+    }
+    if ($('send-card')) {
+      /* send-card pode aparecer para visitante com ?u= — não força hide global aqui */
+    }
+  }
+  function showLoggedIn(user) {
+    document.body.setAttribute('data-auth', 'in');
+    var login = $('login-card');
+    if (login) {
+      login.hidden = true;
+      login.setAttribute('hidden', '');
+      login.style.setProperty('display', 'none', 'important');
+    }
+    var wrap = $('profile-wrap');
+    if (wrap) {
+      wrap.hidden = false;
+      wrap.removeAttribute('hidden');
+      wrap.style.removeProperty('display');
+      // re-dispara entrada do bloco de perfil
+      wrap.classList.remove('is-entering');
+      void wrap.offsetWidth;
+      wrap.classList.add('is-entering');
+      window.clearTimeout(wrap._enterTimer);
+      wrap._enterTimer = window.setTimeout(function () {
+        wrap.classList.remove('is-entering');
+      }, 900);
+    }
+    if ($('inbox-card')) {
+      $('inbox-card').hidden = false;
+      $('inbox-card').removeAttribute('hidden');
+    }
+    if ($('connections-card')) {
+      $('connections-card').hidden = false;
+      $('connections-card').removeAttribute('hidden');
+    }
+    if ($('uid') && user) $('uid').textContent = '' + user.id;
+    if (typeof loadConnections === 'function') loadConnections();
+  }
+
+  async function loadProfile(uid) {
+    if (!window.fascDb) return;
+    try {
+      var res = await Promise.race([
+        window.fascDb.from('profiles').select('id,name,handle,photo_url,bio,city').eq('id', uid).maybeSingle(),
+        new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 4000); })
+      ]);
+      if (res.error || !res.data) return;
+      var d = res.data;
+      if ($('pname')) $('pname').value = d.name || '';
+      if ($('phandle')) $('phandle').value = d.handle || '';
+      if ($('pbio')) $('pbio').value = d.bio || '';
+      if (d.photo_url && String(d.photo_url).indexOf('emoji:') === 0) {
+        selectedAvatar = d.photo_url.slice(6) || '🎨';
+        if ($('pphoto')) $('pphoto').value = '';
+      } else if (d.photo_url) {
+        if ($('pphoto')) $('pphoto').value = d.photo_url;
+      }
+      renderAvatars();
+      syncHero();
+    } catch (e) {
+      console.warn('[profile]', e.message || e);
+    }
+  }
+
+  async function refreshSession() {
+    // Login form stays visible until we KNOW there is a user
+    showLoggedOut();
+    if (!window.fascAuth) {
+      msg('auth-msg', 'Não foi possível conectar ao servidor de login. Tente de novo em instantes.', false);
+      return;
+    }
+    try {
+      var user = await window.fascAuth.user();
+      if (!user) return;
+      showLoggedIn(user);
+      await loadProfile(user.id);
+      loadInbox();
+      updateShareHint();
+    } catch (e) {
+      console.warn('[session]', e);
+      showLoggedOut();
+    }
+  }
+
+  // ---- auth form ----
+  function wireAuth() {
+    var tabLogin = $('tab-login');
+    var tabSignup = $('tab-signup');
+    var nameWrap = $('name-wrap');
+    var submit = $('auth-submit');
+    var form = $('auth-form');
+
+    function setMode(m) {
+      mode = m;
+      var signup = m === 'signup';
+      if (tabLogin) tabLogin.setAttribute('aria-selected', signup ? 'false' : 'true');
+      if (tabSignup) tabSignup.setAttribute('aria-selected', signup ? 'true' : 'false');
+      if (nameWrap) nameWrap.hidden = !signup;
+      if (submit) submit.textContent = signup ? 'Criar conta' : 'Entrar';
+      if ($('password')) $('password').autocomplete = signup ? 'new-password' : 'current-password';
+      msg('auth-msg', '', true);
+    }
+    if (tabLogin) tabLogin.onclick = function () { setMode('login'); };
+    if (tabSignup) tabSignup.onclick = function () { setMode('signup'); };
+
+    if (form) {
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+        if (!window.fascAuth) {
+          msg('auth-msg', 'Login indisponível (Supabase não carregou).', false);
+          return;
+        }
+        var email = ($('email') && $('email').value.trim()) || '';
+        var password = ($('password') && $('password').value) || '';
+        if (submit) submit.disabled = true;
+        try {
+          if (mode === 'signup') {
+            msg('auth-msg', 'Criando conta…', true);
+            var name = ($('name') && $('name').value.trim()) || '';
+            var data = await window.fascAuth.signUp(email, password, name);
+            if (data && data.session) {
+              msg('auth-msg', 'Conta criada.', true);
+              await refreshSession();
+            } else {
+              msg('auth-msg', 'Conta criada. Confirme o e-mail (só uma vez) e depois entre com a senha.', true);
+              setMode('login');
+            }
+          } else {
+            msg('auth-msg', 'Entrando…', true);
+            await window.fascAuth.signIn(email, password);
+            msg('auth-msg', 'Ok.', true);
+            await refreshSession();
+          }
+        } catch (err) {
+          msg('auth-msg', err.message || 'Falha na autenticação', false);
+        } finally {
+          if (submit) submit.disabled = false;
+        }
+      };
+    }
+
+    var g = $('btn-google');
+    if (g) {
+      g.onclick = async function () {
+        if (!window.fascAuth) {
+          msg('auth-msg', 'Login indisponível.', false);
+          return;
+        }
+        msg('auth-msg', 'Abrindo Google…', true);
+        try {
+          await window.fascAuth.signInWithGoogle();
+        } catch (err) {
+          msg('auth-msg', err.message || 'Ative o provider Google no Supabase.', false);
+        }
+      };
+    }
+
+    if ($('btn-logout')) {
+      $('btn-logout').onclick = async function () {
+        try { await window.fascAuth.signOut(); } catch (_) {}
+        showLoggedOut();
+        msg('auth-msg', 'Saiu da conta.', true);
+      };
+    }
+
+    if ($('btn-save')) {
+      $('btn-save').onclick = async function () {
+        if (!window.fascAuth || !window.fascDb) return;
+        var user = await window.fascAuth.user();
+        if (!user) return;
+        var handle = ($('phandle') && $('phandle').value.trim().replace(/^@/, '').toLowerCase()) || '';
+        if (!handle) {
+          msg('profile-msg', 'Nick é obrigatório.', false);
+          if ($('phandle')) $('phandle').focus();
+          return;
+        }
+        if (!/^[a-z0-9._]{3,40}$/.test(handle)) {
+          msg('profile-msg', 'Nick: 3–40 caracteres (letras minúsculas, números, . ou _).', false);
+          return;
+        }
+        var photoUrl = ($('pphoto') && $('pphoto').value.trim()) || '';
+        var photo = photoUrl || ('emoji:' + selectedAvatar);
+        var name = ($('pname') && $('pname').value.trim()) || handle;
+        var bio = ($('pbio') && $('pbio').value.trim()) || null;
+        msg('profile-msg', 'Salvando…', true);
+        try {
+          var payload = { id: user.id, name: name, handle: handle, photo_url: photo, city: 'São Cristóvão' };
+          var res = await window.fascDb.from('profiles').upsert(Object.assign({}, payload, { bio: bio }), { onConflict: 'id' });
+          if (res.error && /bio/i.test(res.error.message || '')) {
+            res = await window.fascDb.from('profiles').upsert(payload, { onConflict: 'id' });
+          }
+          if (res.error) throw res.error;
+          msg('profile-msg', 'Perfil salvo.', true);
+          if (typeof syncHero === 'function') syncHero();
+          else {
+            if ($('display-name')) $('display-name').textContent = name;
+            if ($('handle-line')) $('handle-line').textContent = handle;
+            if ($('bio-preview')) $('bio-preview').textContent = bio || '';
+          }
+          updateShareHint();
+          // recolhe o formulário após salvar — libera a tela
+          setTimeout(function () {
+            if (typeof setEditCardOpen === 'function') setEditCardOpen(false);
+          }, 700);
+        } catch (err) {
+          msg('profile-msg', err.message || 'Erro ao salvar', false);
+        }
+      };
+    }
+
+    if ($('pphoto')) $('pphoto').oninput = function(){ updateAvatar(); syncHero(); };
+    ['pname','phandle','pbio'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('input', syncHero); });
+  }
+
+  // ---- inbox ----
+  async function loadInbox() {
+    var list = $('inbox-list');
+    if (!list || !window.fascDb || !window.fascAuth) return;
+    try {
+      var user = await window.fascAuth.user();
+      if (!user) return;
+      var res = await Promise.race([
+        window.fascDb.from('inbox_anon').select('id,body,is_anonymous,answer,created_at')
+          .eq('to_profile_id', user.id).eq('is_hidden', false)
+          .order('created_at', { ascending: false }).limit(40),
+        new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 4000); })
+      ]);
+      if (res.error) {
+        list.innerHTML = '<p class="meow-empty">Caixinha indisponível (rode o SQL da inbox no Supabase).</p>';
+        return;
+      }
+      var rows = res.data || [];
+      if (!rows.length) {
+        list.innerHTML = '<p class="meow-empty">Nenhum scrap ainda. Compartilha teu @nick — a rua manda Meow.</p>';
+        return;
+      }
+      list.innerHTML = rows.map(function (m) {
+        var when = m.created_at ? new Date(m.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '';
+        var label = m.is_anonymous ? '🙈 anônimo' : 'identificado';
+        var answered = m.answer
+          ? '<div class="meow-answer"><strong>Sua reply:</strong> ' + escapeHtml(m.answer) + '</div>'
+          : '<div class="meow-btn-stack">' +
+              '<button type="button" class="meow-btn --reply" data-meow-reply="' + m.id + '">↩ reply</button>' +
+            '</div>' +
+            '<div class="meow-reply-box" id="reply-box-' + m.id + '">' +
+              '<input type="text" id="ans-' + m.id + '" maxlength="500" placeholder="Sua resposta na rua…">' +
+              '<button type="button" class="meow-btn --primary" data-meow-answer="' + m.id + '">Publicar reply</button>' +
+            '</div>';
+        return (
+          '<article class="meow-scrap" data-id="' + m.id + '">' +
+            '<div class="meow-bubble">"' + escapeHtml(m.body) + '"</div>' +
+            '<div class="meow-meta"><span class="anon">' + label + '</span><span>' + escapeHtml(when) + '</span></div>' +
+            answered +
+          '</article>'
+        );
+      }).join('');
+
+      if (list.dataset.meowBound !== '1') {
+        list.dataset.meowBound = '1';
+        list.addEventListener('click', async function (e) {
+          var openBtn = e.target.closest('[data-meow-reply]');
+          var ansBtn = e.target.closest('[data-meow-answer]');
+          if (openBtn) {
+            var id = openBtn.getAttribute('data-meow-reply');
+            var box = $('reply-box-' + id);
+            if (box) box.classList.toggle('is-open');
+            return;
+          }
+          if (ansBtn) {
+            var aid = ansBtn.getAttribute('data-meow-answer');
+            var input = $('ans-' + aid);
+            var text = (input && input.value || '').trim().slice(0, 500);
+            if (!text) { msg('inbox-msg', 'Escreve a reply.', false); return; }
+            try {
+              var up = await window.fascDb.from('inbox_anon').update({
+                answer: text,
+                answered_at: new Date().toISOString()
+              }).eq('id', aid);
+              if (up.error) throw up.error;
+              msg('inbox-msg', 'Reply publicada.', true);
+              loadInbox();
+            } catch (err) {
+              msg('inbox-msg', err.message || 'Falha na reply', false);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('[inbox]', e.message || e);
+    }
+  }
+
+  async function updateShareHint() {
+    var hint = $('share-hint');
+    if (!hint || !window.fascDb || !window.fascAuth) return;
+    try {
+      var user = await window.fascAuth.user();
+      if (!user) return;
+      var res = await window.fascDb.from('profiles').select('handle').eq('id', user.id).maybeSingle();
+      var h = res.data && res.data.handle;
+      if (h) {
+        hint.hidden = false;
+        hint.innerHTML = 'Compartilha teu Meow: <code>profile.html?u=' + escapeHtml(h) + '</code>';
+      }
+    } catch (_) {}
+  }
+
+  /* meow char count */
+  (function(){
+    var ta = document.getElementById('send-body');
+    var ct = document.getElementById('send-count');
+    if (ta && ct) {
+      ta.addEventListener('input', function(){ ct.textContent = (ta.value.length || 0) + ' / 280'; });
+    }
+  })();
+
+  async function wireSend() {
+    var params = new URLSearchParams(window.location.search);
+    var handle = (params.get('u') || params.get('to') || '').replace(/^@/, '').trim();
+    var card = $('send-card');
+    if (!handle || !window.fascDb || !card) return;
+    try {
+      var res = await Promise.race([
+        window.fascDb.from('profiles').select('id,name,handle').eq('handle', handle).maybeSingle(),
+        new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 4000); })
+      ]);
+      if (res.error || !res.data) return;
+      var target = res.data;
+      var me = window.fascAuth ? await window.fascAuth.user() : null;
+      if (me && me.id === target.id) return;
+      card.hidden = false;
+      if ($('send-title')) $('send-title').innerHTML = 'manda um scrap<br>pra @' + escapeHtml(target.handle || target.name || 'alguém') + '!';
+      if ($('send-sub')) $('send-sub').textContent = 'pra @' + (target.handle || '') + ' · meow anônimo';
+      var form = $('send-form');
+      if (form) {
+        form.onsubmit = async function (e) {
+          e.preventDefault();
+          if (!window.fascAuth) {
+            msg('send-msg', 'Entre na sua conta para enviar.', false);
+            return;
+          }
+          var user = await window.fascAuth.user();
+          if (!user) {
+            msg('send-msg', 'Entre na sua conta para enviar.', false);
+            return;
+          }
+          var body = ($('send-body') && $('send-body').value.trim()) || '';
+          var identify = $('send-identify') && $('send-identify').checked;
+          try {
+            var ins = await window.fascDb.from('inbox_anon').insert({
+              to_profile_id: target.id,
+              body: body.slice(0, 280),
+              is_anonymous: !identify,
+              from_profile_id: identify ? user.id : null
+            });
+            if (ins.error) throw ins.error;
+            if ($('send-body')) $('send-body').value = '';
+            msg('send-msg', 'Meow enviado 🐾', true);
+          } catch (err) {
+            msg('send-msg', err.message || 'Falha', false);
+          }
+        };
+      }
+    } catch (e) {
+      console.warn('[send]', e.message || e);
+    }
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || document.documentElement.getAttribute('data-a11y-motion') === 'reduce';
+  }
+
+  function navigateWithTransition(url) {
+    if (prefersReducedMotion()) {
+      window.location.href = url;
+      return;
+    }
+    if (document.startViewTransition) {
+      try {
+        document.startViewTransition(function () {
+          window.location.href = url;
+        });
+        return;
+      } catch (_) { /* fallback */ }
+    }
+    var veil = document.querySelector('.fasc-route-veil');
+    if (!veil) {
+      veil = document.createElement('div');
+      veil.className = 'fasc-route-veil';
+      veil.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(veil);
+    }
+    veil.classList.add('is-covering');
+    window.setTimeout(function () { window.location.href = url; }, 200);
+  }
+
+  function wireRouteLinks() {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== '_self') return;
+      var href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http')) return;
+      if (!/(^|\/)(index\.html|profile\.html)(\?|#|$)/.test(href) && href !== './' && href !== '/') return;
+      e.preventDefault();
+      navigateWithTransition(a.href);
+    });
+  }
+
+  function wireInputMicro() {
+    document.addEventListener('blur', function (e) {
+      var el = e.target;
+      if (!el || !el.classList || !el.classList.contains('input')) return;
+      el.classList.remove('is-invalid', 'is-valid');
+      if (!el.value) return;
+      if (el.checkValidity && !el.checkValidity()) el.classList.add('is-invalid');
+      else if (el.required || el.value.trim()) el.classList.add('is-valid');
+    }, true);
+    document.addEventListener('input', function (e) {
+      var el = e.target;
+      if (!el || !el.classList || !el.classList.contains('input')) return;
+      if (el.classList.contains('is-invalid') && el.checkValidity && el.checkValidity()) {
+        el.classList.remove('is-invalid');
+        el.classList.add('is-valid');
+      }
+    }, true);
+  }
+
+  function wireButtonMicro() {
+    function reduce() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        || document.documentElement.getAttribute('data-a11y-motion') === 'reduce';
+    }
+    function ripple(el, e) {
+      if (reduce() || !el.classList.contains('btn')) return;
+      var rect = el.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      var x = (e.clientX != null ? e.clientX : rect.left + rect.width / 2) - rect.left - size / 2;
+      var y = (e.clientY != null ? e.clientY : rect.top + rect.height / 2) - rect.top - size / 2;
+      var wave = document.createElement('span');
+      wave.className = 'fasc-ripple';
+      wave.style.width = wave.style.height = size + 'px';
+      wave.style.left = x + 'px';
+      wave.style.top = y + 'px';
+      el.appendChild(wave);
+      setTimeout(function () { wave.remove(); }, 600);
+    }
+    document.addEventListener('pointerdown', function (e) {
+      var btn = e.target.closest && e.target.closest('.btn, .tab, .btn-edit-profile, .avatar-picker-toggle, .chip');
+      if (!btn || btn.disabled) return;
+      btn.classList.add('is-pressed');
+      ripple(btn, e);
+    }, { passive: true });
+    function clear() {
+      document.querySelectorAll('.is-pressed').forEach(function (el) { el.classList.remove('is-pressed'); });
+    }
+    document.addEventListener('pointerup', clear, { passive: true });
+    document.addEventListener('pointercancel', clear, { passive: true });
+  }
+
+  function boot() {
+    // UI visível imediatamente — zero espera
+    showLoggedOut();
+    wireA11y();
+    wireAvatarPicker();
+    wireEditProfileBtn();
+    wireConnections();
+    wireRouteLinks();
+    wireButtonMicro();
+    wireInputMicro();
+    renderAvatars();
+    updateAvatar();
+    wireAuth();
+    wireSend();
+
+    // dispara animações de entrada da página
+    requestAnimationFrame(function () {
+      document.body.classList.add('is-ready');
+    });
+
+    // sessão em paralelo, com falha silenciosa
+    setTimeout(function () {
+      refreshSession().catch(function (e) { console.warn(e); });
+    }, 0);
+
+    if (!authBound && window.fascAuth && window.fascAuth.onChange) {
+      authBound = true;
+      window.fascAuth.onChange(function (event) {
+        // evita loop: só reage a eventos úteis
+        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          refreshSession().catch(function () {});
+        }
+      });
+    }
+    window.__fascProfileBooted = true;
+    console.info('[FASC] profile-app pronto');
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+  </script>
+  <script>
+  // Fallback só se o app não bootou E não há sessão logada
+  setTimeout(function () {
+    window.__fascProfileBooted = window.__fascProfileBooted || false;
+    var auth = document.body.getAttribute('data-auth');
+    var login = document.getElementById('login-card');
+    var wrap = document.getElementById('profile-wrap');
+    // Nunca reabrir login se já estamos logados
+    if (auth === 'in' || (wrap && !wrap.hidden)) {
+      if (login) {
+        login.hidden = true;
+        login.setAttribute('hidden', '');
+        login.style.setProperty('display', 'none', 'important');
+      }
+    } else if (!window.__fascProfileBooted && login) {
+      login.hidden = false;
+      login.removeAttribute('hidden');
+      login.style.removeProperty('display');
+      document.body.setAttribute('data-auth', 'out');
+    }
+    var fb = document.getElementById('js-fallback');
+    if (fb) {
+      if (!window.__fascProfileBooted) {
+        fb.style.display = 'block';
+        fb.innerHTML = 'Falha ao iniciar o app. Tente Ctrl+Shift+R. Se abriu como arquivo (file://), use um servidor: <code>npx serve -l 4173 .</code>';
+      } else {
+        fb.style.display = 'none';
+      }
+    }
+  }, 2000);
+  </script>
+
+  <!-- Web Push: defina a chave pública VAPID antes de push.js -->
+  <script>
+    // Gere com: npx web-push generate-vapid-keys
+    // window.FASC_VAPID_PUBLIC_KEY = 'SUA_CHAVE_PUBLICA';
+    if (!window.FASC_VAPID_PUBLIC_KEY && window.FASC_CONFIG && window.FASC_CONFIG.vapidPublicKey) {
+      window.FASC_VAPID_PUBLIC_KEY = window.FASC_CONFIG.vapidPublicKey;
+    }
+  </script>
+  <script src="js/push.js"></script>
+
+  <script src="js/theme.js"></script>
+  <script src="js/a11y-core.js" defer></script>
+  <script src="js/keyboard-nav.js" defer></script>
+  <script src="js/touch-gestures.js" defer></script>
+  <script src="js/sync-monitor.js" defer></script>
+  <script src="js/periodic-sync.js" defer></script>
+
+<script>
+(function(){
+  var bell = document.getElementById('notif-bell');
+  var panel = document.getElementById('notif-panel');
+  if (bell && panel) {
+    bell.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = bell.getAttribute('aria-expanded') === 'true';
+      bell.setAttribute('aria-expanded', open ? 'false' : 'true');
+      panel.hidden = open;
+    });
+    document.addEventListener('click', function(e){
+      if (!panel.hidden && !panel.contains(e.target) && e.target !== bell) {
+        panel.hidden = true;
+        bell.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+  // presence heartbeat + friends online
+  var HEARTBEAT_MS = 60000;
+  async function uid() {
+    try {
+      if (!window.fascAuth || !window.fascAuth.user) return null;
+      var u = await window.fascAuth.user();
+      return u && u.id ? u.id : null;
+    } catch(_) { return null; }
+  }
+  async function heartbeat() {
+    var id = await uid();
+    if (!id || !window.fascDb) return;
+    try {
+      await window.fascDb.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', id);
+    } catch(_) {}
+  }
+  async function loadFriendsOnline() {
+    var list = document.getElementById('friends-online-list');
+    var empty = document.getElementById('friends-online-empty');
+    var meta = document.getElementById('friends-online-meta');
+    if (!list || !window.fascDb) return;
+    var id = await uid();
+    if (!id) return;
+    try {
+      var res = await window.fascDb.from('connections').select('to_id').eq('from_id', id);
+      if (res.error || !res.data || !res.data.length) {
+        list.innerHTML = '';
+        if (empty) empty.hidden = false;
+        if (meta) meta.textContent = '0 online';
+        return;
+      }
+      var ids = res.data.map(function(r){ return r.to_id; }).filter(Boolean);
+      var pr = await window.fascDb.from('profiles').select('id,name,handle,photo_url,last_seen').in('id', ids);
+      var rows = (pr.data || []);
+      var now = Date.now();
+      list.innerHTML = '';
+      var online = 0;
+      rows.forEach(function(p){
+        var seen = p.last_seen ? new Date(p.last_seen).getTime() : 0;
+        var age = now - seen;
+        var status = age < 3*60000 ? 'on' : age < 15*60000 ? 'away' : 'off';
+        if (status === 'on') online++;
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.className = 'friend-chip' + (status === 'away' ? ' is-away' : status === 'off' ? ' is-off' : '');
+        a.href = p.handle ? ('profile.html?u=' + encodeURIComponent(p.handle)) : ('profile.html?id=' + encodeURIComponent(p.id));
+        a.innerHTML = '<span class="dot" aria-hidden="true"></span>' +
+          (p.handle ? '@' + p.handle : (p.name || 'amigo'));
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+      if (empty) empty.hidden = rows.length > 0;
+      if (meta) meta.textContent = online + ' online';
+    } catch (e) {
+      console.info('[friends]', e);
+    }
+  }
+  function loop() {
+    heartbeat();
+    loadFriendsOnline();
+  }
+  window.__cricriPresenceBeat = loop;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ loop(); setInterval(loop, HEARTBEAT_MS); });
+  else { loop(); setInterval(loop, HEARTBEAT_MS); }
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') loop(); });
+})();
+</script>
+
+  <script src="js/notif-bell.js"></script>
+  <script src="js/footer.js"></script>
+  <div id="site-footer-slot"></div>
+</body>
+
+</html>

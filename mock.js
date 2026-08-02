@@ -1,7 +1,7 @@
 // js/mock.js — mapa + geoloc adaptativa + geofencing + bússola
 console.log('Mock carregado');
 
-(function initMap() {
+(async function initMap() {
   const mapEl = document.getElementById('map');
   if (!mapEl || typeof L === 'undefined') {
     console.warn('Leaflet ou #map não encontrado');
@@ -11,7 +11,7 @@ console.log('Mock carregado');
   const map = L.map('map', {
     zoomControl: true,
     attributionControl: true
-  }).setView([-22.9005, -43.2210], 15);
+  }).setView([-11.015, -37.206], 16);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -19,14 +19,16 @@ console.log('Mock carregado');
     maxZoom: 19
   }).addTo(map);
 
-  // ---- Geofences ----
-  const spots = [
-    { id: 'bar-do-ze', name: 'Bar do Zé', lat: -22.8998, lng: -43.2185, status: 'rolando agora', radius: 90 },
-    { id: 'largo-matriz', name: 'Largo da Matriz', lat: -22.9012, lng: -43.2230, status: '62% pronto', radius: 110 },
-    { id: 'largo-rosario', name: 'Largo do Rosário', lat: -22.8985, lng: -43.2200, status: 'vai rolar às 23h', radius: 100 },
-    { id: 'quintal-ana', name: 'Quintal da Ana', lat: -22.9020, lng: -43.2190, status: 'terminou', radius: 80 },
-    { id: 'roda-bica', name: 'Roda da Bica', lat: -22.9000, lng: -43.2245, status: 'rolando agora', radius: 95 }
-  ];
+  // ---- Geofences (Supabase → fallback local) ----
+  const spots = window.fascSpots
+    ? await window.fascSpots.fetchSpots()
+    : [
+        { id: 'convento-sao-francisco', name: 'Convento São Francisco', lat: -11.0149, lng: -37.2047, status: 'rolando agora', radius: 100 },
+        { id: 'praca-sao-francisco', name: 'Praça São Francisco', lat: -11.0152, lng: -37.2052, status: '62% pronto', radius: 120 },
+        { id: 'igreja-matriz', name: 'Igreja Matriz', lat: -11.0138, lng: -37.2068, status: 'vai rolar às 23h', radius: 90 },
+        { id: 'largo-amparo', name: 'Largo do Amparo', lat: -11.0165, lng: -37.2075, status: 'terminou', radius: 85 },
+        { id: 'casa-do-sabao', name: 'Rua da Feira', lat: -11.014, lng: -37.208, status: 'rolando agora', radius: 95 }
+      ];
 
   const pinkIcon = L.divIcon({
     className: 'projano-marker',
@@ -46,11 +48,11 @@ console.log('Mock carregado');
 
   spots.forEach((spot) => {
     const marker = L.marker([spot.lat, spot.lng], { icon: pinkIcon })
-      .addTo(map)
       .bindPopup(
+        `<span class="popup-cat spot">Spot</span><br>` +
         `<strong>${spot.name}</strong><br>` +
-        `<span style="opacity:0.8">${spot.status}</span><br>` +
-        `<span style="opacity:0.55;font-size:0.75em">zona · ${spot.radius} m</span>`
+        `<span style="opacity:0.85">${spot.status}</span><br>` +
+        `<span class="popup-meta">São Cristóvão · SE · zona ${spot.radius} m</span>`
       );
 
     const fence = L.circle([spot.lat, spot.lng], {
@@ -62,10 +64,948 @@ console.log('Mock carregado');
       fillOpacity: 0.06,
       opacity: 0.35,
       interactive: false
-    }).addTo(map);
+    });
 
     spotLayers[spot.id] = { marker, fence, spot };
   });
+
+
+  // ---- POIs interativos: hospedagem + gastronomia (São Cristóvão / SE) ----
+  const POIS = [
+    {
+      id: 'hosp-momentos', layer: 'hospedagem',
+      name: 'Pousada Momentos',
+      lat: -10.9928, lng: -37.1685,
+      desc: 'Rodovia João Bebe Água · Rosa Elze',
+      extra: 'Hospedagem perto do centro histórico'
+    },
+    {
+      id: 'hosp-solove', layer: 'hospedagem',
+      name: 'Pousada Só Love',
+      lat: -10.9955, lng: -37.1720,
+      desc: 'Rodovia João Bebe Água, 3515',
+      extra: 'Minutos da Praça São Francisco'
+    },
+    {
+      id: 'hosp-grand', layer: 'hospedagem',
+      name: "Grand' Hostel São Cristóvão",
+      lat: -11.0102, lng: -37.1988,
+      desc: 'São Cristóvão · SE',
+      extra: 'Opção econômica pro festival'
+    },
+    {
+      id: 'hosp-haras', layer: 'hospedagem',
+      name: 'Casa no Haras',
+      lat: -11.0285, lng: -37.2150,
+      desc: 'Zona rural · São Cristóvão',
+      extra: 'Casa inteira · piscina · grupo'
+    },
+    {
+      id: 'gastro-pordosol', layer: 'gastronomia',
+      name: 'Restaurante Pôr do Sol',
+      lat: -11.0168, lng: -37.2025,
+      desc: 'Ladeira Porto da Banca',
+      extra: 'Frutos do mar · vista do rio'
+    },
+    {
+      id: 'gastro-queijada', layer: 'gastronomia',
+      name: 'Casa da Queijada',
+      lat: -11.0146, lng: -37.2058,
+      desc: 'Centro histórico',
+      extra: 'Queijada tradicional de SC'
+    },
+    {
+      id: 'gastro-mangue', layer: 'gastronomia',
+      name: 'Filhas do Mangue',
+      lat: -11.0155, lng: -37.2048,
+      desc: 'Perto da Praça São Francisco',
+      extra: 'Mariscos · caranguejo · sururu'
+    },
+    {
+      id: 'gastro-ivora', layer: 'gastronomia',
+      name: 'Ivora Pizzaria e Restaurante',
+      lat: -11.0125, lng: -37.2095,
+      desc: 'São Cristóvão · SE',
+      extra: 'Pizza, massas e pratos BR'
+    }
+  ];
+
+  function poiIcon(kind) {
+    return L.divIcon({
+      className: 'projano-marker',
+      html: '<div class="poi-dot ' + (kind === 'hospedagem' ? 'hosp' : 'gastro') + '"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 18],
+      popupAnchor: [0, -16]
+    });
+  }
+
+  const layerGroups = {
+    spots: L.layerGroup(),
+    hospedagem: L.layerGroup(),
+    gastronomia: L.layerGroup(),
+    transporte: L.layerGroup()
+  };
+
+  // spots já no map: move markers/fences para o grupo spots
+  Object.keys(spotLayers).forEach(function (id) {
+    const Lyr = spotLayers[id];
+    if (Lyr.marker) layerGroups.spots.addLayer(Lyr.marker);
+    if (Lyr.fence) layerGroups.spots.addLayer(Lyr.fence);
+  });
+  layerGroups.spots.addTo(map);
+
+  const poiMarkers = [];
+  POIS.forEach(function (p) {
+    const catLabel = p.layer === 'hospedagem' ? 'Hospedagem' : 'Gastronomia';
+    const catClass = p.layer;
+    const marker = L.marker([p.lat, p.lng], { icon: poiIcon(p.layer) })
+      .bindPopup(
+        '<span class="popup-cat ' + catClass + '">' + catLabel + '</span><br>' +
+        '<strong>' + p.name + '</strong><br>' +
+        '<span style="opacity:0.88">' + p.desc + '</span><br>' +
+        '<span class="popup-meta">' + p.extra + ' · São Cristóvão, SE</span>'
+      );
+    layerGroups[p.layer].addLayer(marker);
+    poiMarkers.push({ marker: marker, data: p });
+  });
+  layerGroups.hospedagem.addTo(map);
+  layerGroups.gastronomia.addTo(map);
+
+  // ---- Transporte público (São Cristóvão SE ↔ Aracaju) — dados orientativos front ----
+  // Horários estimados (orientativos). freqMin = intervalo médio em minutos no pico.
+  // windows: [{ days: 'util'|'sab'|'dom'|'fest', start: 'HH:MM', end: 'HH:MM', freqMin }]
+  // departures: lista fixa HH:MM (ex.: especiais do festival)
+  const BUS_LINES = [
+    {
+      code: '031',
+      name: 'Eduardo Gomes / Centro via Des. Maynard',
+      note: '~24 min até Aracaju (direto)',
+      special: false,
+      from: 'Terminal SC / Campus',
+      windows: [
+        { days: 'util', start: '05:00', end: '22:30', freqMin: 25 },
+        { days: 'sab', start: '05:30', end: '22:00', freqMin: 30 },
+        { days: 'dom', start: '06:00', end: '21:00', freqMin: 40 }
+      ]
+    },
+    {
+      code: '307',
+      name: 'São Cristóvão / Zona Oeste',
+      note: 'liga SC ao Terminal Zona Oeste',
+      special: false,
+      from: 'São Cristóvão',
+      windows: [
+        { days: 'util', start: '04:50', end: '23:30', freqMin: 30 },
+        { days: 'sab', start: '05:00', end: '23:00', freqMin: 35 },
+        { days: 'dom', start: '05:00', end: '22:30', freqMin: 40 }
+      ]
+    },
+    {
+      code: '715',
+      name: 'Tijuquinha / Centro via Des. Maynard',
+      note: 'passa pelo Terminal Campus',
+      special: false,
+      from: 'Campus / SC',
+      windows: [
+        { days: 'util', start: '05:15', end: '22:45', freqMin: 28 },
+        { days: 'sab', start: '05:30', end: '22:00', freqMin: 35 },
+        { days: 'dom', start: '06:00', end: '21:30', freqMin: 45 }
+      ]
+    },
+    {
+      code: '050',
+      name: 'Campus / Hospital Universitário',
+      note: 'região Campus / HU',
+      special: false,
+      from: 'Terminal Campus',
+      windows: [
+        { days: 'util', start: '05:30', end: '22:00', freqMin: 30 },
+        { days: 'sab', start: '06:00', end: '21:00', freqMin: 40 },
+        { days: 'dom', start: '06:30', end: '20:00', freqMin: 50 }
+      ]
+    },
+    {
+      code: '090',
+      name: 'Campus / D.I.A.',
+      note: 'Campus ↔ Terminal DIA',
+      special: false,
+      from: 'Terminal Campus',
+      windows: [
+        { days: 'util', start: '05:20', end: '22:15', freqMin: 30 },
+        { days: 'sab', start: '05:45', end: '21:30', freqMin: 40 },
+        { days: 'dom', start: '06:15', end: '20:30', freqMin: 50 }
+      ]
+    },
+    {
+      code: 'FEST',
+      name: 'Especiais do festival (gratuitos)',
+      note: 'Aracaju → SC · retorno madrugada (padrão CTM)',
+      special: true,
+      from: 'Terminais Aracaju → SC',
+      // Janela do evento 19–22/11/2026 (ajuste fino na semana do festival)
+      departures: {
+        // ida Aracaju → SC (terminais Centro/DIA/Atalaia)
+        ida: {
+          'qui-sex': ['18:00', '19:00', '20:00', '21:00'],
+          'sab-dom': ['12:00', '14:00', '16:00', '18:00', '19:30', '20:30']
+        },
+        // retorno SC → Aracaju (Rua 24)
+        volta: {
+          all: ['00:00', '01:00', '02:00', '03:00']
+        }
+      },
+      eventStart: '2026-11-19',
+      eventEnd: '2026-11-22'
+    }
+  ];
+
+  const BUS_STOPS = [
+    {
+      id: 'bus-terminal-sc', layer: 'transporte',
+      name: 'Terminal de São Cristóvão',
+      lat: -11.0128, lng: -37.2065,
+      desc: 'Saídas para Aracaju · linhas metropolitanas',
+      extra: 'Linhas 031, 307 e conexões',
+      lines: ['031', '307']
+    },
+    {
+      id: 'bus-centro-historico', layer: 'transporte',
+      name: 'Parada Centro Histórico',
+      lat: -11.0150, lng: -37.2055,
+      desc: 'Perto da Praça São Francisco',
+      extra: 'Acesso a pé aos spots do festival',
+      lines: ['031', '715']
+    },
+    {
+      id: 'bus-portico', layer: 'transporte',
+      name: 'Pórtico de São Cristóvão',
+      lat: -11.0055, lng: -37.1920,
+      desc: 'Entrada da cidade · conexão metropolitana',
+      extra: 'Parada estratégica especiais do festival',
+      lines: ['031', '307', 'FEST']
+    },
+    {
+      id: 'bus-rua24', layer: 'transporte',
+      name: 'Rua Vinte e Quatro (retorno festival)',
+      lat: -11.0142, lng: -37.2088,
+      desc: 'Ponto de retorno SC → Aracaju (madrugada)',
+      extra: 'Usado nos ônibus especiais do evento',
+      lines: ['FEST']
+    },
+    {
+      id: 'bus-campus', layer: 'transporte',
+      name: 'Terminal Campus (referência)',
+      lat: -10.9265, lng: -37.1028,
+      desc: 'Campus UFS · várias linhas SC/Aracaju',
+      extra: '031 · 050 · 090 · 715',
+      lines: ['031', '050', '090', '715']
+    },
+    {
+      id: 'bus-rosa-elze', layer: 'transporte',
+      name: 'Parada Rosa Elze',
+      lat: -10.9950, lng: -37.1700,
+      desc: 'Bairro Rosa Elze · caminho para o centro',
+      extra: 'Útil se estiver hospedado na região',
+      lines: ['307', '031']
+    }
+  ];
+
+  // rota aproximada centro SC → direção Aracaju (visual)
+  const BUS_ROUTE_SC = [
+    [-11.0150, -37.2055],
+    [-11.0128, -37.2065],
+    [-11.0055, -37.1920],
+    [-10.9950, -37.1700],
+    [-10.9600, -37.1400],
+    [-10.9265, -37.1028]
+  ];
+
+  function busIcon() {
+    return L.divIcon({
+      className: 'projano-marker',
+      html: '<div class="poi-dot bus"></div>',
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+      popupAnchor: [0, -8]
+    });
+  }
+
+  const busRouteLine = L.polyline(BUS_ROUTE_SC, {
+    color: '#3d8a9c',
+    weight: 3,
+    opacity: 0.55,
+    dashArray: '6 8',
+    interactive: false
+  });
+  layerGroups.transporte.addLayer(busRouteLine);
+
+  BUS_STOPS.forEach(function (p) {
+    const linesStr = (p.lines || []).join(' · ');
+    const marker = L.marker([p.lat, p.lng], { icon: busIcon() })
+      .bindPopup(
+        '<span class="popup-cat transporte">Ônibus</span><br>' +
+        '<strong>' + p.name + '</strong><br>' +
+        '<span style="opacity:0.88">' + p.desc + '</span><br>' +
+        '<span class="popup-meta">Linhas: ' + linesStr + '<br>' + p.extra + ' · SC/SE</span>'
+      );
+    layerGroups.transporte.addLayer(marker);
+    poiMarkers.push({ marker: marker, data: p });
+    // also register in markerById later via poiMarkers loop - but markerById built later from poiMarkers - good if built after this
+  });
+  layerGroups.transporte.addTo(map);
+
+  // ---- horários estimados de partida ----
+  function parseHM(hm) {
+    var p = String(hm).split(':');
+    return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+  }
+  function fmtHM(mins) {
+    mins = ((mins % 1440) + 1440) % 1440;
+    var h = Math.floor(mins / 60);
+    var m = mins % 60;
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  function dayKind(d) {
+    // 0=dom ... 6=sab
+    var day = (d || new Date()).getDay();
+    if (day === 0) return 'dom';
+    if (day === 6) return 'sab';
+    return 'util';
+  }
+  function isFestivalDay(d) {
+    d = d || new Date();
+    var t = d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+    return t >= '2026-11-19' && t <= '2026-11-22';
+  }
+  function festivalSlotKey(d) {
+    d = d || new Date();
+    var day = d.getDay(); // 0 dom ... 4 qui 5 sex 6 sab
+    // 19/11/2026 = quinta
+    if (day === 4 || day === 5) return 'qui-sex';
+    return 'sab-dom';
+  }
+  // ---- Previsão em tempo real (modelo local; sem GTFS-RT público da SMTT/CTM) ----
+  // Atraso simulado por linha, estável por ~2 min, oscila levemente a cada tick.
+  var _rtState = {}; // code -> { delayMin, updatedAt }
+  var _rtTick = 0;
+
+  function rtSeed(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  }
+
+  function lineDelayMin(code) {
+    if (window.CricriGtfsRt) {
+      var real = window.CricriGtfsRt.getDelay(code);
+      if (real != null) {
+        _rtState[code] = { delayMin: real, updatedAt: Date.now(), fromRt: true };
+        return real;
+      }
+    }
+    var now = Date.now();
+    var st = _rtState[code];
+    if (st && st.fromRt && now - st.updatedAt < 180000) return st.delayMin;
+    if (!st || now - st.updatedAt > 120000 || st.fromRt) {
+      var base = (rtSeed(code + String(Math.floor(now / 120000))) % 7) - 2;
+      var h = new Date().getHours();
+      if (h >= 7 && h <= 9) base += 2;
+      if (h >= 17 && h <= 19) base += 3;
+      st = { delayMin: base, updatedAt: now, fromRt: false };
+      _rtState[code] = st;
+    }
+    var jitter = ((_rtTick + rtSeed(code)) % 3) - 1;
+    return st.delayMin + jitter;
+  }
+
+  function liveNowMinutes() {
+    var d = new Date();
+    return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+  }
+
+  /** Previsões ao vivo: ETA em minutos + horário previsto + atraso */
+  function livePredictions(line, count) {
+    count = count || 3;
+    var nowM = liveNowMinutes();
+    var delay = line.special ? 0 : lineDelayMin(line.code);
+    var out = [];
+    var now = new Date();
+
+    if (line.special && line.departures) {
+      if (!isFestivalDay(now)) {
+        return [{ label: '—', etaMin: null, delay: 0, status: 'off', note: 'só no festival 19–22/11' }];
+      }
+      var key = festivalSlotKey(now);
+      var ida = (line.departures.ida && (line.departures.ida[key] || line.departures.ida['sab-dom'])) || [];
+      var volta = (line.departures.volta && line.departures.volta.all) || [];
+      function pushFest(hm, note) {
+        var m = parseHM(hm);
+        var abs = m;
+        if (m < 4 * 60 && nowM >= 18 * 60) abs = m + 1440;
+        if (abs + 0.01 < nowM && m >= 4 * 60) return;
+        if (m < 4 * 60 && nowM > m + 30 && nowM < 18 * 60) return;
+        var eta = abs - nowM;
+        if (eta < -0.5) return;
+        out.push({
+          label: hm,
+          etaMin: Math.max(0, Math.round(eta)),
+          delay: 0,
+          status: eta <= 3 ? 'arriving' : eta <= 12 ? 'soon' : 'scheduled',
+          note: note
+        });
+      }
+      ida.forEach(function (hm) { pushFest(hm, 'ida Aracaju→SC'); });
+      volta.forEach(function (hm) { pushFest(hm, 'volta SC→Aracaju'); });
+      out.sort(function (a, b) { return a.etaMin - b.etaMin; });
+      return out.slice(0, count);
+    }
+
+    var kind = dayKind(now);
+    var wins = (line.windows || []).filter(function (w) { return w.days === kind; });
+    if (!wins.length) wins = (line.windows || []).filter(function (w) { return w.days === 'util'; });
+
+    wins.forEach(function (w) {
+      var start = parseHM(w.start);
+      var end = parseHM(w.end);
+      var freq = Math.max(10, w.freqMin || 30);
+      var t = start;
+      if (nowM - delay > start) {
+        var steps = Math.ceil((nowM - delay - start) / freq);
+        t = start + steps * freq;
+      }
+      var guard = 0;
+      while (t <= end + freq && out.length < count + 4 && guard++ < 80) {
+        var predicted = t + delay; // horário real estimado
+        var eta = predicted - nowM;
+        if (eta >= -0.75) {
+          out.push({
+            label: fmtHM(Math.round(predicted)),
+            etaMin: Math.max(0, Math.round(eta)),
+            delay: delay,
+            status: eta <= 2 ? 'arriving' : eta <= 10 ? 'soon' : 'scheduled',
+            note: delay > 0 ? ('+' + delay + ' min') : delay < 0 ? (delay + ' min') : 'no horário'
+          });
+        }
+        t += freq;
+      }
+    });
+
+    out.sort(function (a, b) { return a.etaMin - b.etaMin; });
+    var seen = {};
+    out = out.filter(function (x) {
+      var k = x.label + x.note;
+      if (seen[k]) return false;
+      seen[k] = true;
+      return true;
+    });
+    return out.slice(0, count);
+  }
+
+  // compat
+  function nextDepartures(line, count) {
+    return livePredictions(line, count).map(function (p) {
+      return { label: p.label, when: null, note: p.note, etaMin: p.etaMin, status: p.status, delay: p.delay };
+    });
+  }
+
+  function nextLabelHtml(line) {
+    var next = livePredictions(line, 3);
+    if (!next.length) {
+      return '<span class="bus-next bus-next-off">sem previsão agora</span>';
+    }
+    return next.map(function (n, i) {
+      var cls = 'bus-next';
+      if (n.status === 'arriving') cls += ' bus-next-arriving';
+      else if (n.status === 'soon' || i === 0) cls += ' bus-next-soon';
+      if (n.status === 'off') cls += ' bus-next-off';
+      var eta = (n.etaMin != null && n.status !== 'off')
+        ? (n.etaMin <= 0 ? ' agora' : (' ' + n.etaMin + ' min'))
+        : '';
+      var extra = n.note ? ' <small>' + n.note + '</small>' : '';
+      return '<span class="' + cls + '"><b>' + n.label + '</b>' + eta + extra + '</span>';
+    }).join('');
+  }
+
+  function fillTransitPanel() {
+    _rtTick++;
+    var ul = document.getElementById('map-transit-lines');
+    if (!ul) return;
+    var clock = document.getElementById('map-transit-clock');
+    var live = document.getElementById('map-transit-live');
+    var now = new Date();
+    if (clock) {
+      clock.textContent = 'Agora ' + fmtHM(now.getHours() * 60 + now.getMinutes()) +
+        (isFestivalDay(now) ? ' · dia de festival' : '');
+    }
+    if (live) {
+      live.setAttribute('data-live', '1');
+      live.innerHTML = '<span class="live-dot" aria-hidden="true"></span> previsão ao vivo';
+    }
+    ul.innerHTML = BUS_LINES.map(function (l) {
+      var cls = l.special ? 'bus-line-badge special' : 'bus-line-badge';
+      var preds = livePredictions(l, 1);
+      var delayBadge = '';
+      if (preds[0] && preds[0].delay != null && !l.special && preds[0].status !== 'off') {
+        var d = preds[0].delay;
+        if (d > 0) delayBadge = '<span class="bus-delay bus-delay-late">atraso ~' + d + ' min</span>';
+        else if (d < 0) delayBadge = '<span class="bus-delay bus-delay-early">adiantado ~' + Math.abs(d) + ' min</span>';
+        else delayBadge = '<span class="bus-delay bus-delay-ok">no horário</span>';
+      }
+      return (
+        '<li class="bus-line-row">' +
+          '<div class="bus-line-top">' +
+            '<span class="' + cls + '">' + l.code + '</span> ' +
+            '<strong>' + l.name + '</strong> ' + delayBadge +
+          '</div>' +
+          '<div class="bus-line-note">' + l.note + (l.from ? ' · sai de ' + l.from : '') + '</div>' +
+          '<div class="bus-line-next" aria-label="Previsão em tempo real">' +
+            '<span class="bus-next-label">previsão</span> ' + nextLabelHtml(l) +
+          '</div>' +
+        '</li>'
+      );
+    }).join('');
+  }
+
+  function scheduleSnippetForStop(stop) {
+    var codes = stop.lines || [];
+    var bits = [];
+    codes.forEach(function (code) {
+      var line = null;
+      BUS_LINES.forEach(function (l) { if (l.code === code) line = l; });
+      if (!line) return;
+      var next = livePredictions(line, 2);
+      next.forEach(function (n) {
+        if (n.status === 'off') {
+          bits.push(code + ' ' + (n.note || '—'));
+        } else {
+          bits.push(code + ' ' + n.label + (n.etaMin != null ? (' (' + (n.etaMin <= 0 ? 'agora' : n.etaMin + ' min') + ')') : ''));
+        }
+      });
+    });
+    return bits.length ? bits.join(' · ') : 'sem previsão';
+  }
+
+  function refreshBusStopPopups() {
+    if (typeof poiMarkers === 'undefined') return;
+    poiMarkers.forEach(function (item) {
+      var p = item.data;
+      if (!p || p.layer !== 'transporte') return;
+      var ref = (typeof refPoint === 'function') ? refPoint() : { lat: -11.015, lng: -37.206 };
+      var dist = (typeof haversineMLocal === 'function')
+        ? haversineMLocal(ref, { lat: p.lat, lng: p.lng })
+        : 0;
+      var distStr = (typeof formatDist === 'function') ? formatDist(dist) : '';
+      var linesStr = (p.lines || []).join(' · ');
+      var sched = scheduleSnippetForStop(p);
+      item.marker.setPopupContent(
+        '<span class="popup-cat transporte">Ônibus</span><br>' +
+        '<strong>' + p.name + '</strong><br>' +
+        '<span style="opacity:0.88">' + (p.desc || '') + '</span><br>' +
+        '<span class="popup-meta">' + (distStr ? distStr + ' · ' : '') + 'Linhas: ' + linesStr +
+          '<br>' + (p.extra || '') + ' · SC/SE' +
+          (sched ? '<br>Previsão: ' + sched : '') + '</span>'
+      );
+    });
+  }
+
+  fillTransitPanel();
+  setTimeout(function () {
+    try { refreshBusStopPopups(); } catch (e) {}
+  }, 50);
+  setInterval(function () {
+    try {
+      fillTransitPanel();
+      refreshBusStopPopups();
+    } catch (e) {}
+  }, 15000);
+
+  // Gancho API real (quando existir endpoint):
+  // window.FASC_TRANSIT_RT_URL = 'https://.../delays.json'
+  // formato: { "delays": { "031": 3, "307": -1 } }
+  async function pullRealTimeDelays() {
+    try {
+      if (!window.CricriGtfsRt) return;
+      var st = await window.CricriGtfsRt.fetchFeed();
+      if (st.source === 'none') return;
+      Object.keys(st.delaysByRoute || {}).forEach(function (code) {
+        _rtState[code] = { delayMin: st.delaysByRoute[code], updatedAt: Date.now(), fromRt: true };
+      });
+      var live = document.getElementById('map-transit-live');
+      if (live) {
+        if (st.source === 'gtfs-rt') {
+          live.innerHTML = '<span class="live-dot" aria-hidden="true"></span> GTFS-RT ao vivo';
+        } else if (st.source === 'json-delays') {
+          live.innerHTML = '<span class="live-dot" aria-hidden="true"></span> API de atrasos';
+        }
+      }
+      fillTransitPanel();
+      refreshBusStopPopups();
+      console.info('[CRICRI GTFS-RT]', st.source, st.delaysByRoute);
+    } catch (e) {
+      console.warn('[CRICRI GTFS-RT]', e.message || e);
+    }
+  }
+  setInterval(pullRealTimeDelays, 30000);
+  setTimeout(pullRealTimeDelays, 2500);
+
+
+
+
+
+
+  const CENTER_SC = { lat: -11.015, lng: -37.206 }; // centro histórico São Cristóvão SE
+  let proxRadiusM = 0; // 0 = todos
+  let layerOn = { spots: true, hospedagem: true, gastronomia: true, transporte: true };
+
+  function haversineMLocal(a, b) {
+    const R = 6371000;
+    const toR = Math.PI / 180;
+    const dLat = (b.lat - a.lat) * toR;
+    const dLng = (b.lng - a.lng) * toR;
+    const la1 = a.lat * toR;
+    const la2 = b.lat * toR;
+    const h = Math.sin(dLat / 2) ** 2 +
+      Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function refPoint() {
+    // GPS do usuário se fresco (< 3 min); senão centro de SC
+    if (typeof lastPos !== 'undefined' && lastPos && lastPos.lat != null) {
+      const age = Date.now() - (lastPos.time || 0);
+      if (age < 180000) return { lat: lastPos.lat, lng: lastPos.lng, source: 'gps' };
+    }
+    return { lat: CENTER_SC.lat, lng: CENTER_SC.lng, source: 'centro' };
+  }
+
+  function formatDist(m) {
+    if (m < 1000) return Math.round(m) + ' m';
+    return (m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',') + ' km';
+  }
+
+  function updateProxRefLabel() {
+    const el = document.getElementById('map-prox-ref');
+    if (!el) return;
+    const r = refPoint();
+    el.textContent = r.source === 'gps' ? 'ref: sua posição' : 'ref: centro SC';
+  }
+
+  function applyProximityFilter() {
+    const ref = refPoint();
+    updateProxRefLabel();
+    const maxM = proxRadiusM; // 0 = sem limite
+
+    // Spots
+    Object.keys(spotLayers).forEach(function (id) {
+      const Lyr = spotLayers[id];
+      const dist = haversineMLocal(ref, { lat: Lyr.spot.lat, lng: Lyr.spot.lng });
+      const inRange = !maxM || dist <= maxM;
+      const show = layerOn.spots && inRange;
+      if (show) {
+        if (!layerGroups.spots.hasLayer(Lyr.marker)) layerGroups.spots.addLayer(Lyr.marker);
+        if (Lyr.fence && !layerGroups.spots.hasLayer(Lyr.fence)) layerGroups.spots.addLayer(Lyr.fence);
+        // atualiza popup com distância
+        Lyr.marker.setPopupContent(
+          '<span class="popup-cat spot">Spot</span><br>' +
+          '<strong>' + Lyr.spot.name + '</strong><br>' +
+          '<span style="opacity:0.85">' + Lyr.spot.status + '</span><br>' +
+          '<span class="popup-meta">' + formatDist(dist) + ' · zona ' + Lyr.spot.radius + ' m · SC/SE</span>'
+        );
+      } else {
+        if (layerGroups.spots.hasLayer(Lyr.marker)) layerGroups.spots.removeLayer(Lyr.marker);
+        if (Lyr.fence && layerGroups.spots.hasLayer(Lyr.fence)) layerGroups.spots.removeLayer(Lyr.fence);
+      }
+    });
+
+    // POIs hospedagem / gastronomia / ônibus
+    poiMarkers.forEach(function (item) {
+      const p = item.data;
+      const dist = haversineMLocal(ref, { lat: p.lat, lng: p.lng });
+      const inRange = !maxM || dist <= maxM;
+      const show = layerOn[p.layer] && inRange;
+      const catLabel = p.layer === 'hospedagem' ? 'Hospedagem'
+        : p.layer === 'gastronomia' ? 'Gastronomia'
+        : p.layer === 'transporte' ? 'Ônibus' : String(p.layer);
+      const linesStr = (p.lines && p.lines.length) ? ('Linhas: ' + p.lines.join(' · ') + ' · ') : '';
+      var sched = (p.layer === 'transporte' && typeof scheduleSnippetForStop === 'function')
+        ? scheduleSnippetForStop(p) : '';
+      if (show) {
+        if (!layerGroups[p.layer].hasLayer(item.marker)) layerGroups[p.layer].addLayer(item.marker);
+        item.marker.setPopupContent(
+          '<span class="popup-cat ' + p.layer + '">' + catLabel + '</span><br>' +
+          '<strong>' + p.name + '</strong><br>' +
+          '<span style="opacity:0.88">' + (p.desc || '') + '</span><br>' +
+          '<span class="popup-meta">' + formatDist(dist) + ' · ' + linesStr + (p.extra || '') + ' · SC/SE' +
+            (sched ? '<br>Próximas: ' + sched : '') + '</span>'
+        );
+      } else {
+        if (layerGroups[p.layer].hasLayer(item.marker)) layerGroups[p.layer].removeLayer(item.marker);
+      }
+    });
+    // traçado orientativo da rota SC → Campus
+    if (typeof busRouteLine !== 'undefined') {
+      if (layerOn.transporte && (!maxM || maxM >= 2000)) {
+        if (!layerGroups.transporte.hasLayer(busRouteLine)) layerGroups.transporte.addLayer(busRouteLine);
+      } else if (layerGroups.transporte.hasLayer(busRouteLine)) {
+        layerGroups.transporte.removeLayer(busRouteLine);
+      }
+    }
+
+    // garante grupos no mapa se camada ligada
+    ['spots', 'hospedagem', 'gastronomia', 'transporte'].forEach(function (name) {
+      if (layerOn[name]) {
+        if (!map.hasLayer(layerGroups[name])) map.addLayer(layerGroups[name]);
+      } else if (map.hasLayer(layerGroups[name])) {
+        map.removeLayer(layerGroups[name]);
+      }
+    });
+    if (typeof renderPlacesList === 'function') renderPlacesList();
+  }
+
+  function setLayerVisible(name, on) {
+    if (!(name in layerOn)) return;
+    layerOn[name] = !!on;
+    applyProximityFilter();
+  }
+
+  function fitAllVisible() {
+    const ref = refPoint();
+    const maxM = proxRadiusM;
+    const latlngs = [];
+    spots.forEach(function (s) {
+      if (!layerOn.spots) return;
+      const d = haversineMLocal(ref, s);
+      if (!maxM || d <= maxM) latlngs.push([s.lat, s.lng]);
+    });
+    poiMarkers.forEach(function (item) {
+      const p = item.data;
+      if (!layerOn[p.layer]) return;
+      const d = haversineMLocal(ref, p);
+      if (!maxM || d <= maxM) latlngs.push([p.lat, p.lng]);
+    });
+    if (latlngs.length) {
+      map.fitBounds(latlngs, { padding: [36, 36], maxZoom: 16 });
+    } else {
+      map.setView([ref.lat, ref.lng], maxM && maxM <= 500 ? 16 : 14);
+    }
+  }
+
+
+  let placesQuery = '';
+  let activePlaceId = null;
+  const markerById = {};
+
+  Object.keys(spotLayers).forEach(function (id) {
+    markerById[id] = spotLayers[id].marker;
+  });
+  poiMarkers.forEach(function (item) {
+    markerById[item.data.id] = item.marker;
+  });
+
+  function collectVisiblePlaces() {
+    const ref = refPoint();
+    const maxM = proxRadiusM;
+    const q = (placesQuery || '').trim().toLowerCase();
+    const items = [];
+
+    spots.forEach(function (s) {
+      if (!layerOn.spots) return;
+      const dist = haversineMLocal(ref, { lat: s.lat, lng: s.lng });
+      if (maxM && dist > maxM) return;
+      const hay = (s.name + ' ' + (s.status || '')).toLowerCase();
+      if (q && hay.indexOf(q) === -1) return;
+      items.push({
+        id: s.id,
+        layer: 'spots',
+        kind: 'spot',
+        name: s.name,
+        meta: s.status || 'spot do festival',
+        lat: s.lat,
+        lng: s.lng,
+        dist: dist
+      });
+    });
+
+    // POIs + paradas de ônibus (poiMarkers)
+    poiMarkers.forEach(function (item) {
+      const p = item.data;
+      if (!layerOn[p.layer]) return;
+      const dist = haversineMLocal(ref, { lat: p.lat, lng: p.lng });
+      if (maxM && dist > maxM) return;
+      const hay = (p.name + ' ' + (p.desc || '') + ' ' + (p.extra || '') + ' ' + ((p.lines || []).join(' '))).toLowerCase();
+      if (q && hay.indexOf(q) === -1) return;
+      items.push({
+        id: p.id,
+        layer: p.layer,
+        kind: p.layer === 'transporte' ? 'transporte' : p.layer,
+        name: p.name,
+        meta: p.desc || '',
+        lat: p.lat,
+        lng: p.lng,
+        dist: dist
+      });
+    });
+
+    items.sort(function (a, b) { return a.dist - b.dist; });
+    return items;
+  }
+
+  function renderPlacesList() {
+    const list = document.getElementById('map-places-list');
+    const countEl = document.getElementById('map-places-count');
+    if (!list) return;
+    const items = collectVisiblePlaces();
+    if (countEl) {
+      countEl.textContent = items.length + (items.length === 1 ? ' lugar' : ' lugares');
+    }
+    if (!items.length) {
+      list.innerHTML = '<li class="map-places-empty">Nenhum lugar com esses filtros.</li>';
+      return;
+    }
+    list.innerHTML = items.map(function (it) {
+      const active = it.id === activePlaceId ? ' is-active' : '';
+      return (
+        '<li class="map-place-item' + active + '" role="option" tabindex="0" data-place-id="' + it.id + '" data-lat="' + it.lat + '" data-lng="' + it.lng + '">' +
+          '<span class="map-place-dot ' + it.kind + '" aria-hidden="true"></span>' +
+          '<div>' +
+            '<div class="map-place-name">' + it.name + '</div>' +
+            '<div class="map-place-meta">' + it.meta + '</div>' +
+          '</div>' +
+          '<span class="map-place-dist">' + formatDist(it.dist) + '</span>' +
+        '</li>'
+      );
+    }).join('');
+  }
+
+  function focusPlace(id, lat, lng) {
+    activePlaceId = id;
+    renderPlacesList();
+    map.setView([lat, lng], Math.max(map.getZoom(), 16), { animate: true });
+    const mk = markerById[id];
+    if (mk) {
+      if (mk.openPopup) mk.openPopup();
+    }
+    // highlight list item into view
+    const row = document.querySelector('.map-place-item[data-place-id="' + id + '"]');
+    if (row && row.scrollIntoView) {
+      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+
+  // clique na lista
+  const placesListEl = document.getElementById('map-places-list');
+  if (placesListEl) {
+    placesListEl.addEventListener('click', function (e) {
+      const row = e.target.closest('.map-place-item');
+      if (!row) return;
+      focusPlace(
+        row.getAttribute('data-place-id'),
+        parseFloat(row.getAttribute('data-lat')),
+        parseFloat(row.getAttribute('data-lng'))
+      );
+    });
+    placesListEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest('.map-place-item');
+      if (!row) return;
+      e.preventDefault();
+      focusPlace(
+        row.getAttribute('data-place-id'),
+        parseFloat(row.getAttribute('data-lat')),
+        parseFloat(row.getAttribute('data-lng'))
+      );
+    });
+  }
+
+  // busca
+  const qInput = document.getElementById('map-places-q');
+  if (qInput) {
+    var qTimer = null;
+    qInput.addEventListener('input', function () {
+      clearTimeout(qTimer);
+      qTimer = setTimeout(function () {
+        placesQuery = qInput.value || '';
+        renderPlacesList();
+      }, 120);
+    });
+  }
+
+  // popup → destaca na lista
+  map.on('popupopen', function (e) {
+    if (!e.popup || !e.popup._source) return;
+    const src = e.popup._source;
+    let found = null;
+    Object.keys(markerById).forEach(function (id) {
+      if (markerById[id] === src) found = id;
+    });
+    if (found) {
+      activePlaceId = found;
+      renderPlacesList();
+    }
+  });
+
+
+  // chips de camada
+  document.querySelectorAll('[data-map-layer]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const layer = btn.getAttribute('data-map-layer');
+      if (layer === 'fit') {
+        fitAllVisible();
+        return;
+      }
+      const on = !btn.classList.contains('is-on');
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      setLayerVisible(layer, on);
+    });
+  });
+
+  // chips de proximidade
+  document.querySelectorAll('[data-prox]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const v = parseInt(btn.getAttribute('data-prox'), 10) || 0;
+      proxRadiusM = v;
+      document.querySelectorAll('[data-prox]').forEach(function (b) {
+        const active = b === btn;
+        b.classList.toggle('is-on', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      applyProximityFilter();
+      fitAllVisible();
+    });
+  });
+
+  // reaplicar quando GPS atualizar
+  window.addEventListener('projano:position', function () {
+    updateProxRefLabel();
+    applyProximityFilter(); // atualiza distâncias na lista sempre
+  });
+
+  // expõe API
+  window.projanoMapLayers = {
+    groups: layerGroups,
+    pois: POIS,
+    fitAll: fitAllVisible,
+    setVisible: setLayerVisible,
+    setProximity: function (m) {
+      proxRadiusM = m || 0;
+      applyProximityFilter();
+    },
+    getProximity: function () { return proxRadiusM; },
+    applyFilter: applyProximityFilter,
+    focusPlace: focusPlace,
+    renderList: renderPlacesList
+  };
+
+  // estado inicial
+  applyProximityFilter();
+  setTimeout(function () {
+    try { fitAllVisible(); } catch (e) {}
+  }, 300);
+
 
   // ---- Perfis GPS ----
   const GEO_PROFILES = {
@@ -371,6 +1311,12 @@ console.log('Mock carregado');
     lastPos = next;
     lastUiUpdate = now;
 
+    try {
+      window.dispatchEvent(new CustomEvent('projano:position', {
+        detail: { lat: next.lat, lng: next.lng, accuracy: next.accuracy, time: next.time }
+      }));
+    } catch (_) {}
+
     if (!userMarker) {
       userMarker = L.marker([next.lat, next.lng], {
         icon: buildUserIcon(heading),
@@ -482,7 +1428,7 @@ console.log('Mock carregado');
       startWatch('high');
       return;
     }
-    const seed = lastPos || { lat: -22.9005, lng: -43.2210, accuracy: 100 };
+    const seed = lastPos || { lat: -11.015, lng: -37.206, accuracy: 100 };
     startWatch(desiredProfile(seed.lat, seed.lng, seed.accuracy));
   }
 
@@ -913,6 +1859,8 @@ console.log('Mock carregado');
   map.addControl(new LocateControl());
 
   window.projanoMap = {
+    map: map,
+    flyTo: function (lat, lng, z) { map.setView([lat, lng], z || 16); },
     map,
     getPosition: () => lastPos,
     getHeading: () => heading,
@@ -929,6 +1877,23 @@ console.log('Mock carregado');
       }).filter(Boolean),
     getSpots: () => spots.map((s) => ({ ...s }))
   };
+
+  // Realtime: atualiza status do popup quando o banco muda
+  if (window.fascSpots && window.fascSpots.subscribeSpots) {
+    window.fascSpots.subscribeSpots((payload) => {
+      const row = payload.new;
+      if (!row) return;
+      const id = row.slug || row.id;
+      const layer = spotLayers[id];
+      if (!layer) return;
+      layer.spot.status = row.status || layer.spot.status;
+      layer.marker.setPopupContent(
+        `<strong>${layer.spot.name}</strong><br>` +
+        `<span style="opacity:0.8">${layer.spot.status}</span><br>` +
+        `<span style="opacity:0.55;font-size:0.75em">zona · ${layer.spot.radius} m</span>`
+      );
+    });
+  }
 
   if ('IntersectionObserver' in window) {
     const obs = new IntersectionObserver((entries) => {
@@ -960,3 +1925,256 @@ console.log('Mock carregado');
   setCompassChip(null, 'off');
   setTimeout(() => map.invalidateSize(), 200);
 })();
+
+
+// ============================================================
+// MARKETPLACE — dados mock + renderização dos cards
+// ============================================================
+(function initMarketplace() {
+  const grid = document.getElementById('market-grid');
+  if (!grid) return;
+
+  const icons = {
+    hospedagem: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>',
+    arte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="13.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M12 20.5A8.5 8.5 0 0 1 9 4.1c1 0 1.8.8 1.8 1.8 0 .5-.2 1-.5 1.3-.3.3-.5.7-.5 1.2 0 .9.7 1.6 1.6 1.6h2.4c1.9 0 3.5 1.6 3.5 3.5 0 3.9-2.7 7-5.3 7z"/></svg>',
+    gastronomia: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6.5a2.5 2.5 0 0 0 5 0V3"/><path d="M8.5 3v18"/><path d="M17 3c-1.4 0-2.5 1.8-2.5 5.5S15.6 13 17 13v8"/></svg>',
+    musica: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.5l11-2.2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+    mobilidade: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.5V12l2-5h12l2 5v4.5"/><path d="M4 16.5h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>',
+    servicos: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M9 6V4.8A1.8 1.8 0 0 1 10.8 3h2.4A1.8 1.8 0 0 1 15 4.8V6"/><circle cx="12" cy="12.5" r="3"/></svg>'
+  };
+
+  const pinIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 0 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11" r="1.8"/></svg>';
+
+  const labels = {
+    hospedagem: 'Hospedagem',
+    arte: 'Arte',
+    gastronomia: 'Gastronomia',
+    musica: 'Música',
+    mobilidade: 'Mobilidade',
+    servicos: 'Serviços'
+  };
+
+  const thumbColors = {
+    hospedagem: 'var(--terra)',
+    arte: 'var(--pink)',
+    gastronomia: 'var(--laranja)',
+    musica: 'var(--azul)',
+    mobilidade: 'var(--verde)',
+    servicos: 'var(--stone)'
+  };
+
+  const listings = [
+    {
+      category: 'hospedagem',
+      title: "Pousada Momentos",
+      lat: -10.9928, lng: -37.1685,
+      desc: 'Rodovia João Bebe Água · Rosa Elze. Quartos aconchegantes perto do centro histórico — reserva direta com a casa.',
+      price: 'consultar', unit: '',
+      location: 'Rosa Elze · São Cristóvão',
+      user: 'pousada.momentos'
+    },
+    {
+      category: 'hospedagem',
+      title: 'Pousada Só Love',
+      lat: -10.9955, lng: -37.1720,
+      desc: 'Rodovia João Bebe Água, 3515. Estadia tranquila a poucos minutos da praça São Francisco e do convento.',
+      price: 'consultar', unit: '',
+      location: 'São Cristóvão · SE',
+      user: 'pousada.solove'
+    },
+    {
+      category: 'hospedagem',
+      title: "Grand' Hostel São Cristóvão",
+      lat: -11.0102, lng: -37.1988,
+      desc: 'Opção econômica no município — beliches e quartos privados, boa base pra quem vem pro festival.',
+      price: 'a partir de R$ 179', unit: '/noite',
+      location: 'São Cristóvão',
+      user: 'grand.hostel'
+    },
+    {
+      category: 'hospedagem',
+      title: 'Casa no Haras',
+      lat: -11.0285, lng: -37.2150,
+      desc: 'Casa inteira rural com piscina, área de lazer e contato com animais. Ideal pra grupo no fim de semana do evento.',
+      price: 'consultar', unit: '',
+      location: 'Zona rural · São Cristóvão',
+      user: 'casa.haras'
+    },
+    {
+      category: 'arte',
+      title: 'Tela pintura acrílica — Cortejo',
+      desc: 'Obra original inspirada no cortejo de abertura, 40x60cm, moldura inclusa.',
+      price: 'R$ 250', unit: '',
+      location: 'Ateliê da praça',
+      user: 'edu_grafite'
+    },
+    {
+      category: 'arte',
+      title: 'Artesanato em barro',
+      desc: 'Peças utilitárias e decorativas feitas à mão, encomenda personalizada aceita.',
+      price: 'R$ 35', unit: 'a partir de',
+      location: 'Feira de artesanato',
+      user: 'dona.creuza'
+    },
+    {
+      category: 'gastronomia',
+      title: 'Restaurante Pôr do Sol',
+      lat: -11.0168, lng: -37.2025,
+      desc: 'Frutos do mar e caldinho às margens do rio — Ladeira Porto da Banca. Clássico do pôr do sol sergipano.',
+      price: '$$–$$$', unit: '',
+      location: 'Ladeira Porto da Banca',
+      user: 'por.do.sol'
+    },
+    {
+      category: 'gastronomia',
+      title: 'Casa da Queijada',
+      lat: -11.0146, lng: -37.2058,
+      desc: 'Queijada tradicional de São Cristóvão — doce patrimônio do município, receita de gerações.',
+      price: '$', unit: '',
+      location: 'Centro histórico',
+      user: 'casa.queijada'
+    },
+    {
+      category: 'gastronomia',
+      title: 'Filhas do Mangue',
+      lat: -11.0155, lng: -37.2048,
+      desc: 'Comida marisqueira perto da Praça São Francisco — caranguejo, sururu e pratos da região.',
+      price: '$$', unit: '',
+      location: 'Centro · São Cristóvão',
+      user: 'filhas.mangue'
+    },
+    {
+      category: 'gastronomia',
+      title: 'Ivora Pizzaria e Restaurante',
+      lat: -11.0125, lng: -37.2095,
+      desc: 'Pizza, massas e pratos brasileiros no município — opção versátil pra antes ou depois da roda.',
+      price: '$$', unit: '',
+      location: 'São Cristóvão · SE',
+      user: 'ivora'
+    },
+    {
+      category: 'musica',
+      title: 'Roda de samba pra evento privado',
+      desc: 'Grupo com 5 integrantes, repertório de samba e MPB, disponível pra afters.',
+      price: 'R$ 500', unit: '/apresentação',
+      location: 'A combinar',
+      user: 'roda.dos7'
+    },
+    {
+      category: 'musica',
+      title: 'DJ set eletrônico/afrobeat',
+      desc: 'Equipamento próprio, sets de 2h, ideal pra after menor.',
+      price: 'R$ 300', unit: '/set',
+      location: 'A combinar',
+      user: 'dj.marane'
+    },
+    {
+      category: 'mobilidade',
+      title: 'Carona Aracaju → São Cristóvão',
+      desc: 'Saindo do centro de Aracaju dia 19 de manhã, 3 vagas, volta no domingo.',
+      price: 'R$ 20', unit: '/pessoa',
+      location: 'Saída de Aracaju',
+      user: 'carlos.carona'
+    },
+    {
+      category: 'servicos',
+      title: 'Fotógrafo pro festival',
+      desc: 'Cobertura de eventos, afters e ensaios avulsos. Entrega em 48h.',
+      price: 'R$ 150', unit: '/hora',
+      location: 'Circula pela cidade toda',
+      user: 'lente.sc'
+    },
+    {
+      category: 'servicos',
+      title: 'Videomaker — reels e timelapse',
+      desc: 'Registro em vídeo do seu after ou evento, edição inclusa.',
+      price: 'R$ 200', unit: '/pacote',
+      location: 'Circula pela cidade toda',
+      user: 'vhs.sc'
+    }
+  ];
+
+  const frag = document.createDocumentFragment();
+
+  listings.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'market-card';
+    card.dataset.category = item.category;
+
+    card.innerHTML = `
+      <div class="market-thumb" style="background:${thumbColors[item.category]}">
+        ${icons[item.category]}
+      </div>
+      <div class="market-body">
+        <div class="market-head">
+          <span class="market-title">${item.title}</span>
+          <span class="market-price">${item.price}<small>${item.unit}</small></span>
+        </div>
+        <p class="market-desc">${item.desc}</p>
+        <div class="market-meta">
+          <span class="market-cat-badge ${item.category}">${labels[item.category]}</span>
+          <span class="market-location">${pinIcon}${item.location}</span>
+        </div>
+        <div class="post-actions">
+          <button class="scrap-btn" type="button" data-user="${item.user}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4 3 11.5l7.5 2.7L13.5 21 21 4z"/><path d="M10.5 14.2 21 4"/></svg>
+            enviar scrap
+          </button>
+          ${item.lat != null ? `<button class="scrap-btn map-goto-btn" type="button" data-map-goto data-lat="${item.lat}" data-lng="${item.lng}">ver no mapa</button>` : ''}
+        </div>
+      </div>
+    `;
+
+    frag.appendChild(card);
+  });
+
+  grid.appendChild(frag);
+
+  const empty = document.createElement('div');
+  empty.className = 'market-empty';
+  empty.id = 'market-empty';
+  empty.hidden = true;
+  empty.textContent = 'Nenhum anúncio nessa categoria por enquanto.';
+  grid.appendChild(empty);
+})();
+
+
+// CRICRI · ir do card do marketplace ao pin no mapa
+document.addEventListener('click', function (e) {
+  var btn = e.target.closest('[data-map-goto]');
+  if (!btn) return;
+  e.preventDefault();
+  var lat = parseFloat(btn.getAttribute('data-lat'));
+  var lng = parseFloat(btn.getAttribute('data-lng'));
+  if (!isFinite(lat) || !isFinite(lng)) return;
+  var sec = document.getElementById('mapa');
+  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(function () {
+    if (window.projanoMap && typeof window.projanoMap.flyTo === 'function') {
+      window.projanoMap.flyTo(lat, lng, 16);
+      return;
+    }
+    // fallback: leaflet map on #map
+    var el = document.getElementById('map');
+    if (el && window.L) {
+      // maps are stored weakly; use projanoMapLayers fit
+      if (window.projanoMapLayers && window.projanoMapLayers.groups) {
+        try {
+          var mapRef = null;
+          Object.keys(window.projanoMapLayers.groups).some(function (k) {
+            var g = window.projanoMapLayers.groups[k];
+            if (g && g._map) { mapRef = g._map; return true; }
+            return false;
+          });
+          if (mapRef) {
+            mapRef.setView([lat, lng], 16);
+            // open nearest poi popup
+            if (window.projanoMapLayers.pois) {
+              window.projanoMapLayers.pois.forEach(function () {});
+            }
+          }
+        } catch (err) {}
+      }
+    }
+  }, 400);
+});

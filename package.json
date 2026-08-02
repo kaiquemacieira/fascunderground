@@ -1,0 +1,11 @@
+{
+  "name": "fasc-plus",
+  "private": true,
+  "version": "0.1.0",
+  "description": "FASC+ — Festival de Artes de São Cristóvão",
+  "scripts": {
+    "a11y": "python3 scripts/a11y-check.py index.html",
+    "a11y:json": "python3 scripts/a11y-check.py index.html --json",
+    "serve": "npx --yes serve -l 4173 ."
+  }
+}

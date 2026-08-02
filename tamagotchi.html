@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tamagotchi da Roda · CRICRI São Cristóvão SE</title>
+  <meta name="theme-color" content="#100e0c">
+  <meta name="description" content="Cuide da criatura do São Cristóvão · Sergipe · a roda na sua mão.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #0c0a08; --ink: #17120e; --paper: #ebe3cf; --cream: #f6efdc;
+      --rosa: #e33d6b; --rosa-deep: #b01f4c; --rosa-soft: #f28aa8;
+      --ochre: #d49a2c; --ochre-deep: #a67418; --terra: #c4472a;
+      --azul: #1b4f5e; --stone: #8c8376;
+      --bezel: #e33d6b; --accent: #f28aa8; --shell-bg: #1a1210;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100dvh; font-family: 'Oswald', system-ui, sans-serif;
+      background: var(--void); color: var(--paper);
+      padding: 0.85rem 0.85rem 5.25rem;
+      background-image:
+        radial-gradient(ellipse 90% 55% at 50% -15%, rgba(212, 47, 98, 0.2), transparent),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(196, 138, 42, 0.08), transparent);
+    }
+    a { color: var(--rosa); text-decoration: none; }
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .logo { font-family: 'Saira Stencil One', Oswald, sans-serif; font-size: 1.25rem; color: var(--paper); }
+    .logo span { color: var(--rosa); }
+    .back { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone); }
+    .back:hover { color: var(--rosa); }
+
+    #start-gate { max-width: 22rem; margin: 2rem auto 0; text-align: center; }
+    #start-gate h1 {
+      font-family: 'Saira Stencil One', Oswald, sans-serif;
+      font-size: clamp(1.6rem, 5vw, 2.1rem); font-weight: 400; line-height: 1.1;
+      margin: 0 0 0.5rem; letter-spacing: 0.02em;
+    }
+    #start-gate h1 em { font-style: normal; color: var(--rosa); }
+    .start-sub { color: var(--stone); font-size: 0.88rem; line-height: 1.4; margin: 0 0 1.5rem; font-weight: 500; }
+    .start-egg {
+      font-size: 4.5rem; line-height: 1; margin-bottom: 1.25rem;
+      filter: drop-shadow(0 6px 0 rgba(0,0,0,0.35));
+      animation: egg-bob 2.4s ease-in-out infinite;
+    }
+    @keyframes egg-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .btn-start {
+      appearance: none; border: none; background: var(--rosa); color: #fff;
+      font-family: inherit; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.14em;
+      text-transform: uppercase; padding: 0.9rem 2rem; border-radius: 999px; cursor: pointer;
+      box-shadow: 4px 5px 0 rgba(0,0,0,0.4); transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 4px 7px 0 rgba(0,0,0,0.4); }
+    .btn-start:active { transform: translateY(1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.4); }
+    .start-place { margin-top: 1.25rem; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ochre); font-weight: 700; }
+
+    .tabs {
+      display: flex; gap: 0.35rem; max-width: 22rem; margin: 0 auto 0.85rem; padding: 0.25rem;
+      background: rgba(0,0,0,0.35); border-radius: 999px; border: 1px solid rgba(230,220,196,0.1);
+    }
+    .tabs button {
+      flex: 1; appearance: none; border: none; background: transparent; color: var(--stone);
+      font-family: inherit; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0.45rem; border-radius: 999px; cursor: pointer;
+    }
+    .tabs button[aria-selected="true"] { background: var(--rosa); color: #fff; }
+
+    .device {
+      max-width: 20rem; margin: 0 auto; background: var(--shell-bg);
+      border: 3px solid var(--bezel); border-radius: 26px 26px 32px 32px; padding: 0.85rem;
+      box-shadow: 5px 7px 0 rgba(0,0,0,0.45);
+    }
+    .screen {
+      background: #0a0908; border: 2px solid rgba(230,220,196,0.12); border-radius: 12px;
+      min-height: 11.5rem; padding: 0.75rem; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0.2rem; position: relative; overflow: hidden;
+    }
+    .screen::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 3px);
+      pointer-events: none;
+    }
+    .face { font-size: 3.6rem; line-height: 1; z-index: 1; filter: drop-shadow(0 3px 0 rgba(0,0,0,0.35)); }
+    .face.is-pop { animation: face-pop 0.4s cubic-bezier(0.34, 1.4, 0.64, 1); }
+    @keyframes face-pop { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
+    .name { z-index: 1; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+    .meta { z-index: 1; display: flex; gap: 0.5rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); }
+    .status { z-index: 1; font-size: 0.72rem; text-align: center; color: var(--paper); max-width: 16rem; line-height: 1.3; margin-top: 0.15rem; }
+    .life-chip {
+      z-index: 1; margin-top: 0.35rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
+      padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid rgba(212,47,98,0.4);
+      background: rgba(212,47,98,0.12); color: var(--paper);
+    }
+    .life-chip.is-late { border-color: rgba(196,138,42,0.6); background: rgba(196,138,42,0.15); color: var(--ochre); }
+    .life-chip.is-dying { border-color: rgba(212,47,98,0.8); color: #f06a95; }
+    .life-chip.is-ended { opacity: 0.6; }
+
+    .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem; margin-top: 0.7rem; }
+    .pad button {
+      appearance: none; border: 2px solid var(--bezel); background: rgba(0,0,0,0.3); color: var(--paper);
+      font-family: inherit; font-weight: 700; font-size: 0.65rem; letter-spacing: 0.05em;
+      text-transform: uppercase; padding: 0.5rem 0.2rem; border-radius: 999px; cursor: pointer;
+    }
+    .pad button:hover:not(:disabled) { background: var(--bezel); color: #fff; }
+    .pad button:disabled { opacity: 0.35; }
+
+    .stats { max-width: 20rem; margin: 0.85rem auto 0; display: grid; gap: 0.35rem; }
+    .stat {
+      display: grid; grid-template-columns: 3.8rem 1fr; gap: 0.35rem; align-items: center;
+      font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--stone);
+    }
+    .track { height: 7px; background: rgba(0,0,0,0.45); border-radius: 99px; overflow: hidden; border: 1px solid rgba(230,220,196,0.08); }
+    .fill { height: 100%; width: 50%; border-radius: 99px; transition: width 0.45s cubic-bezier(0.22,1,0.36,1); background: var(--rosa); }
+    .fill.is-high { background: linear-gradient(90deg, #35662c, #8aba4a); }
+    .fill.is-ok { background: linear-gradient(90deg, var(--ochre), #e0b04a); }
+    .fill.is-low { background: linear-gradient(90deg, #b03a22, var(--rosa)); }
+    #bar-evolve { background: linear-gradient(90deg, #2a5f8f, var(--ochre), var(--rosa)); }
+
+    .row-tools {
+      max-width: 20rem; margin: 0.75rem auto 0; display: flex; flex-wrap: wrap;
+      gap: 0.35rem; justify-content: center; align-items: center;
+    }
+    .row-tools button, .shell-dot {
+      appearance: none; border: 1px solid rgba(230,220,196,0.15); background: rgba(0,0,0,0.3);
+      color: var(--stone); font-family: inherit; font-weight: 700; font-size: 0.62rem;
+      letter-spacing: 0.06em; text-transform: uppercase; padding: 0.35rem 0.55rem;
+      border-radius: 999px; cursor: pointer;
+    }
+    .row-tools button:hover { color: var(--paper); border-color: var(--rosa); }
+    .shell-dot { width: 1.35rem; height: 1.35rem; padding: 0; border-radius: 50%; }
+    .shell-dot[data-shell="rosa"] { background: #e33d6b; }
+    .shell-dot[data-shell="ocre"] { background: #d49a2c; }
+    .shell-dot[data-shell="azul"] { background: #2a5f8f; }
+    .shell-dot[data-shell="stencil"] { background: #e6dcc4; }
+    .shell-dot[aria-pressed="true"] { outline: 2px solid #fff; outline-offset: 2px; }
+
+    .collection-head {
+      max-width: 22rem; margin: 0 auto 0.65rem; display: flex; justify-content: space-between;
+      align-items: baseline; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--stone);
+    }
+    .collection-head strong { color: var(--paper); }
+    .collection-grid {
+      max-width: 22rem; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;
+    }
+    .photo-card {
+      border-radius: 10px; border: 1px solid rgba(230,220,196,0.12); background: rgba(0,0,0,0.35);
+      overflow: hidden; min-height: 7.5rem; display: flex; flex-direction: column;
+    }
+    .photo-card.is-locked { opacity: 0.45; }
+    .photo-card.rarity-raro { border-color: rgba(196,138,42,0.45); }
+    .photo-card.rarity-super { border-color: rgba(212,47,98,0.55); box-shadow: 0 0 16px rgba(212,47,98,0.15); }
+    .pc-art {
+      flex: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem;
+      background: linear-gradient(160deg, rgba(212,47,98,0.12), transparent 60%); min-height: 3.5rem;
+    }
+    .photo-card.rarity-raro .pc-art { background: linear-gradient(160deg, rgba(196,138,42,0.15), transparent 60%); }
+    .photo-card.rarity-super .pc-art { background: linear-gradient(160deg, rgba(212,47,98,0.22), rgba(196,138,42,0.1)); }
+    .pc-meta { padding: 0.4rem 0.45rem 0.5rem; display: grid; gap: 0.1rem; }
+    .pc-rarity { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone); font-weight: 700; }
+    .rarity-raro .pc-rarity { color: var(--ochre); }
+    .rarity-super .pc-rarity { color: var(--rosa); }
+    .pc-name { font-size: 0.78rem; letter-spacing: 0.03em; color: var(--paper); }
+    .pc-how { font-size: 0.62rem; color: var(--stone); font-weight: 500; }
+
+    .card-toast {
+      position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%); z-index: 80;
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.85rem; border-radius: 12px;
+      background: rgba(16,14,12,0.95); border: 1px solid var(--rosa);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45); animation: toast-in 0.35s ease;
+    }
+    .card-toast[hidden] { display: none !important; }
+    .card-toast.rarity-raro { border-color: var(--ochre); }
+    .card-toast.rarity-super { border-color: var(--rosa); box-shadow: 0 0 24px rgba(212,47,98,0.35); }
+    .ct-emoji { font-size: 1.5rem; }
+    .card-toast strong { display: block; font-size: 0.85rem; }
+    .card-toast small { color: var(--stone); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .bottom-nav {
+      position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around;
+      padding: 0.4rem 0.4rem calc(0.4rem + env(safe-area-inset-bottom));
+      background: rgba(12,10,9,0.94); border-top: 1px solid rgba(230,220,196,0.1); z-index: 50;
+    }
+    .bottom-nav a {
+      display: flex; flex-direction: column; align-items: center; gap: 0.1rem; color: var(--stone);
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .bottom-nav a svg { width: 21px; height: 21px; stroke: currentColor; fill: none; }
+    .bottom-nav a.active { color: var(--rosa); }
+
+    
+    html[data-theme="light"], html[data-a11y-theme="light"] {
+      --void: #f3ecdc; --paper: #17120e; --stone: #5c564e; --rosa: #e33d6b; --ochre: #b8821a;
+      --bezel: #e33d6b; --accent: #c42a58; --shell-bg: #fffef8;
+    }
+    html[data-theme="light"] body {
+      background: var(--void);
+      color: var(--paper);
+      background-image:
+        radial-gradient(ellipse 90% 55% at 50% -15%, rgba(227, 61, 107, 0.12), transparent),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212, 154, 44, 0.08), transparent);
+    }
+    html[data-theme="light"] .device { box-shadow: 5px 7px 0 rgba(23,18,14,0.15); }
+    html[data-theme="light"] .screen { background: #f6efdc; border-color: rgba(23,18,14,0.15); }
+    html[data-theme="light"] .tabs { background: rgba(255,255,255,0.6); border-color: rgba(23,18,14,0.1); }
+    html[data-theme="light"] .bottom-nav { background: rgba(246,239,220,0.96); border-top-color: rgba(23,18,14,0.1); }
+    html[data-theme="light"] .bottom-nav a { color: #5c564e; }
+    html[data-theme="light"] .bottom-nav a.active { color: var(--rosa); }
+    html[data-theme="light"] .photo-card { background: rgba(255,254,248,0.9); border-color: rgba(23,18,14,0.1); }
+
+
+    /* —— Tamagotchi clássico (estética ovo / LCD) —— */
+    .device {
+      --bezel: #6b3fa0;
+      --accent: #c9a0ff;
+      --shell-bg: #4a2a78;
+      position: relative;
+      max-width: 20rem;
+      margin: 0 auto 1rem;
+      padding: 1.35rem 1.15rem 1.1rem;
+      border-radius: 52% 52% 46% 46% / 48% 48% 52% 52%;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 18%, rgba(255,255,255,0.18), transparent 55%),
+        linear-gradient(165deg, var(--accent) 0%, var(--bezel) 42%, var(--shell-bg) 100%);
+      border: 3px solid rgba(255,255,255,0.22);
+      box-shadow:
+        0 12px 0 rgba(0,0,0,0.35),
+        inset 0 2px 0 rgba(255,255,255,0.25),
+        inset 0 -8px 20px rgba(0,0,0,0.25);
+    }
+    .device::before {
+      content: 'TAMAGOTCHI';
+      display: block;
+      text-align: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.62rem;
+      letter-spacing: 0.28em;
+      color: rgba(255,255,255,0.92);
+      text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+      margin-bottom: 0.55rem;
+    }
+    .screen {
+      background: #c5e8a8;
+      border: 4px solid #1a1a18;
+      border-radius: 12px;
+      min-height: 11.5rem;
+      padding: 0.65rem 0.55rem 0.55rem;
+      box-shadow:
+        inset 0 0 0 2px #8fbc6a,
+        inset 0 4px 12px rgba(0,0,0,0.12);
+      color: #1a2e12;
+      position: relative;
+    }
+    .screen-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #2a4018; margin-bottom: 0.35rem;
+    }
+    .sprite-wrap {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 5.5rem; gap: 0.2rem;
+    }
+    .sprite {
+      font-size: 3.4rem; line-height: 1;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,0.15));
+      image-rendering: pixelated;
+    }
+    .sprite-name {
+      font-family: 'Oswald', sans-serif; font-weight: 700;
+      font-size: 0.95rem; letter-spacing: 0.04em; color: #1a2e12;
+    }
+    .sprite-meta { font-size: 0.65rem; color: #3a5520; font-weight: 600; }
+    .lcd-icons {
+      display: flex; justify-content: space-around; margin: 0.35rem 0 0.2rem;
+      font-size: 0.95rem; opacity: 0.85;
+    }
+    .btns-classic {
+      display: flex; justify-content: center; gap: 1.4rem; margin-top: 0.85rem;
+    }
+    .btns-classic button {
+      width: 2.4rem; height: 2.4rem; border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.25);
+      background: radial-gradient(circle at 35% 30%, #fff 0%, #e8e0f0 45%, #b0a0c8 100%);
+      box-shadow: 0 3px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.7);
+      cursor: pointer; font-size: 0; color: transparent;
+    }
+    .btns-classic button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
+    .shell-picker {
+      display: flex; justify-content: center; gap: 0.55rem; margin: 0.85rem 0 0.25rem;
+    }
+    .shell-picker button {
+      width: 1.55rem; height: 1.55rem; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5); cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    }
+    .shell-picker button[aria-pressed="true"] {
+      outline: 2px solid #fff; outline-offset: 2px;
+    }
+    .shell-picker [data-shell="classic"] { background: linear-gradient(135deg, #c9a0ff, #6b3fa0); }
+    .shell-picker [data-shell="rosa"] { background: linear-gradient(135deg, #f28aa8, #e33d6b); }
+    .shell-picker [data-shell="azul"] { background: linear-gradient(135deg, #5ec4d6, #1b4f5e); }
+    .shell-picker [data-shell="amarelo"] { background: linear-gradient(135deg, #ffe066, #d49a2c); }
+    .tama-page-bg {
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(107,63,160,0.35), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(227,61,107,0.12), transparent) !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    html[data-a11y-motion="reduce"] *,
+    html[data-a11y-motion="reduce"] *::before,
+    html[data-a11y-motion="reduce"] *::after {
+      animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  </style>
+
+<style id="tama-alert-style">
+/* ---- alertas / confirmação estilo atenção CRICRI ---- */
+.tama-confirm-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(8, 6, 5, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.25rem;
+  animation: tama-fade-in 0.2s ease;
+}
+@keyframes tama-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.tama-confirm-card {
+  width: min(360px, 100%);
+  background: linear-gradient(165deg, #2a221c 0%, #1a1512 100%);
+  border: 2px solid rgba(227, 61, 107, 0.55);
+  border-radius: 16px;
+  padding: 1.35rem 1.25rem 1.15rem;
+  box-shadow:
+    0 0 0 1px rgba(227,61,107,0.15),
+    0 18px 40px rgba(0,0,0,0.55),
+    0 0 32px rgba(227,61,107,0.12);
+  text-align: center;
+}
+.tama-confirm-icon {
+  width: 48px; height: 48px; margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 1.35rem;
+  background: rgba(227,61,107,0.18);
+  border: 2px solid rgba(227,61,107,0.5);
+  color: #f5a3b8;
+  box-shadow: 0 0 20px rgba(227,61,107,0.25);
+}
+.tama-confirm-card h2 {
+  margin: 0 0 0.45rem;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f2e8d2;
+}
+.tama-confirm-body {
+  margin: 0 0 1.15rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #c4b9a6;
+}
+.tama-confirm-actions {
+  display: flex; gap: 0.55rem; justify-content: stretch;
+}
+.tama-confirm-actions button {
+  flex: 1;
+  appearance: none;
+  border-radius: 10px;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.7rem 0.6rem;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.15s;
+}
+.tama-btn-cancel {
+  background: transparent;
+  border: 1.5px solid rgba(230,220,196,0.28);
+  color: #ebe3cf;
+}
+.tama-btn-cancel:hover { background: rgba(255,255,255,0.06); }
+.tama-btn-danger {
+  background: linear-gradient(135deg, #e33d6b, #c4472a);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(227,61,107,0.35);
+}
+.tama-btn-danger:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.tama-btn-danger:focus-visible,
+.tama-btn-cancel:focus-visible {
+  outline: 2px solid #e33d6b;
+  outline-offset: 2px;
+}
+/* botão renascer com cara de atenção */
+button[data-action="reset"] {
+  border-color: rgba(227,61,107,0.45) !important;
+  color: #f5a3b8 !important;
+  background: rgba(227,61,107,0.12) !important;
+}
+button[data-action="reset"]:hover {
+  background: rgba(227,61,107,0.22) !important;
+  box-shadow: 0 0 12px rgba(227,61,107,0.2);
+}
+</style>
+
+</head>
+<body class="tama-page-bg">
+  <div class="top">
+    <a class="logo" href="index.html">CRI<span>CRI</span></a>
+    <span style="display:flex;align-items:center;gap:0.4rem">
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar tema" title="Tema" style="width:2.2rem;height:2.2rem;border-radius:999px;border:1.5px solid rgba(235,227,207,0.22);background:rgba(0,0,0,0.28);color:inherit;display:inline-flex;align-items:center;justify-content:center;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
+      </button>
+      <a class="back" href="index.html">← Home</a>
+    </span>
+  </div>
+
+  <div id="start-gate">
+    <div class="start-egg" aria-hidden="true">🥚</div>
+    <h1>Tamagotchi<br><em>da Roda</em></h1>
+    <p class="start-sub">
+      São Cristóvão · Sergipe · a roda na sua mão.<br>
+      Cuide da criatura até o fim do FASC 2026 e colecione photocards.
+    </p>
+    <button type="button" class="btn-start" data-action="start">Start</button>
+    <p class="start-place">São Cristóvão · SE · 19–22/11/2026</p>
+  </div>
+
+  <div id="tama-app" hidden>
+    <div class="tabs" role="tablist">
+      <button type="button" data-tab="play" role="tab" aria-selected="true">Jogo</button>
+      <button type="button" data-tab="collection" role="tab" aria-selected="false">Coleção</button>
+    </div>
+
+    <div data-panel="play">
+      <div class="device" id="tama-device">
+        <div class="screen" aria-live="polite">
+          <div class="face" id="tama-face">🥚</div>
+          <div class="name" id="tama-name">Roda</div>
+          <div class="meta">
+            <span id="tama-stage">Ovo</span>
+            <span>·</span>
+            <span id="tama-age">0 min</span>
+          </div>
+          <div class="status" id="tama-status">…</div>
+          <div class="life-chip" id="tama-life">—</div>
+        </div>
+        <div class="pad">
+          <button type="button" data-action="feed">Comer</button>
+          <button type="button" data-action="play">Brincar</button>
+          <button type="button" data-action="clean">Limpar</button>
+          <button type="button" data-action="sleep">Dormir</button>
+          <button type="button" data-action="medicine">Remédio</button>
+          <button type="button" data-action="after">After</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span>Fome</span><div class="track"><div class="fill" id="bar-hunger"></div></div></div>
+        <div class="stat"><span>Felicidade</span><div class="track"><div class="fill" id="bar-happy"></div></div></div>
+        <div class="stat"><span>Energia</span><div class="track"><div class="fill" id="bar-energy"></div></div></div>
+        <div class="stat"><span>Higiene</span><div class="track"><div class="fill" id="bar-hygiene"></div></div></div>
+        <div class="stat"><span id="tama-evolve-label">Evolução</span><div class="track"><div class="fill" id="bar-evolve"></div></div></div>
+      </div>
+
+      <div class="row-tools">
+        <button type="button" data-action="mapa">Mapa</button>
+        <button type="button" data-action="scrap">Scrap</button>
+        <button type="button" data-action="rename">Nome</button>
+        <button type="button" data-action="reset">Renascer</button>
+        <div class="shell-picker" role="group" aria-label="Cor do Tamagotchi">
+          <button type="button" data-shell="classic" aria-label="Roxo clássico" aria-pressed="true"></button>
+          <button type="button" data-shell="rosa" aria-label="Rosa" aria-pressed="false"></button>
+          <button type="button" data-shell="azul" aria-label="Azul" aria-pressed="false"></button>
+          <button type="button" data-shell="amarelo" aria-label="Amarelo" aria-pressed="false"></button>
+        </div>
+      </div>
+    </div>
+
+    <div data-panel="collection" hidden>
+      <div class="collection-head">
+        <span>Photocards CRICRI</span>
+        <strong id="collection-stats">0/14</strong>
+      </div>
+      <div class="collection-grid" id="collection-grid"></div>
+    </div>
+  </div>
+
+  <div class="card-toast" id="card-toast" hidden></div>
+
+  <div id="site-footer-slot"></div>
+  <nav class="bottom-nav" aria-label="Navegação">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+      Home
+    </a>
+    <a href="tamagotchi.html" class="active" aria-current="page">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/><path d="M9.5 14.5c1 1 4 1 5 0"/></svg>
+      Bicho
+    </a>
+    <a href="index.html#mapa">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+      Mapa
+    </a>
+    <a href="profile.html">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
+      Perfil
+    </a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/a11y-motion.js"></script>
+  <script src="js/notif-bell.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/tamagotchi.js"></script>
+  <script src="js/a11y-core.js" defer></script>
+  <script src="js/keyboard-nav.js" defer></script>
+  <script src="js/touch-gestures.js" defer></script>
+  <script src="js/sync-monitor.js" defer></script>
+  <script src="js/periodic-sync.js" defer></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

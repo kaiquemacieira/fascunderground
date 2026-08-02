@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Programação · CRICRI</title>
+  <meta name="description" content="Programação do festival em São Cristóvão — site independente da roda. Referência: mapa oficial da prefeitura." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body.prog-page { background: var(--void, #0c0a09); color: var(--cream, #ebe3cf); min-height: 100vh; padding-bottom: 88px; }
+    .prog-wrap { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.1rem 2rem; }
+    .prog-hero { margin-bottom: 1.25rem; }
+    .prog-hero h1 {
+      font-family: Oswald, system-ui, sans-serif;
+      font-weight: 700; font-size: clamp(1.5rem, 5vw, 2rem);
+      letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 0.4rem;
+    }
+    .prog-hero p { margin: 0; color: #b8ae9e; font-size: 0.95rem; line-height: 1.45; }
+    .prog-ref {
+      margin: 0.85rem 0 0;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      border: 1.5px solid rgba(230,220,196,0.15);
+      background: rgba(42,37,32,0.45);
+      font-size: 0.82rem; color: #c4b9a6;
+    }
+    .prog-ref a { color: #e33d6b; font-weight: 600; }
+    .prog-tabs {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.1rem 0 0.9rem;
+    }
+    .prog-tab {
+      appearance: none; border-radius: 999px; cursor: pointer;
+      border: 1.5px solid rgba(230,220,196,0.22);
+      background: rgba(42,37,32,0.5); color: #ebe3cf;
+      font-family: Oswald, system-ui, sans-serif; font-weight: 600;
+      font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.4rem 0.75rem;
+    }
+    .prog-tab.is-on {
+      border-color: #e33d6b; background: rgba(227,61,107,0.18); color: #fff;
+    }
+    .prog-tab[data-cat="Música"].is-on { border-color: #d49a2c; background: rgba(212,154,44,0.2); }
+    .prog-status {
+      font-family: Space Mono, ui-monospace, monospace;
+      font-size: 0.72rem; color: #9a9184; margin-bottom: 0.75rem;
+    }
+    .prog-grid {
+      display: grid; gap: 0.85rem;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+    .prog-card {
+      border-radius: 12px;
+      border: 1.5px solid rgba(230,220,196,0.12);
+      background: rgba(28,21,17,0.55);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .prog-poster {
+      aspect-ratio: 3/4;
+      background:
+        linear-gradient(145deg, rgba(227,61,107,0.12), transparent 50%),
+        repeating-linear-gradient(-12deg, transparent, transparent 8px, rgba(230,220,196,0.04) 8px, rgba(230,220,196,0.04) 9px),
+        #1a1512;
+      display: grid; place-items: center;
+      position: relative;
+    }
+    .prog-poster-empty {
+      text-align: center; padding: 1rem;
+      color: #8c8376; font-size: 0.8rem;
+    }
+    .prog-poster-empty strong {
+      display: block; font-family: Oswald, system-ui, sans-serif;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: #c4b9a6; margin-bottom: 0.35rem; font-size: 0.85rem;
+    }
+    .prog-card-body { padding: 0.75rem 0.85rem 0.9rem; }
+    .prog-cat {
+      font-size: 0.65rem; font-family: Oswald, system-ui, sans-serif;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #e33d6b;
+      margin-bottom: 0.25rem;
+    }
+    .prog-cat.musica { color: #d49a2c; }
+    .prog-title { font-weight: 700; font-size: 0.98rem; margin: 0 0 0.25rem; color: #ebe3cf; }
+    .prog-meta { font-size: 0.78rem; color: #a89f92; line-height: 1.4; margin: 0; }
+    .prog-empty-block {
+      grid-column: 1 / -1;
+      text-align: center; padding: 2rem 1rem;
+      border: 1.5px dashed rgba(230,220,196,0.2);
+      border-radius: 12px; color: #9a9184;
+    }
+    .music-blank-grid {
+      display: grid; gap: 0.85rem;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      margin-top: 0.5rem;
+    }
+    .music-blank-poster {
+      aspect-ratio: 3/4; border-radius: 10px;
+      border: 1.5px dashed rgba(212,154,44,0.35);
+      background: rgba(42,37,32,0.4);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.35rem; color: #9a9184; font-size: 0.75rem; text-align: center; padding: 0.75rem;
+    }
+    .music-blank-poster span {
+      font-family: Oswald, system-ui, sans-serif;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #d49a2c; font-size: 0.7rem;
+    }
+  </style>
+</head>
+<body class="prog-page">
+  <div class="prog-wrap">
+    <header class="prog-hero">
+      <h1>Programação</h1>
+      <p>Agenda da roda em São Cristóvão — montada pra quem tá no chão do festival. Não somos o site oficial.</p>
+      <p class="prog-ref">
+        Fonte de referência (prefeitura):
+        <a href="https://mapafasc.saocristovao.se.gov.br/" target="_blank" rel="noopener noreferrer">mapafasc.saocristovao.se.gov.br</a>
+      </p>
+    </header>
+
+    <div class="prog-tabs" role="tablist" aria-label="Categorias">
+      <button type="button" class="prog-tab is-on" data-cat="all">Tudo</button>
+      <button type="button" class="prog-tab" data-cat="Música">Música</button>
+      <button type="button" class="prog-tab" data-cat="Teatro">Teatro</button>
+      <button type="button" class="prog-tab" data-cat="Cinema">Cinema</button>
+      <button type="button" class="prog-tab" data-cat="Literatura">Literatura</button>
+      <button type="button" class="prog-tab" data-cat="Exposição">Exposição</button>
+      <button type="button" class="prog-tab" data-cat="Cultura Popular">Cultura Popular</button>
+      <button type="button" class="prog-tab" data-cat="Dança">Dança</button>
+      <button type="button" class="prog-tab" data-cat="Outros">Outros</button>
+    </div>
+    <p class="prog-status" id="prog-status">carregando…</p>
+    <div class="prog-grid" id="prog-grid" aria-live="polite"></div>
+  </div>
+
+  <div id="site-footer-slot"></div>
+
+  <nav class="bottom-nav" aria-label="Navegação principal">
+    <a class="nav-item" href="index.html" aria-label="Home">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+    </a>
+    <a class="nav-item" href="programacao.html" aria-current="page" aria-label="Programação">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+    </a>
+    <a class="nav-item" href="index.html#mapa" aria-label="Mapa">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+    </a>
+    <a class="nav-item" href="tamagotchi.html" aria-label="Tamagotchi">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="7"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 14.5c1 1 4 1 5 0"/></svg>
+    </a>
+  </nav>
+
+  <script src="js/notif-bell.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/programacao.js"></script>
+  <script src="js/a11y-core.js" defer></script>
+  <script src="js/keyboard-nav.js" defer></script>
+  <script src="js/touch-gestures.js" defer></script>
+  <script src="js/sync-monitor.js" defer></script>
+  <script src="js/periodic-sync.js" defer></script>
+</body>
+</html>

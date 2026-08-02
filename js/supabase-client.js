@@ -1,0 +1,97 @@
+// FASC+ — client Supabase (vanilla)
+(function () {
+  const cfg = window.FASC_CONFIG || {};
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    console.error('[FASC+] FASC_CONFIG ausente');
+    window.fascAuth = null;
+    return;
+  }
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    console.error('[FASC+] supabase-js não carregou (CDN)');
+    window.fascAuth = null;
+    return;
+  }
+
+  const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  window.fascDb = client;
+
+  function profileRedirect() {
+    return window.location.origin.replace(/\/$/, '') + '/profile.html';
+  }
+
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise(function (_, reject) {
+        setTimeout(function () {
+          reject(new Error((label || 'operação') + ' demorou demais'));
+        }, ms);
+      })
+    ]);
+  }
+
+  window.fascAuth = {
+    withTimeout: withTimeout,
+    async session() {
+      try {
+        var res = await withTimeout(client.auth.getSession(), 2500, 'sessão');
+        if (res.error) console.warn('[FASC auth]', res.error.message);
+        return (res.data && res.data.session) || null;
+      } catch (e) {
+        console.warn('[FASC auth] session:', e.message || e);
+        return null;
+      }
+    },
+    async user() {
+      var s = await this.session();
+      return s ? s.user : null;
+    },
+    async signUp(email, password, name) {
+      var res = await client.auth.signUp({
+        email: String(email || '').trim(),
+        password: String(password || ''),
+        options: {
+          emailRedirectTo: profileRedirect(),
+          data: { name: name || 'novo usuário' }
+        }
+      });
+      if (res.error) throw res.error;
+      return res.data;
+    },
+    async signIn(email, password) {
+      var res = await client.auth.signInWithPassword({
+        email: String(email || '').trim(),
+        password: String(password || '')
+      });
+      if (res.error) throw res.error;
+      return res.data;
+    },
+    async signInWithGoogle() {
+      var res = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: profileRedirect() }
+      });
+      if (res.error) throw res.error;
+      return res.data;
+    },
+    async signOut() {
+      var res = await client.auth.signOut();
+      if (res.error) throw res.error;
+    },
+    onChange: function (cb) {
+      var out = client.auth.onAuthStateChange(function (event, session) {
+        try { cb(event, session); } catch (e) { console.warn(e); }
+      });
+      return out.data && out.data.subscription;
+    }
+  };
+
+  console.info('[FASC+] Supabase client pronto ·', cfg.env || 'dev');
+})();

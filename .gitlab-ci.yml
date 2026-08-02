@@ -1,0 +1,20 @@
+# FASC+ — CI a11y
+stages:
+  - a11y
+
+a11y-static:
+  stage: a11y
+  image: python:3.12-alpine
+  script:
+    - python3 scripts/a11y-check.py index.html | tee a11y-report.txt
+    - python3 scripts/a11y-check.py index.html --json > a11y-report.json
+  artifacts:
+    when: always
+    paths:
+      - a11y-report.txt
+      - a11y-report.json
+    expire_in: 14 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"

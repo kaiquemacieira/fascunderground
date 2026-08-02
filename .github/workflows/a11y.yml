@@ -1,0 +1,125 @@
+name: a11y
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - "**.html"
+      - "**.css"
+      - "**.js"
+      - "scripts/a11y-check.py"
+      - ".github/workflows/a11y.yml"
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: a11y-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-a11y:
+    name: Static a11y (WCAG checks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run FASC+ a11y-check
+        id: a11y
+        run: |
+          set -o pipefail
+          python3 scripts/a11y-check.py index.html --json > a11y-report.json || true
+          python3 scripts/a11y-check.py index.html | tee a11y-report.txt
+          # re-run for exit code
+          python3 scripts/a11y-check.py index.html
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: |
+            a11y-report.txt
+            a11y-report.json
+          retention-days: 14
+
+      - name: PR summary
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## FASC+ a11y"
+            echo ""
+            echo '```'
+            cat a11y-report.txt 2>/dev/null || echo "sem relatório"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Opcional: axe via pa11y em servidor estático local
+  axe-browser:
+    name: axe-core (browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install static server + axe
+        run: |
+          npm install --no-save serve axe-core puppeteer
+
+      - name: Serve and scan
+        run: |
+          npx serve -l 4173 . &
+          SERVER_PID=$!
+          sleep 3
+          node <<'NODE'
+          const http = require('http');
+          const puppeteer = require('puppeteer');
+          const fs = require('fs');
+
+          (async () => {
+            const browser = await puppeteer.launch({
+              headless: true,
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            const page = await browser.newPage();
+            await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle0', timeout: 60000 });
+            await page.addScriptTag({ path: require.resolve('axe-core') });
+            const results = await page.evaluate(async () => await axe.run(document, {
+              runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'] }
+            }));
+            fs.writeFileSync('axe-report.json', JSON.stringify(results, null, 2));
+            const serious = results.violations.filter(v => ['critical', 'serious'].includes(v.impact));
+            console.log('axe violations:', results.violations.length, '| serious/critical:', serious.length);
+            results.violations.forEach(v => {
+              console.log(`- [${v.impact}] ${v.id}: ${v.help} (${v.nodes.length} nodes)`);
+            });
+            await browser.close();
+            if (serious.length) process.exit(1);
+          })().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+          kill $SERVER_PID || true
+
+      - name: Upload axe report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-report
+          path: axe-report.json
+          retention-days: 14
