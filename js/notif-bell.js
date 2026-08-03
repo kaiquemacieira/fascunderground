@@ -55,6 +55,16 @@
   }
 
   function mount() {
+    // desativado: perfil só com acessibilidade (sem sininho/ferramentas)
+    if (true) { /* CRICRI_TOP_TOOLS_DISABLED */
+      return;
+    }
+
+    // Sininho/ferramentas só na área do usuário (pedido de produto)
+    var onProfile = document.body.classList.contains('page-profile')
+      || /profile\.html/i.test(location.pathname || '')
+      || document.getElementById('login-card');
+    if (!onProfile) return;
     if (document.getElementById('cricri-top-tools')) {
       applyTopToolsLayout(document.getElementById('cricri-top-tools'));
       return;

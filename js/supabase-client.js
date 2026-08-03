@@ -23,7 +23,12 @@
   window.fascDb = client;
 
   function profileRedirect() {
-    return window.location.origin.replace(/\/$/, '') + '/profile.html';
+    try {
+      var u = new URL('profile.html', window.location.href);
+      return u.origin + u.pathname;
+    } catch (e) {
+      return window.location.origin.replace(/\/$/, '') + '/profile.html';
+    }
   }
 
   function withTimeout(promise, ms, label) {
@@ -74,11 +79,20 @@
       return res.data;
     },
     async signInWithGoogle() {
+      var redirectTo = profileRedirect();
+      console.info('[FASC auth] Google redirectTo =', redirectTo);
       var res = await client.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: profileRedirect() }
+        options: {
+          redirectTo: redirectTo,
+          queryParams: { access_type: 'offline', prompt: 'select_account' },
+          skipBrowserRedirect: false
+        }
       });
       if (res.error) throw res.error;
+      if (res.data && res.data.url) {
+        window.location.assign(res.data.url);
+      }
       return res.data;
     },
     async signOut() {

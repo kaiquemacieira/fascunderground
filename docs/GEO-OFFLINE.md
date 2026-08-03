@@ -36,3 +36,11 @@ projanoMap.getResolvedPosition()
 ## LGPD
 Só a **última posição** fica no aparelho. Não enviamos cache offline a terceiros.
 Limpar: `localStorage.removeItem('cricri_geo_last_v1')`.
+
+### Encontro de bichinhos (P2/P3.1)
+Quando o mapa está ativo e você entra no geofence de um spot, o app pode registrar **apenas o id do spot** (não lat/lng contínuos) em `spot_presence`, para avisar se um **amigo com conexão mútua** está no mesmo spot ao mesmo tempo.
+
+- **Só conexões mútuas** (você adicionou e a pessoa te adicionou). Desconhecidos **nunca** veem sua presença.
+- Aviso: “Seu CRICRI encontrou o de [nome] em [spot]”.
+- Sem geoloc / sem mapa aberto → sem presença compartilhada.
+- Limpar presença: sair do spot (evento `leave`) ou `set_my_spot_presence(null)`.

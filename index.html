@@ -10,9 +10,12 @@
   /* FASC+ theme boot — evita flash; dark = default da marca */
   (function () {
     try {
-      var KEY = 'fasc-a11y-v1';
       var s = {};
-      try { s = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
+      try { s = JSON.parse(localStorage.getItem('cricri-a11y-v2') || '{}') || {}; } catch (e) {}
+      try {
+        var leg = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+        if (!s.theme && leg.theme) s.theme = leg.theme;
+      } catch (e) {}
       var t = s.theme;
       if (t !== 'light') t = 'dark'; // FASC default escuro
       var html = document.documentElement;
@@ -397,9 +400,17 @@ html[data-a11y-theme="light"] .fasc-countdown-link {
 </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=Saira+Stencil+One&family=Space+Mono:wght@400;700&family=Stardos+Stencil:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preload" href="css/critical-home.css" as="style">
+  <link rel="stylesheet" href="css/critical-home.css">
+  <!-- full CSS async (não bloqueia first paint) -->
+  <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="style.css"></noscript>
+  <!-- fonts non-blocking -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=Saira+Stencil+One&family=Space+Mono:wght@400;700&family=Stardos+Stencil:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@600;700&family=Saira+Stencil+One&display=swap" rel="stylesheet"></noscript>
+  <!-- Leaflet CSS sob demanda via js/map-lazy.js -->
   <style id="fasc-rua">
 /* ============================================================
    FASC+ · São Cristóvão de rua
@@ -2265,10 +2276,10 @@ html[data-a11y-theme="light"] .header-search input {
   background: #e33d6b !important;
   border: 2px solid #f2e8d2 !important;
   color: #fff !important;
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px !important;
-  min-height: 48px !important;
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
   border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center;
@@ -2278,8 +2289,9 @@ html[data-a11y-theme="light"] .header-search input {
   position: relative;
   z-index: 5001 !important;
   touch-action: manipulation !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45), 0 0 14px rgba(227,61,107,0.35);
   transition: transform 0.15s ease, background 0.15s ease;
+  padding: 0 !important;
 }
 
 .a11y-toggle:hover,
@@ -2293,7 +2305,7 @@ html[data-a11y-theme="light"] .header-search input {
   outline-offset: 3px;
 }
 
-.a11y-toggle svg { width: 22px; height: 22px; pointer-events: none; }
+.a11y-toggle svg { width: 24px; height: 24px; pointer-events: none; display: block; }
 
 .a11y-panel {
   position: fixed !important;
@@ -2660,8 +2672,8 @@ html[data-a11y-cursor="large"] * {
   }
 
   .a11y-toggle {
-    width: 48px !important;
-    height: 48px !important;
+    width: 52px !important;
+    height: 52px !important;
   }
 
   .a11y-panel {
@@ -3317,34 +3329,34 @@ html[data-a11y-theme="light"] #header-search-btn {
   z-index: 5100 !important;
 }
 </style>
+
+  <script>
+  /*! loadCSS rel=preload polyfill (minimal) */
+  (function(){var l=document.querySelectorAll('link[rel="preload"][as="style"]');
+  for(var i=0;i<l.length;i++){if(!l[i].onload){l[i].rel='stylesheet';}}
+  })();
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
 
-  <!-- HEADER -->
+  <!-- HEADER: logo | Entrar | Acessibilidade -->
   <header class="header">
-    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu" type="button">
-      <svg class="icon-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg>
-      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
-    </button>
-    <div class="logo">CRI<span>CRI</span></div>
-    
-    <div class="header-tools">
-      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar modo escuro" title="Tema">
-        <svg class="icon-moon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></svg>
+    <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
+    <div class="header-actions">
+      <a class="auth-chip" id="auth-chip" href="profile.html">Entrar</a>
+      <button type="button" class="a11y-toggle" id="a11y-toggle"
+        aria-expanded="false" aria-controls="a11y-panel"
+        aria-label="Abrir opções de acessibilidade" title="Acessibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="5" r="2.2"/>
+          <path d="M12 8.5v3.5"/>
+          <path d="M8 22l4-10 4 10"/>
+          <path d="M6.5 13.5h11"/>
+        </svg>
       </button>
-
-      <div class="fest-status" title="Festival de Artes de São Cristóvão 2026">
-        <span class="fest-status-dot" aria-hidden="true"></span>
-        <span class="fest-status-text">
-          <strong>AO VIVO</strong>
-          <span class="fest-status-meta">19–22/11 · São Cristóvão</span>
-        </span>
-      </div>
     </div>
-    
-    </header>
+  </header>
 
   <div class="search-overlay" id="search-overlay" hidden>
       <div class="search-sheet" role="dialog" aria-modal="true" aria-label="Busca no CRICRI">
@@ -3364,7 +3376,6 @@ html[data-a11y-theme="light"] #header-search-btn {
           <button type="button" class="search-filter active" data-search-filter="todos" role="tab" aria-selected="true">Todos</button>
           <button type="button" class="search-filter" data-search-filter="mural" role="tab" aria-selected="false">Mural</button>
           <button type="button" class="search-filter" data-search-filter="mapa" role="tab" aria-selected="false">Mapa</button>
-          <button type="button" class="search-filter" data-search-filter="market" role="tab" aria-selected="false">Market</button>
         </div>
 
         <div class="search-body">
@@ -3376,7 +3387,7 @@ html[data-a11y-theme="light"] #header-search-btn {
             <ul class="search-history-list" id="search-history-list"></ul>
             <p class="search-history-empty" id="search-history-empty">Suas buscas aparecem aqui.</p>
           </div>
-          <p class="search-hint" id="search-hint">Digite para buscar no mural, no mapa e no marketplace.</p>
+          <p class="search-hint" id="search-hint">Digite para buscar no mural e no mapa.</p>
           <ul class="search-results" id="search-results" role="listbox" aria-label="Resultados da busca"></ul>
           <p class="search-empty" id="search-empty" hidden>Nada encontrado. Tente outro termo.</p>
         </div>
@@ -3398,11 +3409,7 @@ html[data-a11y-theme="light"] #header-search-btn {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
         Mapa
       </a>
-      <a href="#marketplace" data-mobile-link>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5 5.5 4h13L20 8.5"/><path d="M4 8.5v9.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V8.5"/><path d="M4 8.5h16"/><path d="M9.5 12a2.5 2.5 0 0 0 5 0"/></svg>
-        Marketplace
-      </a>
-    </nav>
+</nav>
   </div>
 
   <!-- HERO -->
@@ -3443,6 +3450,7 @@ html[data-a11y-theme="light"] #header-search-btn {
     </div>
   </section>
 
+  <!-- ORDEM v1: Feed + Mapa acima do fold institucional (Sobre/Manifesto no footer) -->
   <!-- FEED (mural de posts, estilo orkut: parede pública + parte privada de amigos) -->
   <section class="feed-section" id="feed">
     <div class="feed-container">
@@ -3485,40 +3493,18 @@ html[data-a11y-theme="light"] #header-search-btn {
     </div>
   </section>
 
-
-  <!-- QUEM SOMOS · CRICRI -->
-  <section class="about-section" id="quem-somos" aria-labelledby="about-title">
-    <div class="about-inner">
-      <p class="about-eyebrow">Quem somos</p>
-      <h2 id="about-title">CRICRI é o mural da cidade.</h2>
-      <p class="about-lead">A camada viva onde São Cristóvão cola seus próprios cartazes — quem tá tocando agora, onde a roda formou, o que rolou na esquina.</p>
-      <p class="about-text">O nome vem do som do grilo ao entardecer: o ruído constante de fundo que nunca cala. Aqui, esse ruído virou o mural — os cartazes falados que a galera cola contando o que tá rolando, igual quem grita da janela pra rua.</p>
-      <div class="about-credit">
-        <span class="about-credit-label">Desenvolvedora &amp; idealizadora</span>
-        <strong class="about-credit-name">AcidBurn2026</strong>
-      </div>
-    </div>
-  </section>
-
-  <!-- MANIFESTO -->
-  <section class="manifesto">
-    <p>Não é mapa.<br><span>É a cidade viva.</span></p>
-  </section>
-
-  <!-- MAPA INTERATIVO · São Cristóvão SE -->
+<!-- MAPA INTERATIVO · São Cristóvão SE -->
   <section class="map-section" id="mapa">
     <div class="map-header">
       <h2>MAPA · São Cristóvão · SE</h2>
       <span id="geo-status" class="geo-status pending">buscando…</span>
-      <button type="button" class="heat-toggle" id="btn-heat-toggle" aria-pressed="false" title="Mapa de calor do público">Calor</button>
-    </div>
-    <p class="map-sub">Spots, eventos, hospedagem, gastronomia e ônibus (SC ↔ Aracaju). 19–22/11/2026</p>
+</div>
+    <p class="map-sub">Spots, eventos, hospedagem e gastronomia · 19–22/11/2026</p>
     <div class="map-layers" id="map-layers" role="group" aria-label="Camadas do mapa">
       <button type="button" class="map-layer-chip is-on" data-map-layer="spots" aria-pressed="true">Spots</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="hospedagem" aria-pressed="true">Hospedagem</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="gastronomia" aria-pressed="true">Gastronomia</button>
-      <button type="button" class="map-layer-chip is-on" data-map-layer="transporte" aria-pressed="true">Ônibus</button>
-      <button type="button" class="map-layer-chip is-on" data-map-layer="eventos" aria-pressed="true">Eventos</button>
+<button type="button" class="map-layer-chip is-on" data-map-layer="eventos" aria-pressed="true">Eventos</button>
       <button type="button" class="map-layer-chip" data-map-layer="fit" id="map-fit-all">Ver todos</button>
     </div>
     <div class="map-proximity" id="map-proximity" role="group" aria-label="Filtro por proximidade">
@@ -3536,17 +3522,12 @@ html[data-a11y-theme="light"] #header-search-btn {
         <span class="map-prox-count" id="map-prox-count" aria-live="polite"></span>
       </div>
     </div>
-    <label class="heat-optin-row" for="heat-optin">
-      <input type="checkbox" id="heat-optin" name="heat-optin">
-      <span id="heat-optin-hint">Ative para somar sua posição ao calor (login + GPS).</span>
-    </label>
-    <div id="map" class="map" role="region" aria-label="Mapa interativo de São Cristóvão com spots, hospedagem e gastronomia"></div>
+<div id="map" class="map" role="region" aria-label="Mapa interativo de São Cristóvão com spots, hospedagem e gastronomia"></div>
     <ul class="map-legend" aria-label="Legenda">
       <li><span class="leg-dot leg-spot"></span> Spot do festival</li>
       <li><span class="leg-dot leg-hosp"></span> Hospedagem</li>
       <li><span class="leg-dot leg-gastro"></span> Gastronomia</li>
-      <li><span class="leg-dot leg-bus"></span> Ônibus / parada</li>
-      <li><span class="leg-dot leg-event"></span> Evento / programação</li>
+<li><span class="leg-dot leg-event"></span> Evento / programação</li>
       <li><span class="leg-dot leg-you"></span> Você</li>
     </ul>
     <div class="map-places-head">
@@ -3558,60 +3539,7 @@ html[data-a11y-theme="light"] #header-search-btn {
       <input type="search" id="map-places-q" placeholder="Buscar no mapa…" autocomplete="off" enterkeyhint="search" />
     </div>
     <ul class="map-places-list" id="map-places-list" role="listbox" aria-label="Lista de lugares no mapa"></ul>
-    <aside class="map-transit-note" id="map-transit-note" aria-label="Transporte público">
-      <h3>Ônibus · São Cristóvão ↔ Aracaju</h3>
-      <div class="map-transit-status">
-        <p class="map-transit-clock" id="map-transit-clock" aria-live="polite"></p>
-        <p class="map-transit-live" id="map-transit-live"><span class="live-dot" aria-hidden="true"></span> previsão ao vivo</p>
-      </div>
-      <p>Linhas regulares que passam por São Cristóvão (SE). Durante o festival costuma haver <strong>ônibus especiais gratuitos</strong> saindo de terminais de Aracaju (Centro / DIA / Atalaia) com retorno pela madrugada — confira a prefeitura/CTM na semana do evento.</p>
-      <ul class="map-transit-lines" id="map-transit-lines"></ul>
-      <p class="map-transit-hint">Previsão <strong>ao vivo</strong> (modelo local + grade) · SMTT/CTM não publicam GTFS-RT aberto · sujeita a alteração</p>
-    </aside>
-  </section>
-
-  <!-- MARKETPLACE -->
-  <section class="market-section" id="marketplace">
-    <div class="market-header">
-      <h2>Marketplace</h2>
-      <p class="market-sub">hospedagem, arte, comida, música, carona e serviços — direto com quem tá na roda</p>
-      <button type="button" class="section-collapse-btn" data-collapse-target="market-body" aria-expanded="false">Expandir marketplace</button>
-    </div>
-
-    <div id="market-body" class="collapsible-body is-collapsed" hidden>
-    <div class="market-tabs" id="market-tabs" role="tablist" aria-label="Categorias do marketplace">
-      <button class="market-tab active" data-market-cat="todos" type="button" role="tab" aria-selected="true">Todos</button>
-      <button class="market-tab" data-market-cat="hospedagem" type="button" role="tab" aria-selected="false" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
-        Hospedagens
-      </button>
-      <button class="market-tab" data-market-cat="arte" type="button" role="tab" aria-selected="false" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="13.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M12 20.5A8.5 8.5 0 0 1 9 4.1c1 0 1.8.8 1.8 1.8 0 .5-.2 1-.5 1.3-.3.3-.5.7-.5 1.2 0 .9.7 1.6 1.6 1.6h2.4c1.9 0 3.5 1.6 3.5 3.5 0 3.9-2.7 7-5.3 7z"/></svg>
-        Arte
-      </button>
-      <button class="market-tab" data-market-cat="gastronomia" type="button" role="tab" aria-selected="false" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6.5a2.5 2.5 0 0 0 5 0V3"/><path d="M8.5 3v18"/><path d="M17 3c-1.4 0-2.5 1.8-2.5 5.5S15.6 13 17 13v8"/></svg>
-        Gastronomia
-      </button>
-      <button class="market-tab" data-market-cat="musica" type="button" role="tab" aria-selected="false" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.5l11-2.2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>
-        Música
-      </button>
-      <button class="market-tab" data-market-cat="mobilidade" type="button" role="tab" aria-selected="false" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.5V12l2-5h12l2 5v4.5"/><path d="M4 16.5h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>
-        Mobilidade
-      </button>
-      <button class="market-tab" data-market-cat="servicos" type="button" role="tab" aria-selected="false" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M9 6V4.8A1.8 1.8 0 0 1 10.8 3h2.4A1.8 1.8 0 0 1 15 4.8V6"/><circle cx="12" cy="12.5" r="3"/></svg>
-        Serviços
-      </button>
-    </div>
-
-    <div class="market-grid" id="market-grid">
-      <!-- cards injetados por mock.js -->
-    </div>
-    </div><!-- /market-body -->
-  </section>
+</section>
 
   <!-- CTA FIXO + BOTTOM NAV ESTILO INSTAGRAM -->
   </main>
@@ -3635,11 +3563,11 @@ html[data-a11y-theme="light"] #header-search-btn {
 
       <div class="support-grid">
         <div class="support-card support-card--emergency">
-          <button type="button" class="support-collapse-btn" data-collapse="support-emergency" aria-expanded="true" aria-controls="support-emergency-panel">
+          <button type="button" class="support-collapse-btn" data-collapse="support-emergency" aria-expanded="false" aria-controls="support-emergency-panel">
             <span>Emergência agora · canais públicos</span>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div class="support-collapse-panel" id="support-emergency-panel">
+          <div class="support-collapse-panel" id="support-emergency-panel" hidden>
           <ul class="support-phones">
             <li>
               <a href="tel:190" class="support-phone">
@@ -3683,11 +3611,11 @@ html[data-a11y-theme="light"] #header-search-btn {
         </div>
 
         <div class="support-card support-card--form">
-          <button type="button" class="support-collapse-btn" data-collapse="support-form" aria-expanded="true" aria-controls="support-form-panel">
+          <button type="button" class="support-collapse-btn" data-collapse="support-form" aria-expanded="false" aria-controls="support-form-panel">
             <span>Canal de denúncia · formulário</span>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div class="support-collapse-panel" id="support-form-panel">
+          <div class="support-collapse-panel" id="support-form-panel" hidden>
           <p class="support-form-intro">Relato pro time do CRICRI. Não publicamos isso no mural.</p>
           <form id="denuncia-form" class="denuncia-form" novalidate>
             <div class="denuncia-field">
@@ -3745,34 +3673,8 @@ html[data-a11y-theme="light"] #header-search-btn {
       Perfil
     </a>
   </nav>
-
-    <!-- busca fixa (fora do header — não compete com a11y) -->
-  <button type="button" class="header-search-btn" id="header-search-btn"
-    aria-label="Buscar no CRICRI" aria-expanded="false" aria-controls="search-overlay">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="7"/>
-      <path d="M20 20l-3.5-3.5"/>
-    </svg>
-  </button>
-
-
-  <!-- Auth → página de perfil -->
-  <div id="fasc-auth-root">
-    <a class="auth-chip" id="auth-chip" href="profile.html">Entrar</a>
-  </div>
-
-<!-- a11y-portal -->
+<!-- a11y-portal: painel (botão está no header) -->
   <div class="a11y-wrap">
-      <button type="button" class="a11y-toggle" id="a11y-toggle" style="pointer-events:auto"
-        aria-expanded="false" aria-controls="a11y-panel"
-        aria-label="Abrir opções de acessibilidade" title="Acessibilidade">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="5" r="2.2"/>
-          <path d="M12 8.5v3.5"/>
-          <path d="M8 22l4-10 4 10"/>
-          <path d="M6.5 13.5h11"/>
-        </svg>
-      </button>
       <div class="a11y-panel" id="a11y-panel" role="dialog" aria-label="Opções de acessibilidade" hidden>
         <h2>Acessibilidade</h2>
 
@@ -3861,190 +3763,137 @@ html[data-a11y-theme="light"] #header-search-btn {
     </div>
 
   <script>
-  /* FASC+ a11y — controle completo (não depende de script.js) */
+  /* FASC+ a11y HOME — wire imediato (não depende de defer/bundle) */
   (function () {
-    var KEY = 'fasc-a11y-v1';
-    var defaults = {
-      text: 'md', contrast: 'default', theme: 'dark', motion: 'default',
-      font: 'default', spacing: 'default', links: 'default', color: 'default', cursor: 'default'
-    };
-
-    function load() {
-      try { return Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); }
-      catch (e) { return Object.assign({}, defaults); }
-    }
-    function save(state) {
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-    }
-
-    function syncTheme(state) {
-      if (window.fascTheme) {
-        window.fascTheme.set(state.theme === 'light' ? 'light' : 'dark');
-        return;
-      }
-      // fallback
-      return (function syncThemeLegacy(state) {
-      var root = document.documentElement;
-      var t = state.theme || 'default';
-      root.classList.add('theme-anim');
-      if (t === 'light' || t === 'dark') {
-        root.setAttribute('data-a11y-theme', t);
-        root.setAttribute('data-theme', t);
-      } else {
-        root.removeAttribute('data-a11y-theme');
-        root.setAttribute('data-theme', 'auto');
-      }
-      var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-      var isDark = t === 'dark' || (t !== 'light' && !prefersLight);
-      // marca = dark quando "default" e sistema não é light explícito
-      if (t === 'default') isDark = true; // FASC+ padrão de marca é escuro
-      var meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.content = isDark ? '#0c0a08' : '#f3ecdc';
-      window.setTimeout(function () { root.classList.remove('theme-anim'); }, 400);
-    }
-
-    function apply(state) {
-      var root = document.documentElement;
-      Object.keys(defaults).forEach(function (k) {
-        var v = state[k] || defaults[k];
-        if (k === 'theme') return; // tratado em syncTheme
-        if (v === 'default' || v === 'md') root.removeAttribute('data-a11y-' + k);
-        else root.setAttribute('data-a11y-' + k, v);
-      });
-      syncTheme(state);
-      var panel = document.getElementById('a11y-panel');
-      if (!panel) return;
-      panel.querySelectorAll('[data-a11y-set]').forEach(function (btn) {
-        var raw = btn.getAttribute('data-a11y-set') || '';
-        var parts = raw.split(':');
-        var key = parts[0], val = parts[1];
-        var current = state[key] || defaults[key];
-        btn.setAttribute('aria-pressed', current === val ? 'true' : 'false');
-      });
-    }
-
-    function isOpen(panel) {
-      return panel && (!panel.hasAttribute('hidden') || panel.classList.contains('is-open'));
-    }
-    function openPanel(toggle, panel) {
-      panel.removeAttribute('hidden');
-      panel.classList.add('is-open');
-      if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    }
-    function closePanel(toggle, panel) {
-      panel.setAttribute('hidden', '');
-      panel.classList.remove('is-open');
-      if (toggle) toggle.setAttribute('aria-expanded', 'false');
-    }
+    function qs(id) { return document.getElementById(id); }
 
     function wire() {
-      /* a11y-core.js assume o controle global — evita listeners duplicados */
-      if (window.CricriA11y || document.querySelector('script[src*="a11y-core.js"]')) {
-        console.info('[a11y] delegado ao a11y-core.js');
-        return;
-      }
-      var toggle = document.getElementById('a11y-toggle');
-      var panel = document.getElementById('a11y-panel');
+      var toggle = qs('a11y-toggle');
+      var panel = qs('a11y-panel');
       if (!toggle || !panel) {
-        console.warn('[FASC+ a11y] #a11y-toggle ou #a11y-panel ausente');
+        console.warn('[CRICRI a11y] toggle/panel ausente');
         return;
       }
-      if (panel.dataset.a11yReady === '1') return;
-      panel.dataset.a11yReady = '1';
-
-      var state = load();
-      if (!localStorage.getItem(KEY) && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        state.motion = 'reduce';
+      if (toggle.dataset.a11yHomeWired === '1') return;
+      toggle.dataset.a11yHomeWired = '1';
+      // Se a11y-core já montou, ele controla o clique — evita open/close duplo
+      if (window.CricriA11y) {
+        console.info('[CRICRI a11y] home: delegando toggle ao a11y-core');
+        return;
       }
-      apply(state);
-      save(state);
 
-      // abrir/fechar — pointerdown + click (mobile + desktop)
-      var ignoreDocClickUntil = 0;
+      // garante clicável mesmo com CSS legado
+      toggle.style.pointerEvents = 'auto';
+      toggle.style.cursor = 'pointer';
+      toggle.style.position = 'relative';
+      toggle.style.zIndex = '99991';
+
+      function isOpen() {
+        return toggle.getAttribute('aria-expanded') === 'true' && !panel.hidden;
+      }
+      function open() {
+        panel.hidden = false;
+        panel.removeAttribute('hidden');
+        panel.classList.add('is-open');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+      function close() {
+        panel.hidden = true;
+        panel.setAttribute('hidden', '');
+        panel.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+
+      var ignoreUntil = 0;
+      var last = 0;
       function onToggle(e) {
         if (e) {
           e.preventDefault();
           e.stopPropagation();
         }
-        if (isOpen(panel)) closePanel(toggle, panel);
+        var now = Date.now();
+        if (now - last < 250) return;
+        last = now;
+        if (isOpen()) close();
         else {
-          openPanel(toggle, panel);
-          ignoreDocClickUntil = Date.now() + 300;
+          open();
+          ignoreUntil = now + 400;
         }
       }
-      toggle.addEventListener('click', onToggle, true);
-      toggle.addEventListener('pointerup', function (e) {
-        /* só touch; evita double-fire no desktop */
-        if (e.pointerType === 'touch') {
-          e.preventDefault();
-          onToggle(e);
-        }
-      }, true);
 
-      // cliques DENTRO do painel (chips + reset)
+      toggle.addEventListener('click', onToggle, true);
+
+      // chips (tema/texto/etc.) — delegação no painel
       panel.addEventListener('click', function (e) {
         e.stopPropagation();
-        var reset = e.target.closest('#a11y-reset');
-        if (reset) {
-          state = Object.assign({}, defaults);
-          apply(state);
-          save(state);
-          return;
-        }
-        var btn = e.target.closest('[data-a11y-set]');
-        if (!btn) return;
-        var raw = btn.getAttribute('data-a11y-set') || '';
+        var chip = e.target.closest('[data-a11y-set]');
+        if (!chip) return;
+        var raw = chip.getAttribute('data-a11y-set') || '';
         var parts = raw.split(':');
+        if (parts.length < 2) return;
         var key = parts[0], val = parts[1];
-        if (!key) return;
-        state[key] = val;
-        apply(state);
-        save(state);
+        var root = document.documentElement;
+        try {
+          var s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+          s[key] = val;
+          localStorage.setItem('fasc-a11y-v1', JSON.stringify(s));
+          // sync chave do a11y-core
+          var s2 = JSON.parse(localStorage.getItem('cricri-a11y-v2') || '{}') || {};
+          s2[key] = val;
+          localStorage.setItem('cricri-a11y-v2', JSON.stringify(s2));
+        } catch (_) {}
+        if (key === 'theme') {
+          var theme = val === 'light' ? 'light' : 'dark';
+          root.setAttribute('data-theme', theme);
+          root.setAttribute('data-a11y-theme', theme);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', theme === 'light' ? '#f6efdc' : '#0c0a08');
+          if (window.fascTheme && window.fascTheme.set) {
+            try { window.fascTheme.set(theme); } catch (_) {}
+          }
+          if (window.CricriA11y && window.CricriA11y.set) {
+            try { window.CricriA11y.set({ theme: theme }); } catch (_) {}
+          }
+        } else if (key === 'text') {
+          if (val === 'md') root.removeAttribute('data-a11y-text');
+          else root.setAttribute('data-a11y-text', val);
+        } else if (key === 'motion') {
+          if (val === 'default') root.removeAttribute('data-a11y-motion');
+          else root.setAttribute('data-a11y-motion', val);
+        } else if (key === 'contrast') {
+          if (val === 'default') root.removeAttribute('data-a11y-contrast');
+          else root.setAttribute('data-a11y-contrast', val);
+        } else {
+          if (val === 'default') root.removeAttribute('data-a11y-' + key);
+          else root.setAttribute('data-a11y-' + key, val);
+        }
+        panel.querySelectorAll('[data-a11y-set^="' + key + ':"]').forEach(function (b) {
+          b.setAttribute('aria-pressed', b.getAttribute('data-a11y-set') === raw ? 'true' : 'false');
+        });
       }, true);
 
-      // fechar ao clicar fora
       document.addEventListener('click', function (e) {
-        if (!isOpen(panel)) return;
-        if (Date.now() < ignoreDocClickUntil) return;
-        if (panel.contains(e.target) || toggle.contains(e.target) || e.target === toggle) return;
-        closePanel(toggle, panel);
+        if (!isOpen()) return;
+        if (Date.now() < ignoreUntil) return;
+        if (panel.contains(e.target) || toggle.contains(e.target)) return;
+        close();
       });
-
       document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && isOpen(panel)) {
-          closePanel(toggle, panel);
-          toggle.focus();
-        }
+        if (e.key === 'Escape' && isOpen()) close();
       });
 
+      // API mínima
+      window.fascA11yOpen = open;
+      window.fascA11yClose = close;
       window.fascA11yToggle = onToggle;
-      window.fascA11yOpen = function () { openPanel(toggle, panel); };
-      window.fascA11yClose = function () { closePanel(toggle, panel); };
-      window.fascA11yApply = function (partial) {
-        state = Object.assign({}, state, partial || {});
-        apply(state);
-        save(state);
-      };
-      console.info('[FASC+ a11y] pronto — chips e temas ativos');
+      console.info('[CRICRI a11y] home wired (imediato)');
     }
 
-    // Só sincroniza chips — NÃO chama apply/syncTheme (evita loop com fascTheme.set)
-    window.addEventListener('fasc:theme', function (ev) {
-      var th = (ev.detail && ev.detail.theme) || 'dark';
-      var st = load();
-      st.theme = th;
-      save(st);
-      var panel = document.getElementById('a11y-panel');
-      if (!panel) return;
-      panel.querySelectorAll('[data-a11y-set]').forEach(function (btn) {
-        var raw = btn.getAttribute('data-a11y-set') || '';
-        if (raw.indexOf('theme:') !== 0) return;
-        var val = raw.split(':')[1];
-        btn.setAttribute('aria-pressed', val === th ? 'true' : 'false');
-      });
-    });
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
-    else wire();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wire);
+    } else {
+      wire();
+    }
   })();
   </script>
 
@@ -4107,7 +3956,7 @@ html[data-a11y-theme="light"] #header-search-btn {
     function bind() {
       var btn = $('header-search-btn');
       var ov = $('search-overlay');
-      if (!btn) { console.error('[FASC busca] #header-search-btn ausente'); return; }
+      if (!btn) { return; } /* busca movida para profile */
       // remove listeners duplicados clonando o botão
       var clone = btn.cloneNode(true);
       btn.parentNode.replaceChild(clone, btn);
@@ -4176,8 +4025,6 @@ html[data-a11y-theme="light"] #header-search-btn {
   }, true);
 })();
 </script>
-
-  
 <script>
 /* support collapse */
 (function () {
@@ -4269,27 +4116,14 @@ html[data-a11y-theme="light"] #header-search-btn {
 })();
 </script>
 
-  <script src="js/notif-bell.js"></script>
-  <script src="js/footer.js"></script>
-  <script type="module" src="js/denuncia.js"></script>
-  <script src="js/config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="js/supabase-client.js"></script>
-  <script src="js/geo-offline.js"></script>
-  <script src="js/spots-api.js"></script>
-  <script src="js/events-api.js"></script>
-  <script src="js/auth-ui.js"></script>
+  <script type="module" src="js/denuncia.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script>
     if (!window.FASC_VAPID_PUBLIC_KEY && window.FASC_CONFIG && window.FASC_CONFIG.vapidPublicKey) {
       window.FASC_VAPID_PUBLIC_KEY = window.FASC_CONFIG.vapidPublicKey;
     }
   </script>
-  <script src="js/push.js"></script>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-  <script src="js/gtfs-rt.js"></script>
-  <script src="mock.js"></script>
 
 <script>
 /* map harden: invalidateSize when #mapa / resize */
@@ -4312,11 +4146,17 @@ html[data-a11y-theme="light"] #header-search-btn {
 })();
 </script>
 
-  <script src="js/heat-map.js"></script>
-  <script src="js/theme.js"></script>
-  <script src="js/a11y-motion.js"></script>
-  <script src="js/fasc-motion.js"></script>
-  <script src="script.js"></script>
+
+  <!-- bundles home: core (config/auth/apis) + ui (a11y/gestos) -->
+  <script src="js/bundles/home-core.js" defer></script>
+  <script src="js/bundles/home-ui.js" defer></script>
+  <script src="js/theme.js" defer></script>
+  <!-- a11y-core atualizado (tema + ícone unificado HOME/Perfil/Meow) -->
+  <script src="js/a11y-core.js" defer></script>
+  <script src="js/map-lazy.js" defer></script>
+  <script src="script.js" defer></script>
+  <!-- P2/P3.1 — encontro de bichinhos (só conexões mútuas + geofence) -->
+  <script src="js/cricri-meet.js" defer></script>
 
   <script>
   (function () {
@@ -4534,11 +4374,6 @@ html[data-a11y-theme="light"] #header-search-btn {
 })();
 </script>
 
-  <script src="js/a11y-core.js" defer></script>
-  <script src="js/keyboard-nav.js" defer></script>
-  <script src="js/touch-gestures.js" defer></script>
-  <script src="js/sync-monitor.js" defer></script>
-  <script src="js/periodic-sync.js" defer></script>
 
 <script>
 if ('serviceWorker' in navigator) {

@@ -1,13 +1,14 @@
 /* CRICRI Service Worker — push + background sync + offline shell */
 /* global self, clients, caches */
 
-const SW_VERSION = 'cricri-sw-v6';
-const CACHE = 'cricri-shell-v6';
+const SW_VERSION = 'cricri-sw-v7';
+const CACHE = 'cricri-shell-v7';
 const SHELL = [
   './',
   './index.html',
   './style.css',
   './tamagotchi.html',
+  './marketplace.html',
   './programacao.html',
   './profile.html',
   './js/config.js',
@@ -18,7 +19,11 @@ const SHELL = [
   './js/geo-offline.js',
   './js/spots-api.js',
   './js/events-api.js',
-  './js/tamagotchi.js'
+  './js/tamagotchi.js',
+  './js/bundles/home-ui.js',
+  './js/bundles/home-core.js',
+  './js/map-lazy.js',
+  './css/critical-home.css'
 ];
 
 self.addEventListener('install', (event) => {

@@ -409,7 +409,7 @@ console.log('Mock carregado');
     poiMarkers.push({ marker: marker, data: p });
     // also register in markerById later via poiMarkers loop - but markerById built later from poiMarkers - good if built after this
   });
-  layerGroups.transporte.addTo(map);
+  // layerGroups.transporte.addTo(map); // v1: sem transporte em tela
 
   // ---- horários estimados de partida ----
   function parseHM(hm) {
@@ -669,6 +669,11 @@ console.log('Mock carregado');
 
   fillTransitPanel();
   setTimeout(function () {
+  var __MARKET_ENABLED = !!(document.getElementById('market-grid') || document.getElementById('marketplace'));
+  if (!__MARKET_ENABLED) {
+    console.info('[CRICRI] mock: catálogo marketplace não montado (seção ausente)');
+  }
+
     try { refreshBusStopPopups(); } catch (e) {}
   }, 50);
   setInterval(function () {
@@ -719,7 +724,9 @@ console.log('Mock carregado');
   const PROX_MAX_GPS_AGE_MS = 180000; // 3 min
   let proxRadiusM = 0; // 0 = todos
   let proxCircle = null; // círculo visual do raio
-  let layerOn = { spots: true, hospedagem: true, gastronomia: true, transporte: true, eventos: true };
+  let layerOn = { spots: true, hospedagem: true, gastronomia: true, transporte: false, eventos: true }; // transporte fora da v1 (sem GTFS real)
+  // Hoisted: refPoint()/applyProximityFilter rodam antes do bloco GPS — evita TDZ
+  let lastPos = null;
 
   try {
     var storedProx = parseInt(sessionStorage.getItem(PROX_STORAGE_KEY), 10);
@@ -741,15 +748,17 @@ console.log('Mock carregado');
 
   function refPoint() {
     // Offline-aware: GPS fresco → cache PWA → centro SC
+    // lastPos é let no topo do escopo (evita TDZ se chamado cedo no boot do mapa)
+    var pos = null;
+    try { pos = lastPos; } catch (_) { pos = null; }
     if (window.fascGeoOffline && typeof window.fascGeoOffline.resolve === 'function') {
-      const r = window.fascGeoOffline.resolve(lastPos);
+      const r = window.fascGeoOffline.resolve(pos);
       return { lat: r.lat, lng: r.lng, source: r.source, quality: r.quality, accuracy: r.accuracy, time: r.time };
     }
-    if (typeof lastPos !== 'undefined' && lastPos && lastPos.lat != null) {
-      const age = Date.now() - (lastPos.time || 0);
-      if (age < 180000) return { lat: lastPos.lat, lng: lastPos.lng, source: 'gps' };
-      // offline/sem GPS: ainda usa lastPos se < 6h
-      if (age < 6 * 3600000) return { lat: lastPos.lat, lng: lastPos.lng, source: navigator.onLine === false ? 'offline' : 'cache' };
+    if (pos && pos.lat != null) {
+      const age = Date.now() - (pos.time || 0);
+      if (age < 180000) return { lat: pos.lat, lng: pos.lng, source: 'gps' };
+      if (age < 6 * 3600000) return { lat: pos.lat, lng: pos.lng, source: navigator.onLine === false ? 'offline' : 'cache' };
     }
     return { lat: CENTER_SC.lat, lng: CENTER_SC.lng, source: 'centro' };
   }
@@ -1300,7 +1309,7 @@ console.log('Mock carregado');
   let userMarker = null;
   let accuracyCircle = null;
   let watchId = null;
-  let lastPos = null;
+  // lastPos hoisted no topo (evita TDZ em refPoint)
   // PWA offline: restaura último fix salvo
   try {
     if (window.fascGeoOffline) {

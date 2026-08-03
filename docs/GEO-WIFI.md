@@ -44,3 +44,10 @@ projanoMap.startWatching // via opts.precise no código interno / botão GPS
 
 ## LGPD
 Só pedimos posição com mapa visível. Não lemos lista de WiFi. Último fix fica no `localStorage` do aparelho (`cricri_geo_last_v1`).
+
+### Presença em spot entre amigos (P2/P3.1)
+Com geoloc ativa no mapa, ao entrar na zona de um spot o CRICRI pode informar **somente amigos mútuos** que vocês estão no mesmo lugar (“Seu CRICRI encontrou o de X em [spot]”).
+
+Isso **não** publica localização para o feed, mural ou perfis públicos.
+Não há match com quem não está na sua lista **e** não te tem de volta.
+Detalhes: tabela `spot_presence` + RPC `get_cricri_meets` (SECURITY DEFINER, filtro de mutualidade). Ver `docs/CRICRI-MEET.md`.

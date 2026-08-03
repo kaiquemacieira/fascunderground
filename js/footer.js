@@ -46,7 +46,7 @@
     'font-family:"Space Mono",ui-monospace,monospace;font-size:.68rem;color:#8c8376;line-height:1.4}',
     '.cricri-footer-meta strong{color:#e33d6b;font-weight:700}',
     '.cricri-footer-dot{opacity:.45}',
-    '.cricri-footer-glow{pointer-events:none;position:absolute;inset:auto 10% -40%;height:8rem;',
+    '.cricri-footer-manifesto{margin:0 auto 1.25rem;max-width:28rem;font-family:Oswald,system-ui,sans-serif;font-size:clamp(1.35rem,4.2vw,1.85rem);font-weight:600;letter-spacing:.04em;line-height:1.25;color:#f2e8d2}','.cricri-footer-manifesto span{color:#e33d6b}','.cricri-footer-about{margin:0 auto 1.25rem;max-width:32rem;text-align:left;padding:1rem 1.1rem;border-radius:12px;border:1px solid rgba(230,220,196,.12);background:rgba(255,255,255,.03)}','.cricri-footer-about-eyebrow{margin:0 0 .35rem;font-family:Oswald,system-ui,sans-serif;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#e33d6b}','.cricri-footer-about-lead{margin:0 0 .55rem;font-family:Oswald,system-ui,sans-serif;font-size:1.05rem;font-weight:600;color:#ebe3cf}','.cricri-footer-glow{pointer-events:none;position:absolute;inset:auto 10% -40%;height:8rem;',
     'background:radial-gradient(ellipse at center,rgba(227,61,107,.12),transparent 70%);z-index:0}',
     '@media (min-width:700px){.cricri-footer{padding:3rem 2rem 7.5rem}.cricri-footer-a11y{padding:1rem 1.25rem}}'
   ].join('');
@@ -58,10 +58,20 @@
           '<span class="cricri-footer-mark">CRICRI</span>' +
           '<span class="cricri-footer-tag">projeto independente · pro povo do festival</span>' +
         '</div>' +
-        '<p class="cricri-footer-text">' +
-          'Feito por quem vive São Cristóvão no chão. Não somos o site oficial — ' +
-          'programação e mapa institucional usam como <strong>referência</strong> o portal da prefeitura.' +
+        '<p class="cricri-footer-manifesto" aria-label="Manifesto">' +
+          'Não é mapa. <span>É a cidade viva.</span>' +
         '</p>' +
+        '<div class="cricri-footer-about" id="sobre">' +
+          '<p class="cricri-footer-about-eyebrow">Sobre</p>' +
+          '<p class="cricri-footer-about-lead">CRICRI é o mural da cidade.</p>' +
+          '<p class="cricri-footer-text">' +
+            'A camada viva onde São Cristóvão cola seus próprios cartazes — quem tá tocando agora, onde a roda formou, o que rolou na esquina. ' +
+            'O nome vem do som do grilo ao entardecer: o ruído constante de fundo que nunca cala.' +
+          '</p>' +
+          '<p class="cricri-footer-text">' +
+            'Não somos o site oficial — programação e mapa institucional usam como <strong>referência</strong> o portal da prefeitura.' +
+          '</p>' +
+        '</div>' +
         '<p class="cricri-footer-pulse">' +
           'A performance é de quem está na rua — vivência, paixão e o que a cidade cola no mural.' +
         '</p>' +
@@ -94,6 +104,7 @@
       '</div>' +
       '<div class="cricri-footer-glow" aria-hidden="true"></div>' +
     '</footer>';
+
 
   function injectCss() {
     if (document.getElementById('cricri-footer-css')) return;

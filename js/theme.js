@@ -17,6 +17,13 @@
     var s = readState();
     Object.keys(partial).forEach(function (k) { s[k] = partial[k]; });
     try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (_) {}
+    // mantém a11y-core em sincronia
+    try {
+      var s2 = {};
+      try { s2 = JSON.parse(localStorage.getItem(KEY2) || '{}') || {}; } catch (_) {}
+      Object.keys(partial).forEach(function (k) { s2[k] = partial[k]; });
+      localStorage.setItem(KEY2, JSON.stringify(s2));
+    } catch (_) {}
     return s;
   }
 

@@ -23,10 +23,16 @@
 
   function load() {
     try {
-      var raw = localStorage.getItem(KEY) || localStorage.getItem(LEGACY);
-      if (!raw) return Object.assign({}, defaults);
-      var o = JSON.parse(raw);
-      return Object.assign({}, defaults, o);
+      var raw = localStorage.getItem(KEY);
+      var leg = localStorage.getItem(LEGACY);
+      var o = {};
+      if (raw) try { o = JSON.parse(raw) || {}; } catch (_) {}
+      var legO = {};
+      if (leg) try { legO = JSON.parse(leg) || {}; } catch (_) {}
+      // mescla: preferir cricri-a11y-v2, mas herdar theme do legado se faltar
+      var merged = Object.assign({}, defaults, legO, o);
+      if ((!o.theme || o.theme === 'default') && legO.theme) merged.theme = legO.theme;
+      return merged;
     } catch (_) {
       return Object.assign({}, defaults);
     }
@@ -43,18 +49,19 @@
     var s = document.createElement('style');
     s.id = 'cricri-a11y-css';
     s.textContent = [
-      '.a11y-wrap{position:fixed;right:max(0.75rem,env(safe-area-inset-right));bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:99990;display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;pointer-events:none}',
-      '.a11y-toggle{pointer-events:auto;width:52px;height:52px;border-radius:50%;border:2px solid rgba(227,61,107,0.55);background:#1a1512;color:#ebe3cf;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,0.45),0 0 16px rgba(227,61,107,0.25)}',
-      '.a11y-toggle:hover,.a11y-toggle[aria-expanded="true"]{border-color:#e33d6b;background:#2a221c}',
-      '.a11y-toggle:focus-visible{outline:3px solid #e33d6b;outline-offset:3px}',
-      '.a11y-toggle svg{width:22px;height:22px}',
-      '.a11y-panel{pointer-events:auto;position:absolute;bottom:60px;right:0;width:min(320px,calc(100vw - 1.5rem));max-height:min(70vh,520px);overflow:auto;background:#1c1511;color:#ebe3cf;border:2px solid rgba(227,61,107,0.4);border-radius:12px;padding:0.9rem 0.85rem 1rem;box-shadow:0 16px 40px rgba(0,0,0,0.5);z-index:99991}',
+      '.a11y-wrap{position:fixed;top:max(0.65rem,env(safe-area-inset-top,0px));right:max(0.65rem,env(safe-area-inset-right,0px));z-index:99990;display:flex;flex-direction:column;align-items:flex-end;gap:0.45rem;pointer-events:none}',
+      'body.page-profile .a11y-wrap,html:has(body.page-profile) .a11y-wrap{top:max(0.65rem,env(safe-area-inset-top,0px))}',
+      '.a11y-toggle{pointer-events:auto!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;border-radius:50%!important;border:2px solid #f2e8d2!important;background:#e33d6b!important;color:#fff!important;display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 18px rgba(0,0,0,0.45),0 0 14px rgba(227,61,107,0.35);transition:transform .15s ease,background .15s ease,border-color .15s ease}',
+      '.a11y-toggle:hover,.a11y-toggle[aria-expanded="true"]{background:#b03a22!important;border-color:#f2e8d2!important;transform:scale(1.05)}',
+      '.a11y-toggle:focus-visible{outline:3px solid #d49a2c!important;outline-offset:3px}',
+      '.a11y-toggle svg{width:24px;height:24px;pointer-events:none;display:block}',
+      '.a11y-panel{pointer-events:auto!important;position:fixed!important;top:calc(0.65rem + 56px + env(safe-area-inset-top,0px))!important;right:max(0.65rem,env(safe-area-inset-right,0px))!important;left:auto!important;width:min(340px,calc(100vw - 1.25rem))!important;max-height:min(70vh,calc(100dvh - 6rem - env(safe-area-inset-bottom,0px)))!important;overflow:auto;-webkit-overflow-scrolling:touch;background:#1c1511!important;color:#ebe3cf!important;border:2px solid rgba(227,61,107,0.4)!important;border-radius:12px!important;padding:0.9rem 0.85rem 1rem;box-shadow:0 16px 40px rgba(0,0,0,0.5);z-index:99992!important}',
       '.a11y-panel[hidden]{display:none!important}',
       '.a11y-panel h2{margin:0 0 0.75rem;font-family:Oswald,system-ui,sans-serif;font-size:0.95rem;letter-spacing:0.1em;text-transform:uppercase}',
       '.a11y-group{margin-bottom:0.75rem;padding-bottom:0.65rem;border-bottom:1px solid rgba(230,220,196,0.1)}',
       '.a11y-group-label{display:block;font-family:Oswald,system-ui,sans-serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:#c4b9a6;margin-bottom:0.4rem}',
       '.a11y-row{display:flex;flex-wrap:wrap;gap:0.35rem}',
-      '.a11y-chip{appearance:none;border:1.5px solid rgba(230,220,196,0.22);background:rgba(42,37,32,0.6);color:#ebe3cf;font-family:Oswald,system-ui,sans-serif;font-size:0.68rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;padding:0.35rem 0.55rem;border-radius:999px;cursor:pointer}',
+      '.a11y-chip{appearance:none;border:1.5px solid rgba(230,220,196,0.22);background:rgba(42,37,32,0.6);color:#ebe3cf;font-family:Oswald,system-ui,sans-serif;font-size:0.68rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;padding:0.5rem 0.65rem;min-height:40px;border-radius:999px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
       '.a11y-chip[aria-pressed="true"]{border-color:#e33d6b;background:rgba(227,61,107,0.2);color:#fff}',
       '.a11y-reset{width:100%;margin-top:0.35rem;appearance:none;border:1.5px solid rgba(230,220,196,0.25);background:transparent;color:#ebe3cf;font-family:Oswald,system-ui,sans-serif;font-weight:600;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.55rem;border-radius:8px;cursor:pointer}',
       '.a11y-note{margin:0.5rem 0 0;font-size:0.72rem;color:#9a9184;line-height:1.4}',
@@ -154,6 +161,13 @@
       wrap.className = 'a11y-wrap';
       document.body.appendChild(wrap);
     }
+    var A11Y_ICON =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<circle cx="12" cy="5" r="2.2"/>' +
+      '<path d="M12 8.5v3.5"/>' +
+      '<path d="M8 22l4-10 4 10"/>' +
+      '<path d="M6.5 13.5h11"/>' +
+      '</svg>';
     var toggle = document.getElementById('a11y-toggle');
     if (!toggle) {
       toggle = document.createElement('button');
@@ -164,10 +178,28 @@
       toggle.setAttribute('aria-controls', 'a11y-panel');
       toggle.setAttribute('aria-label', 'Abrir opções de acessibilidade');
       toggle.title = 'Acessibilidade';
-      toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><path d="M12 8.5v3.5"/><path d="M8 22l4-10 4 10"/><path d="M6.5 13.5h11"/></svg>';
+      toggle.innerHTML = A11Y_ICON;
       wrap.appendChild(toggle);
+    } else {
+      // unifica ícone (HOME SVG · evita ♿ só no perfil)
+      if (!toggle.querySelector('svg')) toggle.innerHTML = A11Y_ICON;
+      toggle.setAttribute('aria-label', 'Abrir opções de acessibilidade');
+      toggle.title = 'Acessibilidade';
+      if (!toggle.getAttribute('type')) toggle.setAttribute('type', 'button');
     }
     var panel = document.getElementById('a11y-panel');
+    var drawer = document.getElementById('a11y-drawer');
+    // perfil usa #a11y-drawer — unifica como painel controlado pelo core
+    if (!panel && drawer) {
+      panel = drawer;
+      panel.classList.add('a11y-panel');
+      panel.id = 'a11y-panel';
+      // drawer legado do perfil (poucos chips) → painel completo do core
+      if (!panel.querySelector('[data-a11y-set="color:protanopia"]')) {
+        panel.innerHTML = panelHTML();
+      }
+      toggle.setAttribute('aria-controls', 'a11y-panel');
+    }
     if (!panel) {
       panel = document.createElement('div');
       panel.className = 'a11y-panel';
@@ -178,16 +210,25 @@
       panel.hidden = true;
       panel.innerHTML = panelHTML();
       wrap.appendChild(panel);
-    } else {
-      // garante grupo daltonismo se painel antigo
+    } else if (panel.id === 'a11y-panel' && !panel.querySelector('[data-a11y-set], [data-k]')) {
+      // painel vazio legado
       if (!panel.querySelector('[data-a11y-set="color:protanopia"]')) {
         panel.innerHTML = panelHTML();
       }
+    } else if (panel.id === 'a11y-panel' && !panel.querySelector('[data-a11y-set="color:protanopia"]') && panel.querySelector('[data-a11y-set]')) {
+      /* ok — chips já existem */
+    } else if (panel.id === 'a11y-panel' && !panel.querySelector('[data-a11y-set="color:protanopia"]') && !panel.querySelector('[data-k]')) {
+      panel.innerHTML = panelHTML();
     }
-    // reforça interatividade
+    // painel sempre dentro do wrap (posicionamento fixo)
+    if (panel.parentNode !== wrap) wrap.appendChild(panel);
+    // toggle pode ficar no header — não mover
     toggle.style.pointerEvents = 'auto';
-    toggle.style.zIndex = '99992';
+    toggle.style.cursor = 'pointer';
+    if (!toggle.getAttribute('type')) toggle.setAttribute('type', 'button');
     wrap.style.zIndex = '99990';
+    wrap.style.pointerEvents = 'none';
+    panel.style.pointerEvents = 'auto';
     return { wrap: wrap, toggle: toggle, panel: panel };
   }
 
@@ -196,19 +237,27 @@
     Object.keys(defaults).forEach(function (k) {
       var v = state[k] || defaults[k];
       if (k === 'theme') {
-        if (v === 'light') {
-          root.setAttribute('data-theme', 'light');
-          root.setAttribute('data-a11y-theme', 'light');
-        } else {
-          root.setAttribute('data-theme', 'dark');
-          root.setAttribute('data-a11y-theme', 'dark');
+        var theme = v === 'light' ? 'light' : 'dark';
+        root.setAttribute('data-theme', theme);
+        root.setAttribute('data-a11y-theme', theme);
+        // sync legado (theme.js / boot HOME)
+        try {
+          var leg = {};
+          try { leg = JSON.parse(localStorage.getItem(LEGACY) || '{}') || {}; } catch (_) {}
+          leg.theme = theme;
+          localStorage.setItem(LEGACY, JSON.stringify(leg));
+        } catch (_) {}
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'light' ? '#f6efdc' : '#0c0a08');
+        if (global.fascTheme && typeof global.fascTheme.set === 'function') {
+          try { global.fascTheme.set(theme); } catch (_) {}
         }
         return;
       }
       if (v === 'default' || v === 'md') root.removeAttribute('data-a11y-' + k);
       else root.setAttribute('data-a11y-' + k, v);
     });
-    var panel = document.getElementById('a11y-panel');
+    var panel = document.getElementById('a11y-panel') || document.getElementById('a11y-drawer');
     if (panel) {
       panel.querySelectorAll('[data-a11y-set]').forEach(function (btn) {
         var raw = btn.getAttribute('data-a11y-set') || '';
@@ -216,6 +265,18 @@
         var key = parts[0], val = parts[1];
         var current = state[key] || defaults[key];
         btn.setAttribute('aria-pressed', current === val ? 'true' : 'false');
+      });
+      // chips legados data-k / data-v
+      panel.querySelectorAll('.chip[data-k]').forEach(function (btn) {
+        var key = btn.getAttribute('data-k');
+        var val = btn.getAttribute('data-v');
+        var current = state[key] || defaults[key];
+        var match = (val === current) || ((val === 'default' || val === 'md') && (current === 'default' || current === 'md' || current === 'dark' && key === 'theme' && val === 'default'));
+        if (key === 'theme') {
+          match = (val === 'light' && current === 'light') ||
+            ((val === 'dark' || val === 'default') && current !== 'light');
+        }
+        btn.setAttribute('aria-pressed', match ? 'true' : 'false');
       });
     }
     try {
@@ -291,54 +352,87 @@
         if (ui.toggle.getAttribute('aria-expanded') === 'true') closePanel(ui.toggle, ui.panel);
         else {
           openPanel(ui.toggle, ui.panel);
-          ignoreUntil = Date.now() + 350;
+          ignoreUntil = Date.now() + 450;
         }
       } else {
         openPanel(ui.toggle, ui.panel);
-        ignoreUntil = Date.now() + 350;
+        ignoreUntil = Date.now() + 450;
       }
     }
 
-    ui.toggle.addEventListener('click', onToggle, true);
-    ui.toggle.addEventListener('touchend', function (e) {
-      e.preventDefault();
+    // Toggle: se HOME já wireou, não duplica open/close — mas chips SEMPRE passam pelo core
+    var lastToggleAt = 0;
+    var homeWired = ui.toggle.dataset.a11yHomeWired === '1';
+    // Sempre liga o toggle no core. HOME pode ter wire paralelo (debounce evita double-toggle).
+    ui.toggle.addEventListener('click', function (e) {
+      if (Date.now() - lastToggleAt < 280) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      lastToggleAt = Date.now();
+      // se HOME já abriu no mesmo gesto, onToggle ainda sincroniza estado
       onToggle(e);
-    }, { passive: false });
+    }, true);
+    ui.toggle.style.pointerEvents = 'auto';
+    ui.toggle.style.zIndex = '99991';
 
+    // Chips de tema/texto/etc. — uma única fonte de verdade (inclui HOME)
     ui.panel.addEventListener('click', function (e) {
-      e.stopPropagation();
       var reset = e.target.closest('[data-a11y-reset]');
       if (reset) {
+        e.preventDefault();
+        e.stopPropagation();
         state = Object.assign({}, defaults);
         apply(state);
         save(state);
         return;
       }
-      var chip = e.target.closest('[data-a11y-set]');
+      var chip = e.target.closest('[data-a11y-set], .chip[data-k]');
       if (!chip) return;
+      e.preventDefault();
+      e.stopPropagation();
       var raw = chip.getAttribute('data-a11y-set') || '';
-      var parts = raw.split(':');
-      if (parts.length < 2) return;
-      state[parts[0]] = parts[1];
+      var key, val;
+      if (raw && raw.indexOf(':') > 0) {
+        var parts = raw.split(':');
+        key = parts[0]; val = parts[1];
+      } else {
+        key = chip.getAttribute('data-k');
+        val = chip.getAttribute('data-v');
+      }
+      if (!key) return;
+      // normaliza tema
+      if (key === 'theme') {
+        if (val === 'default') val = 'dark';
+        val = val === 'light' ? 'light' : 'dark';
+      }
+      state = Object.assign({}, load(), state);
+      state[key] = val;
       apply(state);
       save(state);
-    });
+      ui.panel.querySelectorAll('.chip[data-k="' + key + '"]').forEach(function (c) {
+        var cv = c.getAttribute('data-v');
+        var on = cv === val || (key === 'theme' && val === 'dark' && (cv === 'dark' || cv === 'default'));
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }, true);
 
-    document.addEventListener('click', function (e) {
-      if (Date.now() < ignoreUntil) return;
-      if (ui.toggle.getAttribute('aria-expanded') !== 'true') return;
-      if (ui.panel.contains(e.target) || ui.toggle.contains(e.target)) return;
-      closePanel(ui.toggle, ui.panel);
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && ui.toggle.getAttribute('aria-expanded') === 'true') {
+    // fechar ao clicar fora / Escape (HOME já tem handlers próprios se homeWired)
+    if (!homeWired) {
+      document.addEventListener('click', function (e) {
+        if (Date.now() < ignoreUntil) return;
+        if (ui.toggle.getAttribute('aria-expanded') !== 'true') return;
+        if (ui.panel.contains(e.target) || ui.toggle.contains(e.target)) return;
         closePanel(ui.toggle, ui.panel);
-        ui.toggle.focus();
-      }
-    });
-
-    wireVLibras();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && ui.toggle.getAttribute('aria-expanded') === 'true') {
+          closePanel(ui.toggle, ui.panel);
+          try { ui.toggle.focus(); } catch (_) {}
+        }
+      });
+    }
 
     global.CricriA11y = {
       get: load,
@@ -351,8 +445,11 @@
         state = Object.assign({}, defaults);
         apply(state);
         save(state);
-      }
+      },
+      open: function () { openPanel(ui.toggle, ui.panel); },
+      close: function () { closePanel(ui.toggle, ui.panel); }
     };
+    wireVLibras();
   }
 
   if (document.readyState === 'loading') {

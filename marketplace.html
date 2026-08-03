@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Marketplace · CRICRI</title>
+  <meta name="theme-color" content="#0c0a08">
+  <link rel="stylesheet" href="style.css">
+  <script>
+  (function () {
+    try {
+      var s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+      var t = s.theme || 'dark';
+      var html = document.documentElement;
+      html.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+      html.setAttribute('data-a11y-theme', t === 'light' ? 'light' : 'dark');
+    } catch (e) {}
+  })();
+  </script>
+</head>
+<body class="page-marketplace">
+  <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
+
+  <header class="header">
+    <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
+    <div class="header-actions">
+      <a class="auth-chip" id="auth-chip" href="profile.html">Entrar</a>
+      <button type="button" class="a11y-toggle" id="a11y-toggle"
+        aria-expanded="false" aria-controls="a11y-panel"
+        aria-label="Abrir opções de acessibilidade" title="Acessibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="5" r="2.2"/>
+          <path d="M12 8.5v3.5"/>
+          <path d="M8 22l4-10 4 10"/>
+          <path d="M6.5 13.5h11"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="a11y-wrap">
+    <div class="a11y-panel" id="a11y-panel" role="dialog" aria-label="Opções de acessibilidade" hidden>
+      <h2>Acessibilidade</h2>
+      <div class="a11y-group">
+        <span class="a11y-group-label" id="a11y-theme-label">Tema / tela</span>
+        <div class="a11y-row" role="group" aria-labelledby="a11y-theme-label">
+          <button type="button" class="a11y-chip" data-a11y-set="theme:dark" aria-pressed="true">Escuro</button>
+          <button type="button" class="a11y-chip" data-a11y-set="theme:light" aria-pressed="false">Claro</button>
+        </div>
+      </div>
+      <div class="a11y-group">
+        <span class="a11y-group-label" id="a11y-text-label">Tamanho do texto</span>
+        <div class="a11y-row a11y-stepper" role="group" aria-labelledby="a11y-text-label">
+          <button type="button" class="a11y-chip" data-a11y-set="text:md" aria-pressed="true">A</button>
+          <button type="button" class="a11y-chip" data-a11y-set="text:lg" aria-pressed="false">A+</button>
+          <button type="button" class="a11y-chip" data-a11y-set="text:xl" aria-pressed="false">A++</button>
+        </div>
+      </div>
+      <button type="button" class="a11y-reset" id="a11y-reset">Restaurar padrão</button>
+    </div>
+  </div>
+
+  <main id="conteudo-principal" class="route-section is-route-enter" style="padding-bottom:6rem">
+  <!-- MARKETPLACE -->
+  <section class="market-section" id="marketplace">
+    <div class="market-header">
+      <h2>Marketplace</h2>
+      <p class="market-sub">hospedagem, arte, comida, música, carona e serviços — direto com quem tá na roda</p>
+    </div>
+
+    <div id="market-body" class="collapsible-body">
+    <div class="market-tabs" id="market-tabs" role="tablist" aria-label="Categorias do marketplace">
+      <button class="market-tab active" data-market-cat="todos" type="button" role="tab" aria-selected="true">Todos</button>
+      <button class="market-tab" data-market-cat="hospedagem" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+        Hospedagens
+      </button>
+      <button class="market-tab" data-market-cat="arte" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="13.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M12 20.5A8.5 8.5 0 0 1 9 4.1c1 0 1.8.8 1.8 1.8 0 .5-.2 1-.5 1.3-.3.3-.5.7-.5 1.2 0 .9.7 1.6 1.6 1.6h2.4c1.9 0 3.5 1.6 3.5 3.5 0 3.9-2.7 7-5.3 7z"/></svg>
+        Arte
+      </button>
+      <button class="market-tab" data-market-cat="gastronomia" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6.5a2.5 2.5 0 0 0 5 0V3"/><path d="M8.5 3v18"/><path d="M17 3c-1.4 0-2.5 1.8-2.5 5.5S15.6 13 17 13v8"/></svg>
+        Gastronomia
+      </button>
+      <button class="market-tab" data-market-cat="musica" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.5l11-2.2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>
+        Música
+      </button>
+      <button class="market-tab" data-market-cat="mobilidade" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.5V12l2-5h12l2 5v4.5"/><path d="M4 16.5h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>
+        Mobilidade
+      </button>
+      <button class="market-tab" data-market-cat="servicos" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M9 6V4.8A1.8 1.8 0 0 1 10.8 3h2.4A1.8 1.8 0 0 1 15 4.8V6"/><circle cx="12" cy="12.5" r="3"/></svg>
+        Serviços
+      </button>
+    </div>
+
+    <div class="market-grid" id="market-grid">
+      <!-- cards injetados por mock.js -->
+    </div>
+    </div><!-- /market-body -->
+  </section>
+
+
+  </main>
+
+  <div id="site-footer-slot"></div>
+
+  <nav class="bottom-nav" aria-label="Navegação">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg>
+      Home
+    </a>
+    <a href="marketplace.html" class="active" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16l-1.2 11.2A2 2 0 0 1 16.81 20H7.19a2 2 0 0 1-1.99-1.8L4 7z"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M9 11v4M15 11v4"/></svg>
+      Market
+    </a>
+    <a href="tamagotchi.html">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><circle cx="9" cy="10" r="1.35" fill="currentColor"/><circle cx="15" cy="10" r="1.35" fill="currentColor"/><path d="M7 13.5c1.2 1.4 2.8 2.1 5 2.1s3.8-.7 5-2.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.5 11.5c-.8-.3-1.6-.9-2.2-1.6M19.5 11.5c.8-.3 1.6-.9 2.2-1.6M4.8 13.8c-.9.1-1.8.1-2.6-.1M19.2 13.8c.9.1 1.8.1 2.6-.1" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+      Meow
+    </a>
+    <a href="profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20c1.1-3.6 4.1-5.6 7.5-5.6s6.4 2 7.5 5.6"/></svg>
+      Perfil
+    </a>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/a11y-core.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="mock.js"></script>
+  <script>
+  document.body.classList.add('is-page-ready');
+  // tabs marketplace
+  document.querySelectorAll('.market-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.market-tab').forEach(function (b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      var cat = btn.getAttribute('data-market-cat') || 'todos';
+      document.querySelectorAll('.market-card').forEach(function (card) {
+        var c = card.getAttribute('data-cat') || '';
+        var show = cat === 'todos' || c === cat;
+        card.hidden = !show;
+      });
+    });
+  });
+  </script>
+</body>
+</html>

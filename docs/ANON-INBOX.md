@@ -1,5 +1,12 @@
 # Caixinha anônima — FASC+
 
+## Expiração com o festival (P1.6)
+
+- Corte: **mesmo `EVENT_END` do tamagotchi** — `2026-11-23T00:00:00-03:00` (`FASC_CONFIG.eventEndIso` / `window.fascEventEnded()`).
+- Após essa data a caixinha **não lista** recados (filtro na leitura + `.lt('created_at', eventEndIso)`).
+- Sem delete físico nesta fase; limpeza pode ser job posterior.
+- Novos envios também bloqueados no client após o fim do evento.
+
 ## SQL (obrigatório uma vez)
 
 No Dashboard → SQL Editor, rode:
@@ -25,3 +32,11 @@ No Dashboard → SQL Editor, rode:
 
 Anonimato = o **dono não vê** o `from_profile_id` quando `is_anonymous = true`.
 O backend ainda exige login para rate-limit futuro por usuário.
+
+## Mural de gentilezas (P1.3)
+
+- Coluna `is_public boolean default false` em `inbox_anon`.
+- Dono marca **um** recado por vez: `update { is_public: true } where id = …` (RLS: só a própria caixinha).
+- Leitura pública: RPC `get_kindness_wall` / `get_kindness_wall_by_handle` — **nunca** retorna `from_profile_id`.
+- UI do mural sempre mostra remetente como **anônimo**.
+- SQL: `supabase/STEP_N_inbox_is_public.sql`.

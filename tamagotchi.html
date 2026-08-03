@@ -380,7 +380,42 @@
       z-index: 4000;
     }
 
-    </style>
+    
+.btn-share-cricri {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin: 0.65rem 0 0.25rem;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(227, 61, 107, 0.55);
+  background: rgba(227, 61, 107, 0.14);
+  color: #f2e8d2;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-share-cricri:hover {
+  background: rgba(227, 61, 107, 0.28);
+  border-color: #e33d6b;
+}
+.btn-share-cricri:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.btn-share-cricri:focus-visible {
+  outline: 2px solid #e33d6b;
+  outline-offset: 2px;
+}
+
+</style>
 
 <style id="tama-alert-style">
 /* ---- alertas / confirmação estilo atenção CRICRI ---- */
@@ -481,9 +516,7 @@ button[data-action="reset"]:hover {
   <div class="top">
     <a class="logo" href="index.html">CRI<span>CRI</span></a>
     <span style="display:flex;align-items:center;gap:0.4rem">
-      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar tema" title="Tema" style="width:2.2rem;height:2.2rem;border-radius:999px;border:1.5px solid rgba(235,227,207,0.22);background:rgba(0,0,0,0.28);color:inherit;display:inline-flex;align-items:center;justify-content:center;cursor:pointer">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
-      </button>
+      <!-- Tema só via botão de acessibilidade -->
       <a class="back" href="index.html">← Home</a>
     </span>
   </div>
@@ -644,6 +677,7 @@ button[data-action="reset"]:hover {
             </svg>
           </div>
           <div class="name" id="tama-name">Roda</div>
+        <button type="button" class="btn-share-cricri" id="btn-share-cricri">Compartilhar meu CRICRI</button>
           <div class="meta">
             <span id="tama-stage">Ovo</span>
             <span>·</span>
@@ -717,6 +751,7 @@ button[data-action="reset"]:hover {
   <script src="js/notif-bell.js"></script>
   <script src="js/footer.js"></script>
   <script src="js/tamagotchi.js"></script>
+  <script src="js/tama-postcard.js"></script>
   <script src="js/a11y-core.js" defer></script>
   <script src="js/keyboard-nav.js" defer></script>
   <script src="js/touch-gestures.js" defer></script>

@@ -36,6 +36,9 @@
   }
 
   async function sendAnon(toProfileId, body, isAnonymous) {
+    if (typeof window.fascEventEnded === 'function' && window.fascEventEnded()) {
+      throw new Error('O festival acabou — a caixinha Meow não recebe mais scraps.');
+    }
     var user = window.fascAuth ? await window.fascAuth.user() : null;
     if (!user) throw new Error('Entre com e-mail para enviar (o recado pode continuar anônimo).');
     if (!toProfileId) throw new Error('Perfil destino inválido.');
@@ -47,6 +50,10 @@
       from_profile_id: isAnonymous === false ? user.id : null
     };
     if (!payload.body) throw new Error('Escreva alguma coisa.');
+    // Filtro de linguagem hostil (client) — bloqueia; não suaviza
+    if (window.CricriHostileFilter) {
+      window.CricriHostileFilter.assertClean(payload.body);
+    }
     var res = await window.fascDb.from('inbox_anon').insert(payload).select('id').single();
     if (res.error) throw res.error;
     return res.data;
@@ -55,11 +62,21 @@
   async function loadMyInbox() {
     var user = window.fascAuth ? await window.fascAuth.user() : null;
     if (!user || !window.fascDb) return [];
+
+    // P1.6 — após EVENT_END não lista recados (filtro de leitura; sem delete)
+    if (typeof window.fascEventEnded === 'function' && window.fascEventEnded()) {
+      return [];
+    }
+    var eventEndIso =
+      (window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso) ||
+      '2026-11-23T00:00:00-03:00';
+
     var res = await window.fascDb
       .from('inbox_anon')
-      .select('id,body,is_anonymous,answer,answered_at,is_hidden,created_at,from_profile_id')
+      .select('id,body,is_anonymous,answer,answered_at,is_hidden,created_at,from_profile_id,reaction,is_public')
       .eq('to_profile_id', user.id)
       .eq('is_hidden', false)
+      .lt('created_at', eventEndIso)
       .order('created_at', { ascending: false })
       .limit(50);
     if (res.error) {
@@ -79,9 +96,78 @@
     if (res.error) throw res.error;
   }
 
+  async function setReaction(id, emoji) {
+    var allowed = { '🔥': 1, '💛': 1, '🥹': 1 };
+    if (!allowed[emoji]) throw new Error('Reação inválida');
+    var res = await window.fascDb.from('inbox_anon').update({ reaction: emoji }).eq('id', id);
+    if (res.error) throw res.error;
+  }
+
   async function hideMessage(id) {
     var res = await window.fascDb.from('inbox_anon').update({ is_hidden: true }).eq('id', id);
     if (res.error) throw res.error;
+  }
+
+  /** Um registro por vez — nunca em lote */
+  async function makePublic(id) {
+    if (!id) throw new Error('Recado inválido.');
+    var res = await window.fascDb.from('inbox_anon').update({ is_public: true }).eq('id', id);
+    if (res.error) throw res.error;
+  }
+
+  /**
+   * Mural público — RPC (sem from_profile_id).
+   * @param {{ userId?: string, handle?: string }} opts
+   */
+  async function loadKindnessWall(opts) {
+    opts = opts || {};
+    if (!window.fascDb || !window.fascDb.rpc) return [];
+    try {
+      if (opts.handle) {
+        var h = await window.fascDb.rpc('get_kindness_wall_by_handle', {
+          p_handle: String(opts.handle).replace(/^@/, '').trim()
+        });
+        if (h.error) {
+          console.warn('[kindness]', h.error.message);
+          return [];
+        }
+        return h.data || [];
+      }
+      if (opts.userId) {
+        var r = await window.fascDb.rpc('get_kindness_wall', { p_to_user: opts.userId });
+        if (r.error) {
+          console.warn('[kindness]', r.error.message);
+          return [];
+        }
+        return r.data || [];
+      }
+      return [];
+    } catch (e) {
+      console.warn('[kindness]', e.message || e);
+      return [];
+    }
+  }
+
+
+  function countReactions(list) {
+    var counts = { '🔥': 0, '💛': 0, '🥹': 0 };
+    (list || []).forEach(function (m) {
+      if (m && m.reaction && counts[m.reaction] != null) counts[m.reaction]++;
+    });
+    return counts;
+  }
+
+  function paintReactionCounts(counts) {
+    var host = $('anon-react-counts');
+    if (!host) return;
+    var total = (counts['🔥'] || 0) + (counts['💛'] || 0) + (counts['🥹'] || 0);
+    host.hidden = false;
+    host.innerHTML =
+      '<span class="anon-react-counts-label">Suas reações</span>' +
+      '<span class="anon-react-count-pill" data-em="🔥">🔥 <strong>' + (counts['🔥'] || 0) + '</strong></span>' +
+      '<span class="anon-react-count-pill" data-em="💛">💛 <strong>' + (counts['💛'] || 0) + '</strong></span>' +
+      '<span class="anon-react-count-pill" data-em="🥹">🥹 <strong>' + (counts['🥹'] || 0) + '</strong></span>' +
+      '<span class="anon-react-counts-total">' + total + ' no total</span>';
   }
 
   function renderInbox(list) {
@@ -91,6 +177,7 @@
       box.innerHTML = '<p class="anon-empty">Nenhum recado ainda. Compartilha teu perfil com <code>?u=seuhandle</code>.</p>';
       return;
     }
+    var REACT_EMOJIS = ['🔥', '💛', '🥹'];
     box.innerHTML = list.map(function (m) {
       var date = m.created_at ? new Date(m.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '';
       var label = m.is_anonymous ? 'anônimo' : 'identificado';
@@ -101,11 +188,20 @@
             '<input class="profile-input anon-answer-input" id="ans-' + m.id + '" maxlength="500" placeholder="Responder em público…">' +
             '<button type="button" class="profile-btn primary anon-answer-btn" data-answer="' + m.id + '">Responder</button>' +
           '</div>';
+      var reactBtns = REACT_EMOJIS.map(function (em) {
+        var on = m.reaction === em ? ' is-on' : '';
+        return '<button type="button" class="anon-react-btn' + on + '" data-react="' + m.id + '" data-emoji="' + em + '" aria-pressed="' + (m.reaction === em ? 'true' : 'false') + '" aria-label="Reagir ' + em + '">' + em + '</button>';
+      }).join('');
+      var publicBtn = m.is_public
+        ? '<button type="button" class="anon-public is-public" disabled>No mural público ✓</button>'
+        : '<button type="button" class="anon-public" data-public="' + m.id + '">Tornar este elogio público no meu perfil</button>';
       return (
         '<article class="anon-item" data-id="' + m.id + '">' +
           '<header class="anon-item-head"><span class="anon-badge">' + label + '</span><time>' + escapeHtml(date) + '</time></header>' +
           '<p class="anon-body">' + escapeHtml(m.body) + '</p>' +
+          '<div class="anon-react-row" role="group" aria-label="Reação rápida">' + reactBtns + '</div>' +
           answered +
+          publicBtn +
           '<button type="button" class="anon-hide" data-hide="' + m.id + '">Ocultar</button>' +
         '</article>'
       );
@@ -116,6 +212,7 @@
     try {
       var list = await loadMyInbox();
       renderInbox(list);
+      paintReactionCounts(countReactions(list));
       var count = $('anon-inbox-count');
       if (count) count.textContent = list.filter(function (m) { return !m.answer; }).length + ' sem resposta';
     } catch (err) {
@@ -130,11 +227,29 @@
     list.addEventListener('click', async function (e) {
       var hideBtn = e.target.closest('[data-hide]');
       var ansBtn = e.target.closest('[data-answer]');
+      var reactBtn = e.target.closest('[data-react]');
+      var publicBtn = e.target.closest('[data-public]');
       try {
+        if (reactBtn) {
+          var rid = reactBtn.getAttribute('data-react');
+          var em = reactBtn.getAttribute('data-emoji');
+          await setReaction(rid, em);
+          await refreshInbox();
+          setMsg($('anon-inbox-msg'), 'Reação ' + em + ' salva.', true);
+          if (typeof window.showMeowPayForward === 'function') window.showMeowPayForward();
+          return;
+        }
         if (hideBtn) {
           await hideMessage(hideBtn.getAttribute('data-hide'));
           await refreshInbox();
           setMsg($('anon-inbox-msg'), 'Recado ocultado.', true);
+          return;
+        }
+        if (publicBtn) {
+          var pid = publicBtn.getAttribute('data-public');
+          await makePublic(pid);
+          await refreshInbox();
+          setMsg($('anon-inbox-msg'), 'Elogio no mural de gentilezas.', true);
           return;
         }
         if (ansBtn) {
@@ -143,10 +258,30 @@
           await answerMessage(id, input && input.value);
           await refreshInbox();
           setMsg($('anon-inbox-msg'), 'Resposta publicada.', true);
+          if (typeof window.showMeowPayForward === 'function') window.showMeowPayForward();
         }
       } catch (err) {
         setMsg($('anon-inbox-msg'), err.message || 'Erro', false);
       }
+    });
+  }
+
+
+  /** Ice-breakers: preenche textarea ao clicar (delegação) */
+  function wireIceBreakers(root, textareaId) {
+    if (!root) return;
+    var ice = root.querySelector('[data-ice-group], .meow-ice, .anon-ice');
+    var ta = document.getElementById(textareaId);
+    if (!ice || !ta || ice.dataset.bound === '1') return;
+    ice.dataset.bound = '1';
+    ice.addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-ice]');
+      if (!chip || !ice.contains(chip)) return;
+      e.preventDefault();
+      var text = chip.getAttribute('data-ice');
+      ta.value = text == null ? '' : String(text);
+      try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+      ta.focus();
     });
   }
 
@@ -178,6 +313,7 @@
 
     if (form.dataset.bound === '1') return;
     form.dataset.bound = '1';
+    wireIceBreakers(card, 'anon-body');
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var body = ($('anon-body') && $('anon-body').value) || '';
@@ -232,6 +368,8 @@
     loadMyInbox: loadMyInbox,
     refresh: refreshInbox,
     resolveTarget: resolveTargetProfile,
+    makePublic: makePublic,
+    loadKindnessWall: loadKindnessWall,
     boot: boot
   };
 

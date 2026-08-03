@@ -28,3 +28,18 @@ Authentication → URL Configuration
 
 ## Se a área do usuário “carregava pra sempre”
 Corrigido: sessão com timeout, login visível na hora, `onChange` só uma vez, caixinha não trava se a tabela `inbox_anon` ainda não existir.
+
+
+## Google redireciona para página branca / erro
+
+Causas mais comuns (não é bug do HTML):
+
+1. **Redirect URL não listada** em Authentication → URL Configuration → Redirect URLs.  
+   Inclua exatamente: `https://SEU-DOMINIO/profile.html` e `http://localhost:PORTA/profile.html`.
+2. **Site URL** diferente do host em que você está testando.
+3. Provider **Google** desligado ou Client ID/Secret incorretos no Dashboard.
+4. No Google Cloud Console, a Authorized redirect URI deve ser a do **Supabase**  
+   (`https://bcnbwshwehofncfkdnra.supabase.co/auth/v1/callback`), não a do site.
+
+O app usa `redirectTo = origin + /profile.html` e `detectSessionInUrl: true`.
+Se ainda falhar, abra o console: `[CRICRI auth] Google redirectTo = …` e confira se essa URL está nas Redirect URLs.
