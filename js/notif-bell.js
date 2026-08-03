@@ -55,10 +55,13 @@
   }
 
   function mount() {
-    // desativado: perfil só com acessibilidade (sem sininho/ferramentas)
-    if (true) { /* CRICRI_TOP_TOOLS_DISABLED */
-      return;
-    }
+    // Desligado globalmente — FABs (sino/engrenagem) conflitaram no mobile (Meow/Home).
+    // Notificações ficam no fluxo do perfil quando o push estiver estável.
+    try {
+      var legacy = document.getElementById('cricri-top-tools');
+      if (legacy && legacy.parentNode) legacy.parentNode.removeChild(legacy);
+    } catch (_) {}
+    return;
 
     // Sininho/ferramentas só na área do usuário (pedido de produto)
     var onProfile = document.body.classList.contains('page-profile')

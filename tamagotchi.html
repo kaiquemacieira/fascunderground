@@ -415,6 +415,19 @@
   outline-offset: 2px;
 }
 
+
+/* Esconde ferramentas/sino injetados no Meow (mobile) */
+#cricri-top-tools,
+.cricri-top-tools,
+#cricri-gear-btn,
+#cricri-notif-btn,
+#cricri-gear-panel,
+#cricri-notif-panel {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 </style>
 
 <style id="tama-alert-style">
@@ -748,8 +761,8 @@ button[data-action="reset"]:hover {
 
   <script src="js/theme.js"></script>
   <script src="js/a11y-motion.js"></script>
-  <script src="js/notif-bell.js"></script>
-  <script src="js/footer.js"></script>
+  <!-- notif-bell desligado no Meow (evita FABs fantasmas no mobile) -->
+<script src="js/footer.js"></script>
   <script src="js/tamagotchi.js"></script>
   <script src="js/tama-postcard.js"></script>
   <script src="js/a11y-core.js" defer></script>

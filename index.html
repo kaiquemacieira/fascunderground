@@ -531,7 +531,7 @@ body {
   background: var(--void);
   color: var(--paper);
   line-height: var(--lh-body);
-  padding-bottom: 128px;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   -webkit-font-smoothing: antialiased;
   position: relative;
 }
@@ -789,6 +789,25 @@ picture img {
 
 
 /* -------- header -------- */
+
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: var(--z-a11y-btn, 210);
+  pointer-events: auto;
+}
+.header-actions .a11y-toggle {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 99991 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 
 .header {
   background: var(--ink);
@@ -1602,6 +1621,47 @@ html[data-a11y-theme="light"] .header-search input {
   max-width: 340px;
   pointer-events: auto;
   box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.45), 0 8px 24px rgba(212, 47, 98, 0.25);
+}
+
+
+/* CTA do mapa — no fluxo do conteúdo (não cobre o bottom-nav) */
+.map-role-cta {
+  margin: 1rem 0 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+.map-role-cta .btn {
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.45), 0 8px 24px rgba(212, 47, 98, 0.25);
+}
+.map-role-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--stone, #9a9184);
+  text-align: center;
+  line-height: 1.35;
+}
+/* bottom-cta legado: some se ainda existir no DOM */
+.bottom-cta { display: none !important; }
+
+/* Menu inferior sempre fixo e acima de tudo do conteúdo */
+.bottom-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  background: var(--ink, #0c0a08) !important;
+  border-top: 2px solid rgba(230, 220, 196, 0.12) !important;
+  z-index: 9000 !important;
+  pointer-events: auto !important;
+}
+body {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .bottom-nav {
@@ -2705,7 +2765,7 @@ html[data-a11y-cursor="large"] * {
   }
 
   body {
-    padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
 
   .feed-tabs,
@@ -3538,18 +3598,18 @@ html[data-a11y-theme="light"] #header-search-btn {
       <label class="sr-only" for="map-places-q">Buscar lugar</label>
       <input type="search" id="map-places-q" placeholder="Buscar no mapa…" autocomplete="off" enterkeyhint="search" />
     </div>
+    
+    <div class="map-role-cta" id="map-role-cta">
+      <button type="button" class="btn primary big" id="btn-marcar">Marcar meu rolê</button>
+      <p class="map-role-hint">Usa sua localização pra pintar o ponto no mapa ao vivo.</p>
+    </div>
+
     <ul class="map-places-list" id="map-places-list" role="listbox" aria-label="Lista de lugares no mapa"></ul>
 </section>
 
   <!-- CTA FIXO + BOTTOM NAV ESTILO INSTAGRAM -->
   </main>
-
-  <div class="bottom-cta">
-    <button class="btn primary big" id="btn-marcar">Marcar meu rolê</button>
-  </div>
-
-  
-  <!-- SUPORTE · DENÚNCIA · EMERGÊNCIA -->
+<!-- SUPORTE · DENÚNCIA · EMERGÊNCIA -->
   <section class="support-section" id="suporte" aria-labelledby="support-title">
     <div class="support-inner">
       <header class="support-head">
@@ -3777,7 +3837,7 @@ html[data-a11y-theme="light"] #header-search-btn {
       if (toggle.dataset.a11yHomeWired === '1') return;
       toggle.dataset.a11yHomeWired = '1';
       // Se a11y-core já montou, ele controla o clique — evita open/close duplo
-      if (window.CricriA11y) {
+      if (window.CricriA11y || window.__CRICRI_A11Y_V2) {
         console.info('[CRICRI a11y] home: delegando toggle ao a11y-core');
         return;
       }
@@ -4149,10 +4209,10 @@ html[data-a11y-theme="light"] #header-search-btn {
 
   <!-- bundles home: core (config/auth/apis) + ui (a11y/gestos) -->
   <script src="js/bundles/home-core.js" defer></script>
+  <!-- a11y-core ANTES do home-ui (bundle traz a11y legado que quebra o toque no mobile) -->
+  <script src="js/a11y-core.js" defer></script>
   <script src="js/bundles/home-ui.js" defer></script>
   <script src="js/theme.js" defer></script>
-  <!-- a11y-core atualizado (tema + ícone unificado HOME/Perfil/Meow) -->
-  <script src="js/a11y-core.js" defer></script>
   <script src="js/map-lazy.js" defer></script>
   <script src="script.js" defer></script>
   <!-- P2/P3.1 — encontro de bichinhos (só conexões mútuas + geofence) -->

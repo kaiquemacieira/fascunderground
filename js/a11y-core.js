@@ -5,6 +5,9 @@
 (function (global) {
   'use strict';
 
+  // Marca cedo: bundles legados (home-ui) devem ceder ao core v2
+  global.__CRICRI_A11Y_V2 = true;
+
   var KEY = 'cricri-a11y-v2';
   var LEGACY = 'fasc-a11y-v1';
 
@@ -336,46 +339,88 @@
     apply(state);
     save(state);
 
-    if (ui.panel.dataset.cricriA11y === '1') return;
+    // v2: sempre assume o controle (home-ui legado marca cricriA11y=1 e quebra no mobile)
+    if (ui.panel.dataset.cricriA11yCoreV2 === '1') {
+      global.CricriA11y = global.CricriA11y || {
+        get: load,
+        set: function (partial) {
+          state = Object.assign({}, load(), partial || {});
+          apply(state); save(state);
+        },
+        reset: function () {
+          state = Object.assign({}, defaults);
+          apply(state); save(state);
+        }
+      };
+      return;
+    }
     ui.panel.dataset.cricriA11y = '1';
+    ui.panel.dataset.cricriA11yCoreV2 = '1';
+
+    // Remove listeners legados (bundle home-ui / wire HOME) clonando o botão
+    try {
+      if (ui.toggle && ui.toggle.parentNode) {
+        var clean = ui.toggle.cloneNode(true);
+        ui.toggle.parentNode.replaceChild(clean, ui.toggle);
+        ui.toggle = clean;
+        // re-resolve after clone
+        ui = { wrap: ui.wrap, toggle: clean, panel: ui.panel };
+      }
+    } catch (_) {}
+
+    // força painel fixo no viewport (mobile HOME)
+    try {
+      ui.panel.style.position = 'fixed';
+      ui.panel.style.top = 'calc(0.65rem + 56px + env(safe-area-inset-top, 0px))';
+      ui.panel.style.right = 'max(0.65rem, env(safe-area-inset-right, 0px))';
+      ui.panel.style.left = 'auto';
+      ui.panel.style.zIndex = '99992';
+      ui.panel.style.pointerEvents = 'auto';
+    } catch (_) {}
+
+    ui.toggle.style.pointerEvents = 'auto';
+    ui.toggle.style.zIndex = '99991';
+    ui.toggle.style.touchAction = 'manipulation';
+    ui.toggle.style.cursor = 'pointer';
+    ui.toggle.style.webkitTapHighlightColor = 'transparent';
 
     var ignoreUntil = 0;
     function onToggle(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
       }
-      if (!ui.panel.hidden && ui.panel.classList.contains('is-open')) {
+      var open = ui.toggle.getAttribute('aria-expanded') === 'true' && !ui.panel.hidden;
+      if (open) {
         closePanel(ui.toggle, ui.panel);
-      } else if (!ui.panel.hidden && !ui.panel.hasAttribute('hidden')) {
-        // some browsers
-        if (ui.toggle.getAttribute('aria-expanded') === 'true') closePanel(ui.toggle, ui.panel);
-        else {
-          openPanel(ui.toggle, ui.panel);
-          ignoreUntil = Date.now() + 450;
-        }
       } else {
         openPanel(ui.toggle, ui.panel);
-        ignoreUntil = Date.now() + 450;
+        // mobile: gesto gera click extra no document — janela maior
+        ignoreUntil = Date.now() + 700;
       }
     }
 
-    // Toggle: se HOME já wireou, não duplica open/close — mas chips SEMPRE passam pelo core
     var lastToggleAt = 0;
-    var homeWired = ui.toggle.dataset.a11yHomeWired === '1';
-    // Sempre liga o toggle no core. HOME pode ter wire paralelo (debounce evita double-toggle).
-    ui.toggle.addEventListener('click', function (e) {
-      if (Date.now() - lastToggleAt < 280) {
-        e.preventDefault();
-        e.stopPropagation();
+    function handleToggleEvent(e) {
+      if (Date.now() - lastToggleAt < 320) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        }
         return;
       }
       lastToggleAt = Date.now();
-      // se HOME já abriu no mesmo gesto, onToggle ainda sincroniza estado
       onToggle(e);
+    }
+    // click + pointerup (melhor no mobile que só click)
+    ui.toggle.addEventListener('click', handleToggleEvent, true);
+    ui.toggle.addEventListener('pointerup', function (e) {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+        handleToggleEvent(e);
+      }
     }, true);
-    ui.toggle.style.pointerEvents = 'auto';
-    ui.toggle.style.zIndex = '99991';
 
     // Chips de tema/texto/etc. — uma única fonte de verdade (inclui HOME)
     ui.panel.addEventListener('click', function (e) {
@@ -418,21 +463,19 @@
       });
     }, true);
 
-    // fechar ao clicar fora / Escape (HOME já tem handlers próprios se homeWired)
-    if (!homeWired) {
-      document.addEventListener('click', function (e) {
-        if (Date.now() < ignoreUntil) return;
-        if (ui.toggle.getAttribute('aria-expanded') !== 'true') return;
-        if (ui.panel.contains(e.target) || ui.toggle.contains(e.target)) return;
+    // fechar ao clicar fora / Escape
+    document.addEventListener('click', function (e) {
+      if (Date.now() < ignoreUntil) return;
+      if (ui.toggle.getAttribute('aria-expanded') !== 'true') return;
+      if (ui.panel.contains(e.target) || ui.toggle.contains(e.target)) return;
+      closePanel(ui.toggle, ui.panel);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && ui.toggle.getAttribute('aria-expanded') === 'true') {
         closePanel(ui.toggle, ui.panel);
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && ui.toggle.getAttribute('aria-expanded') === 'true') {
-          closePanel(ui.toggle, ui.panel);
-          try { ui.toggle.focus(); } catch (_) {}
-        }
-      });
-    }
+        try { ui.toggle.focus(); } catch (_) {}
+      }
+    });
 
     global.CricriA11y = {
       get: load,
