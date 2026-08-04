@@ -162,12 +162,13 @@ window.FASC_CONFIG = {
 
   window.fascDb = client;
 
+  /** Pós-OAuth / e-mail: volta pro login (animação → mural). */
   function profileRedirect() {
     try {
-      var u = new URL('profile.html', window.location.href);
+      var u = new URL('login.html', window.location.href);
       return u.origin + u.pathname;
     } catch (e) {
-      return window.location.origin.replace(/\/$/, '') + '/profile.html';
+      return window.location.origin.replace(/\/$/, '') + '/login.html';
     }
   }
 

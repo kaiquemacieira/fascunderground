@@ -1,10 +1,11 @@
-// CRICRI · Tamagotchi da Roda — São Cristóvão / SE
+// CRICRI · Cri Cabrunco — São Cristóvão / SE
 (function () {
   'use strict';
 
   var STORAGE = 'cricri-tama-v3';
   var STORAGE_LEGACY = ['fasc-tama-v2', 'cricri-tama-v2'];
-  var EVENT_END = new Date('2026-11-23T00:00:00-03:00').getTime();
+  var HALL_STORAGE = 'cricri-hall-v1';
+  var EVENT_END = new Date('2026-11-23T12:00:00-03:00').getTime();
   var TICK_MS = 30 * 1000;
   var AWAY_DECAY_PER_H = 4;
 
@@ -17,11 +18,11 @@
 
   var STAGES = [
     { id: 'ovo', minAgeH: 0, label: 'Ovo' },
-    { id: 'bebe', minAgeH: 1, label: 'Bebê' },
+    { id: 'bebe', minAgeH: 1, label: 'Cabrunquinho' },
     { id: 'filhote', minAgeH: 8, label: 'Filhote' },
     { id: 'cria', minAgeH: 36, label: 'Cria' },
-    { id: 'festa', minAgeH: 96, label: 'Festeira' },
-    { id: 'adulta', minAgeH: 168, label: 'Roda' },
+    { id: 'festa', minAgeH: 96, label: 'Festeiro' },
+    { id: 'adulta', minAgeH: 168, label: 'Cri da Praça' },
     { id: 'ancia', minAgeH: 288, label: 'Anciã' }
   ];
 
@@ -35,7 +36,7 @@
     { id: 'r_convento', name: 'Luz do Convento', rarity: 'raro', emoji: '⛪', how: 'Evoluir p/ Cria' },
     { id: 'r_after', name: 'After SE', rarity: 'raro', emoji: '🌙', how: 'After 2×' },
     { id: 'r_scrap', name: 'Scrap de Rua', rarity: 'raro', emoji: '✉️', how: 'Scrap 3×' },
-    { id: 'r_care', name: 'Cuidadora', rarity: 'raro', emoji: '💗', how: 'Care 15' },
+    { id: 'r_care', name: 'Cuidador Cabrunco', rarity: 'raro', emoji: '💗', how: 'Care 15' },
     { id: 'sr_lenda', name: 'Lenda CRICRI', rarity: 'super', emoji: '👑', how: 'Virar Anciã' },
     { id: 'sr_sergipe', name: 'Sergipe Inteiro', rarity: 'super', emoji: '🔶', how: 'Care 40' },
     { id: 'sr_festival', name: 'CRICRI 2026', rarity: 'super', emoji: '🎉', how: 'Últimos 3 dias vivos' },
@@ -43,9 +44,10 @@
   ];
 
   var RARITY_LABEL = { comum: 'Comum', raro: 'Raro', super: 'Super raro' };
-  var FAREWELL = 'A roda está acabando… obrigado por ficar comigo até aqui. Foi lindo.';
-  var FAREWELL_DONE = 'O FASC fechou o portão. Você cuidou de mim até o fim — gratidão de São Cristóvão.';
-  var FAREWELL_LATE = 'Últimos dias juntos. Cada carinho vira memória.';
+  // Farewell strings: easter egg de fim de festival — não revelar em UI de onboarding
+  var FAREWELL = 'Eita cabrunco… a roda está acabando. Obrigado por ficar comigo. Foi lindo.';
+  var FAREWELL_DONE = 'O FASC fechou o portão. Você cuidou do Cri até o fim — gratidão de São Cristóvão.';
+  var FAREWELL_LATE = 'Últimos dias juntos. Cada carinho vira memória do cabrunco.';
 
   function $(id) { return document.getElementById(id); }
   function reducedMotion() {
@@ -62,7 +64,7 @@
   function defaultState() {
     var now = Date.now();
     return {
-      started: false, name: 'Roda', bornAt: now, lastTick: now,
+      started: false, name: 'Cri', bornAt: now, started_at: now, lastTick: now,
       hunger: 85, happy: 85, energy: 85, hygiene: 85, health: 100,
       shell: 'rosa', sleeping: false, sick: false, alive: true,
       careScore: 0, feedCount: 0, playCount: 0, cleanCount: 0,
@@ -86,6 +88,8 @@
       var merged = Object.assign(defaultState(), parsed);
       if (parsed.started) merged.started = true;
       if (parsed.bornAt) merged.bornAt = parsed.bornAt;
+      if (parsed.started_at) merged.started_at = parsed.started_at;
+      else if (parsed.bornAt) merged.started_at = parsed.bornAt;
       if (parsed.name) merged.name = parsed.name;
       var legacyShell = { classic: 'rosa', amarelo: 'ocre', stencil: 'tuxedo' };
       if (!SHELLS[merged.shell]) merged.shell = legacyShell[merged.shell] || 'rosa';
@@ -216,6 +220,105 @@
     if (ms <= 3 * 86400000) return 'late';
     return 'ok';
   }
+
+  /** Hall da Fama local (este aparelho) — sem schema novo */
+  function loadHall() {
+    try {
+      var raw = localStorage.getItem(HALL_STORAGE);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  }
+  function saveHall(entries) {
+    try {
+      localStorage.setItem(HALL_STORAGE, JSON.stringify(entries.slice(0, 12)));
+    } catch (_) {}
+  }
+  function pushHallEntry(s) {
+    var entry = {
+      name: String(s.name || 'Cri').slice(0, 24),
+      careScore: s.careScore || 0,
+      evolutions: s.evolutions || 0,
+      cards: s.cards ? Object.keys(s.cards).length : 0,
+      stageId: s.stageId || 'ovo',
+      at: Date.now()
+    };
+    var hall = loadHall();
+    hall.unshift(entry);
+    hall.sort(function (a, b) { return (b.careScore || 0) - (a.careScore || 0); });
+    saveHall(hall);
+    return entry;
+  }
+
+  /**
+   * Encerramento oculto do festival.
+   * Roda uma vez quando EVENT_END passa (ou pet já morto no fim).
+   * Não é onboarding — só despedida.
+   */
+  function finalizeEnd(s) {
+    if (!s || s.endedAt) return false;
+    if (Date.now() < EVENT_END && s.alive) return false;
+    s.alive = false;
+    s.endedAt = Date.now();
+    s.sleeping = false;
+    if (!s.endSnapshot) {
+      s.endSnapshot = {
+        careScore: s.careScore || 0,
+        evolutions: s.evolutions || 0,
+        cards: s.cards ? Object.keys(s.cards).length : 0,
+        stageId: s.stageId || 'ovo',
+        name: s.name || 'Cri'
+      };
+      pushHallEntry(s);
+      pushLog(s, FAREWELL_DONE);
+      notifyCri('farewell');
+    }
+    return true;
+  }
+
+  function renderFarewell(s) {
+    var panel = $('farewell-panel');
+    if (!panel) return;
+    var phase = lifePhase();
+    var show = !!(s.started && (phase === 'ended' || s.endedAt || (Date.now() >= EVENT_END)));
+    panel.hidden = !show;
+    if (!show) return;
+
+    var body = $('farewell-body');
+    if (body) body.textContent = FAREWELL_DONE;
+
+    var snap = s.endSnapshot || {
+      careScore: s.careScore || 0,
+      evolutions: s.evolutions || 0,
+      cards: s.cards ? Object.keys(s.cards).length : 0,
+      name: s.name || 'Cri'
+    };
+    var stats = $('farewell-stats');
+    if (stats) {
+      stats.innerHTML =
+        '<div><dt>Cuidados</dt><dd>' + (snap.careScore || 0) + '</dd></div>' +
+        '<div><dt>Evoluções</dt><dd>' + (snap.evolutions || 0) + '</dd></div>' +
+        '<div><dt>Photocards</dt><dd>' + (snap.cards || 0) + '</dd></div>' +
+        '<div><dt>Nome</dt><dd>' + String(snap.name || 'Cri').replace(/</g, '&lt;') + '</dd></div>';
+    }
+
+    var hall = loadHall();
+    var list = $('hall-list');
+    var empty = $('hall-empty');
+    if (list) {
+      if (!hall.length) {
+        list.innerHTML = '';
+        if (empty) empty.hidden = false;
+      } else {
+        if (empty) empty.hidden = true;
+        list.innerHTML = hall.slice(0, 8).map(function (e, i) {
+          return '<li><span>' + (i + 1) + '. ' + String(e.name || 'Cri').replace(/</g, '&lt;') +
+            '</span><strong>' + (e.careScore || 0) + ' pts</strong></li>';
+        }).join('');
+      }
+    }
+  }
   function stageForAge(hours) {
     var cur = STAGES[0];
     for (var i = 0; i < STAGES.length; i++) if (hours >= STAGES[i].minAgeH) cur = STAGES[i];
@@ -249,6 +352,19 @@
     showCardToast._t = setTimeout(function () { el.hidden = true; }, 2800);
   }
 
+  function notifyCri(kind, arg) {
+    try {
+      if (!window.CricriNotifs || !window.CricriNotifs.Cri) return;
+      var Cri = window.CricriNotifs.Cri;
+      if (kind === 'born' && Cri.born) Cri.born();
+      else if (kind === 'evolve' && Cri.evolve) Cri.evolve(arg);
+      else if (kind === 'card' && Cri.card) Cri.card(arg);
+      else if (kind === 'hungry' && Cri.hungry) Cri.hungry();
+      else if (kind === 'sick' && Cri.sick) Cri.sick();
+      else if (kind === 'farewell' && Cri.farewell) Cri.farewell();
+    } catch (_) {}
+  }
+
   function grantCard(s, cardId, silent) {
     var card = null;
     for (var i = 0; i < CARD_CATALOG.length; i++) if (CARD_CATALOG[i].id === cardId) card = CARD_CATALOG[i];
@@ -256,7 +372,11 @@
     s.cards = s.cards || {};
     if (s.cards[cardId]) { s.cards[cardId].count += 1; return false; }
     s.cards[cardId] = { count: 1, at: Date.now() };
-    if (!silent) { pushLog(s, 'Photocard: ' + card.name); showCardToast(card); }
+    if (!silent) {
+      pushLog(s, 'Photocard: ' + card.name);
+      showCardToast(card);
+      notifyCri('card', card.name);
+    }
     return true;
   }
 
@@ -285,6 +405,7 @@
     s.stageId = byAge.id;
     s.evolutions = (s.evolutions || 0) + 1;
     pushLog(s, 'Evoluiu → ' + byAge.label);
+    notifyCri('evolve', byAge.label);
     if (byAge.id === 'filhote') grantCard(s, 'r_filhote');
     if (byAge.id === 'cria') grantCard(s, 'r_convento');
     if (byAge.id === 'ancia') grantCard(s, 'sr_lenda');
@@ -314,11 +435,23 @@
     checkCardMilestones(s);
   }
 
+  var _lastCareNotif = 0;
+  function maybeCareNotif(s) {
+    var now = Date.now();
+    if (now - _lastCareNotif < 30 * 60 * 1000) return; // máx. 1 alerta de cuidado / 30 min
+    if (s.sick) {
+      _lastCareNotif = now;
+      notifyCri('sick');
+    } else if (s.hunger < 18) {
+      _lastCareNotif = now;
+      notifyCri('hungry');
+    }
+  }
+
   function tickOpen(s) {
     if (!s.started || !s.alive) return;
     if (Date.now() >= EVENT_END) {
-      s.alive = false;
-      pushLog(s, FAREWELL_DONE);
+      finalizeEnd(s);
       return;
     }
     var decay = s.sleeping ? 0.4 : 1;
@@ -332,6 +465,7 @@
     s.lastTick = Date.now();
     if (checkEvolution(s)) flashEvolve();
     checkCardMilestones(s);
+    maybeCareNotif(s);
   }
 
   var state = load();
@@ -424,11 +558,7 @@
     if (appMain) appMain.hidden = !s.started;
     if (!s.started) return;
 
-    if (Date.now() >= EVENT_END && s.alive) {
-      s.alive = false;
-      pushLog(s, FAREWELL_DONE);
-      save(s);
-    }
+    if (finalizeEnd(s)) save(s);
     checkEvolution(s);
 
     var shell = SHELLS[s.shell] || SHELLS.rosa;
@@ -444,7 +574,7 @@
       catEl.setAttribute('data-expr', catExpr(s));
     }
     var name = $('tama-name');
-    if (name) name.textContent = s.name || 'Roda';
+    if (name) name.textContent = s.name || 'Cri';
     var st = stageForAge(ageHours(s));
     var stageEl = $('tama-stage');
     if (stageEl) stageEl.textContent = st.label;
@@ -463,11 +593,11 @@
       var phase = lifePhase();
       if (!s.alive || phase === 'ended') status.textContent = FAREWELL_DONE;
       else if (phase === 'dying') status.textContent = FAREWELL;
-      else if (s.sleeping) status.textContent = 'Dormindo…';
-      else if (s.sick) status.textContent = 'Passando mal';
+      else if (s.sleeping) status.textContent = 'Descansando o cabrunco…';
+      else if (s.sick) status.textContent = 'Esse cabrunco não tá legal…';
       else if (phase === 'late') status.textContent = FAREWELL_LATE;
-      else if (mood(s) === 'happy') status.textContent = 'Curtindo São Cristóvão';
-      else if (mood(s) === 'sad') status.textContent = 'Precisa de você';
+      else if (mood(s) === 'happy') status.textContent = 'Cabrunco de bem em São Cristóvão';
+      else if (mood(s) === 'sad') status.textContent = 'Se oriente… precisa de você';
       else status.textContent = 'De boa no centro histórico';
     }
     bar($('bar-hunger'), s.hunger);
@@ -489,15 +619,48 @@
     });
     var sleepBtn = document.querySelector('[data-action="sleep"]');
     if (sleepBtn && s.alive) sleepBtn.textContent = s.sleeping ? 'Acordar' : 'Dormir';
+    // Após o festival: só coleção / renascer bloqueado
+    document.querySelectorAll('[data-action="reset"]').forEach(function (b) {
+      if (Date.now() >= EVENT_END) {
+        b.disabled = true;
+        b.title = 'A roda fechou — sem renascer até o próximo FASC';
+      }
+    });
     renderCollection();
+    renderFarewell(s);
   }
 
   function startGame() {
+    // Mecânica oculta: depois do EVENT_END não nasce criatura nova
+    if (Date.now() >= EVENT_END) {
+      var gate = $('start-gate');
+      if (gate) {
+        var sub = gate.querySelector('.start-sub');
+        if (sub) {
+          sub.innerHTML = 'O FASC 2026 fechou o portão.<br>O Cri virou memória — até a próxima roda em São Cristóvão.';
+        }
+        var btn = gate.querySelector('[data-action="start"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Roda encerrada'; }
+      }
+      // Se já tinha pet, mostra despedida
+      if (state.started) {
+        finalizeEnd(state);
+        save(state);
+        render();
+      }
+      return;
+    }
     if (!state.started) {
+      // Vida conta a partir do primeiro acesso (agora), não de data fixa do festival
       state = defaultState();
+      var birth = Date.now();
+      state.bornAt = birth;
+      state.started_at = birth;
+      state.lastTick = birth;
       state.started = true;
       grantCard(state, 'c_ovo');
       pushLog(state, 'Nasceu em São Cristóvão — CRICRI 2026.');
+      notifyCri('born');
       save(state);
     }
     render();
@@ -523,8 +686,7 @@
     }
     if (!s.started || !s.alive) return;
     if (Date.now() >= EVENT_END) {
-      s.alive = false;
-      pushLog(s, FAREWELL_DONE);
+      finalizeEnd(s);
       save(s);
       render();
       return;
@@ -579,8 +741,8 @@
         s.happy = clamp(s.happy + 14, 0, 100);
         s.scrapCount++; s.careScore++; break;
       case 'rename': {
-        var n = prompt('Nome (máx. 12):', s.name || 'Roda');
-        if (n) s.name = String(n).trim().slice(0, 12) || 'Roda';
+        var n = prompt('Nome (máx. 12):', s.name || 'Cri');
+        if (n) s.name = String(n).trim().slice(0, 12) || 'Cri';
         break;
       }
     }
@@ -634,6 +796,9 @@
   window.CricriTamaRead = window.CricriTamaRead || {
     loadLocal: load,
     cloudLoad: cloudLoad,
+    CARD_CATALOG: CARD_CATALOG,
+    RARITY_LABEL: RARITY_LABEL,
+    ownedCards: function (s) { return (s && s.cards) || {}; },
     resolveState: async function () {
       var local = load();
       var cloud = null;
@@ -649,7 +814,7 @@
       var labels = { rosa: 'Rosa', ocre: 'Ocre', azul: 'Azul', tuxedo: 'Tuxedo' };
       var emoji = { ovo: '🥚', bebe: '🐱', filhote: '🐱', cria: '🐱', festa: '🐱', adulta: '🐱', ancia: '🐱' };
       return {
-        name: String(s.name || 'Roda').slice(0, 24),
+        name: String(s.name || 'Cri').slice(0, 24),
         stageId: st.id,
         stageLabel: st.label,
         emoji: emoji[st.id] || '🐾',

@@ -9,7 +9,7 @@ window.FASC_CONFIG = {
 
   // Fim do festival (mesmo padrão de js/tamagotchi.js EVENT_END)
   // Após esta data: caixinha Meow não lista recados; envio bloqueado no front.
-  eventEndIso: '2026-11-23T12:00:00-03:00',
+  eventEndIso: '2026-11-23T00:00:00-03:00',
 
   // ---- GTFS-RT / previsão ao vivo ----
   // SMTT-CTM (Aracaju/SC) não publica feed aberto. Deixe vazio = modelo local.
@@ -33,10 +33,10 @@ window.FASC_CONFIG = {
 /** Epoch ms do fim do CRICRI — alinhado a tamagotchi.js */
 window.FASC_EVENT_END_MS = (function () {
   try {
-    var iso = (window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso) || '2026-11-23T12:00:00-03:00';
+    var iso = (window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso) || '2026-11-23T00:00:00-03:00';
     return new Date(iso).getTime();
   } catch (_) {
-    return new Date('2026-11-23T12:00:00-03:00').getTime();
+    return new Date('2026-11-23T00:00:00-03:00').getTime();
   }
 })();
 

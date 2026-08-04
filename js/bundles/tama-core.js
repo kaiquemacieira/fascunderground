@@ -144,7 +144,7 @@ window.FASC_CONFIG = {
 
   var STORAGE = 'cricri-tama-v3';
   var STORAGE_LEGACY = ['fasc-tama-v2', 'cricri-tama-v2'];
-  var EVENT_END = new Date('2026-11-23T00:00:00-03:00').getTime();
+  var EVENT_END = new Date('2026-11-23T12:00:00-03:00').getTime();
   var TICK_MS = 30 * 1000;
   var AWAY_DECAY_PER_H = 4;
 

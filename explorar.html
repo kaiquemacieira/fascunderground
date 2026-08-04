@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-a11y-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0a08">
+  <title>CRICRI · Explorar — mapa &amp; suporte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Saira+Stencil+One&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* PASSO 4 · explorar: mapa + denúncia, padding p/ bottom-nav */
+    body.page-explorar {
+      margin: 0;
+      min-height: 100dvh;
+      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+      background: var(--void, #0c0a08);
+      color: var(--paper, #ebe3cf);
+    }
+    body.page-explorar .page-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem 0.5rem;
+      border-bottom: 1px solid rgba(235, 227, 207, 0.08);
+    }
+    body.page-explorar .page-top .logo {
+      font-family: var(--font-stencil, 'Saira Stencil One', Impact, sans-serif);
+      font-size: 1.2rem;
+      color: var(--paper, #ebe3cf);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+    }
+    body.page-explorar .page-top .logo span { color: var(--rosa, #e33d6b); }
+    body.page-explorar .page-top .page-label {
+      font-family: var(--font-condensed, Oswald, sans-serif);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ochre, #d49a2c);
+    }
+    body.page-explorar main {
+      padding: 0.75rem 0 2rem;
+    }
+    body.page-explorar .map-section {
+      padding-left: var(--space-page-x, 1rem);
+      padding-right: var(--space-page-x, 1rem);
+    }
+    body.page-explorar .support-section {
+      margin-top: 1.5rem;
+      padding-left: var(--space-page-x, 1rem);
+      padding-right: var(--space-page-x, 1rem);
+    }
+  </style>
+</head>
+<body class="page-explorar">
+  <!-- PASSO 2/4 · gate de sessão (mesmo contrato do index) -->
+  <style id="cricri-session-gate-css">html.session-pending body > *:not(script):not(style){visibility:hidden!important}</style>
+  <script>
+  (function () {
+    'use strict';
+    var KEEP_KEY = 'cricri-keep-session';
+    var SAVED_KEY = 'cricri-saved-user';
+    var LOGIN = 'login.html';
+    function goLogin() {
+      try { window.location.replace(LOGIN); } catch (_) { window.location.href = LOGIN; }
+    }
+    function pass() {
+      try { document.documentElement.classList.remove('session-pending'); } catch (_) {}
+      var css = document.getElementById('cricri-session-gate-css');
+      if (css && css.parentNode) css.parentNode.removeChild(css);
+    }
+    function keepOn() {
+      try { return localStorage.getItem(KEEP_KEY) !== '0'; } catch (_) { return true; }
+    }
+    function hasSavedUser() {
+      try {
+        var raw = localStorage.getItem(SAVED_KEY);
+        if (!raw) return false;
+        var u = JSON.parse(raw);
+        return !!(u && (u.id || u.email || u.name));
+      } catch (_) { return false; }
+    }
+    function hasSupabaseToken() {
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (!k) continue;
+          if (/auth-token|supabase\.auth\.token/i.test(k)) {
+            var v = localStorage.getItem(k);
+            if (v && v.length > 40) return true;
+          }
+        }
+      } catch (_) {}
+      return false;
+    }
+    function hasLocalSession() {
+      return keepOn() && (hasSavedUser() || hasSupabaseToken());
+    }
+    document.documentElement.classList.add('session-pending');
+    if (!hasLocalSession()) { goLogin(); return; }
+    pass();
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      if (window.fascAuth && typeof window.fascAuth.session === 'function') {
+        clearInterval(timer);
+        window.fascAuth.session().then(function (s) {
+          if (s && s.user) return;
+          if (!(keepOn() && hasSavedUser())) goLogin();
+        }).catch(function () {
+          if (!(keepOn() && hasSavedUser())) goLogin();
+        });
+        return;
+      }
+      if (tries >= 50) clearInterval(timer);
+    }, 100);
+  })();
+  </script>
+
+  <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
+
+  <header class="page-top">
+    <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
+    <span class="page-label">Explorar</span>
+  </header>
+
+  <main id="conteudo-principal" tabindex="-1">
+<section class="map-section" id="mapa">
+    <div class="map-header">
+      <h2>MAPA · São Cristóvão · SE</h2>
+      <span id="geo-status" class="geo-status pending">buscando…</span>
+</div>
+    <p class="map-sub">Spots, eventos, hospedagem e gastronomia · 19–22/11/2026</p>
+    <div class="map-layers" id="map-layers" role="group" aria-label="Camadas do mapa">
+      <button type="button" class="map-layer-chip is-on" data-map-layer="spots" aria-pressed="true">Spots</button>
+      <button type="button" class="map-layer-chip is-on" data-map-layer="hospedagem" aria-pressed="true">Hospedagem</button>
+      <button type="button" class="map-layer-chip is-on" data-map-layer="gastronomia" aria-pressed="true">Gastronomia</button>
+<button type="button" class="map-layer-chip is-on" data-map-layer="eventos" aria-pressed="true">Eventos</button>
+      <button type="button" class="map-layer-chip" data-map-layer="fit" id="map-fit-all">Ver todos</button>
+    </div>
+    <div class="map-proximity" id="map-proximity" role="group" aria-label="Filtro por proximidade">
+      <div class="map-prox-row">
+        <span class="map-prox-label">Perto de mim</span>
+        <button type="button" class="map-prox-chip is-on" data-prox="0" aria-pressed="true" title="Mostrar tudo">Todos</button>
+        <button type="button" class="map-prox-chip" data-prox="200" aria-pressed="false" title="Raio a pé · quarteirões">200 m</button>
+        <button type="button" class="map-prox-chip" data-prox="400" aria-pressed="false" title="Centro histórico">400 m</button>
+        <button type="button" class="map-prox-chip" data-prox="800" aria-pressed="false" title="Caminhada curta">800 m</button>
+        <button type="button" class="map-prox-chip" data-prox="1500" aria-pressed="false" title="Até 1,5 km">1,5 km</button>
+        <button type="button" class="map-prox-chip map-prox-gps" id="map-prox-gps" aria-pressed="false" title="Ativar GNSS (GPS) por alguns segundos. O padrão é WiFi/rede.">GPS</button>
+      </div>
+      <div class="map-prox-meta">
+        <span class="map-prox-ref" id="map-prox-ref" aria-live="polite">ref: centro SC</span>
+        <span class="map-prox-count" id="map-prox-count" aria-live="polite"></span>
+      </div>
+    </div>
+<div id="map" class="map" role="region" aria-label="Mapa interativo de São Cristóvão com spots, hospedagem e gastronomia"></div>
+    <ul class="map-legend" aria-label="Legenda">
+      <li><span class="leg-dot leg-spot"></span> Spot do festival</li>
+      <li><span class="leg-dot leg-hosp"></span> Hospedagem</li>
+      <li><span class="leg-dot leg-gastro"></span> Gastronomia</li>
+<li><span class="leg-dot leg-event"></span> Evento / programação</li>
+      <li><span class="leg-dot leg-you"></span> Você</li>
+    </ul>
+    <div class="map-places-head">
+      <h3 class="map-places-title">Lugares</h3>
+      <span class="map-places-count" id="map-places-count">—</span>
+    </div>
+    <div class="map-places-search">
+      <label class="sr-only" for="map-places-q">Buscar lugar</label>
+      <input type="search" id="map-places-q" placeholder="Buscar no mapa…" autocomplete="off" enterkeyhint="search" />
+    </div>
+    
+    <div class="map-role-cta" id="map-role-cta">
+      <button type="button" class="btn primary big" id="btn-marcar">Marcar meu rolê</button>
+      <p class="map-role-hint">Usa sua localização pra pintar o ponto no mapa ao vivo.</p>
+    </div>
+
+    <ul class="map-places-list" id="map-places-list" role="listbox" aria-label="Lista de lugares no mapa"></ul>
+</section>
+
+
+<section class="support-section" id="suporte" aria-labelledby="support-title">
+    <div class="support-inner">
+      <header class="support-head">
+        <p class="support-kicker">Cuida da rua · cuida de você</p>
+        <h2 id="support-title">Suporte &amp; denúncia</h2>
+        <p class="support-lead">
+          Festival é festa e também é respeito. Se algo pesou, machucou ou passou do limite,
+          aqui tem caminho. Anônimo se quiser — a gente não expõe ninguém na tela.
+        </p>
+      </header>
+
+      <div class="support-grid">
+        <div class="support-card support-card--emergency">
+          <button type="button" class="support-collapse-btn" data-collapse="support-emergency" aria-expanded="false" aria-controls="support-emergency-panel">
+            <span>Emergência agora · canais públicos</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="support-collapse-panel" id="support-emergency-panel" hidden>
+          <ul class="support-phones">
+            <li>
+              <a href="tel:190" class="support-phone">
+                <span class="support-phone-num">190</span>
+                <span class="support-phone-label">Polícia Militar</span>
+              </a>
+            </li>
+            <li>
+              <a href="tel:192" class="support-phone">
+                <span class="support-phone-num">192</span>
+                <span class="support-phone-label">SAMU</span>
+              </a>
+            </li>
+            <li>
+              <a href="tel:193" class="support-phone">
+                <span class="support-phone-num">193</span>
+                <span class="support-phone-label">Bombeiros</span>
+              </a>
+            </li>
+            <li>
+              <a href="tel:180" class="support-phone">
+                <span class="support-phone-num">180</span>
+                <span class="support-phone-label">Central da Mulher</span>
+              </a>
+            </li>
+            <li>
+              <a href="tel:188" class="support-phone">
+                <span class="support-phone-num">188</span>
+                <span class="support-phone-label">CVV — conversa 24h</span>
+              </a>
+            </li>
+            <li>
+              <a href="tel:191" class="support-phone">
+                <span class="support-phone-num">191</span>
+                <span class="support-phone-label">Polícia Rodoviária</span>
+              </a>
+            </li>
+          </ul>
+          <p class="support-note">Em risco imediato, ligue antes de preencher qualquer formulário.</p>
+          </div>
+        </div>
+
+        <div class="support-card support-card--form">
+          <button type="button" class="support-collapse-btn" data-collapse="support-form" aria-expanded="false" aria-controls="support-form-panel">
+            <span>Canal de denúncia · formulário</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="support-collapse-panel" id="support-form-panel" hidden>
+          <p class="support-form-intro">Relato pro time do CRICRI. Uso interno — não fica público no app.</p>
+          <form id="denuncia-form" class="denuncia-form" novalidate>
+            <div class="denuncia-field">
+              <label for="denuncia-tipo">Tipo</label>
+              <select id="denuncia-tipo" name="tipo" required>
+                <option value="">Selecione…</option>
+                <option value="assedio">Assédio / desrespeito</option>
+                <option value="violencia">Violência</option>
+                <option value="furto">Furto / perda</option>
+                <option value="estrutura">Problema de estrutura / segurança</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="denuncia-field">
+              <label for="denuncia-local">Local (opcional)</label>
+              <input id="denuncia-local" name="local" type="text" maxlength="120" placeholder="Ex.: Praça São Francisco, perto do palco…" autocomplete="off" />
+            </div>
+            <div class="denuncia-field">
+              <label for="denuncia-relato">O que aconteceu</label>
+              <textarea id="denuncia-relato" name="relato" required maxlength="2000" rows="5" placeholder="Conte com suas palavras. Sem pressão pra se identificar."></textarea>
+            </div>
+            <div class="denuncia-field">
+              <label for="denuncia-contato">Contato de volta (opcional)</label>
+              <input id="denuncia-contato" name="contato" type="text" maxlength="120" placeholder="Nick, telefone ou nada — você escolhe" autocomplete="off" />
+            </div>
+            <label class="denuncia-anon">
+              <input type="checkbox" id="denuncia-anon" name="anonimo" checked />
+              <span>Quero o máximo de anonimato possível</span>
+            </label>
+            <!-- honeypot anti-bot: escondido -->
+            <input type="text" name="website" id="denuncia-hp" class="denuncia-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <button type="submit" class="denuncia-submit" id="denuncia-submit">Enviar denúncia</button>
+            <p class="denuncia-msg" id="denuncia-msg" role="status" aria-live="polite" hidden></p>
+          </div><!-- /support-form-panel -->
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <div id="site-footer-slot"></div>
+  <div id="bottom-nav-slot"></div>
+
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="js/supabase-client.js" defer></script>
+  <script src="js/theme.js" defer></script>
+  <script src="js/map-lazy.js" defer></script>
+  <script type="module" src="js/denuncia.js" defer></script>
+  <script src="js/footer.js" defer></script>
+  <script src="js/bottom-nav.js"></script>
+  <script src="js/a11y-core.js" defer></script>
+
+  <script>
+  /* support collapse — movido do index */
+  (function () {
+    document.querySelectorAll('.support-collapse-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('aria-controls');
+        var panel = id && document.getElementById(id);
+        if (!panel) return;
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        panel.hidden = open;
+      });
+    });
+  })();
+  </script>
+
+  <script>
+  /* map harden: invalidateSize on load/resize/visibility */
+  (function () {
+    function fix() {
+      try {
+        if (window.projanoMap && window.projanoMap.map) {
+          window.projanoMap.map.invalidateSize(true);
+        }
+      } catch (e) {}
+    }
+    window.addEventListener('load', function () { setTimeout(fix, 300); setTimeout(fix, 1000); });
+    window.addEventListener('resize', function () {
+      clearTimeout(window.__mapFixT);
+      window.__mapFixT = setTimeout(fix, 150);
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) setTimeout(fix, 200);
+    });
+  })();
+  </script>
+</body>
+</html>

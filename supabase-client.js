@@ -22,14 +22,18 @@
 
   window.fascDb = client;
 
-  /** Pós-OAuth / e-mail: volta pro login (animação → mural). */
-  function profileRedirect() {
+  function loginRedirect() {
     try {
       var u = new URL('login.html', window.location.href);
       return u.origin + u.pathname;
     } catch (e) {
       return window.location.origin.replace(/\/$/, '') + '/login.html';
     }
+  }
+
+  /** @deprecated alias — OAuth volta para login.html (birth → home) */
+  function profileRedirect() {
+    return loginRedirect();
   }
 
   function withTimeout(promise, ms, label) {

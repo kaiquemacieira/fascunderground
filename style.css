@@ -6325,10 +6325,10 @@ html[data-theme="light"] .cricri-notif-list strong { color: #17120e; }
   }
 }
 
-/* ===== Bottom nav · 3 itens ===== */
+/* ===== Bottom nav · 4 itens canônicos (Home · Explorar · Tamagotchi · Perfil) ===== */
 .bottom-nav {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 0 !important;
 }
 .bottom-nav a {
@@ -6337,14 +6337,49 @@ html[data-theme="light"] .cricri-notif-list strong { color: #17120e; }
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
-  padding: 0.45rem 0.25rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
+  padding: 0.45rem 0.15rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  color: var(--paper);
+  opacity: 0.5;
+  text-decoration: none;
+  font-family: var(--font-condensed);
+  font-weight: 600;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 .bottom-nav a svg {
   width: 22px;
   height: 22px;
+  flex: none;
+}
+.bottom-nav a:hover { opacity: 0.85; }
+.bottom-nav a:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--ochre);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.bottom-nav a.active {
+  opacity: 1;
+  color: var(--rosa);
+  background: rgba(227, 61, 107, 0.1);
+}
+.bottom-nav a.active svg { stroke-width: 2.1; }
+
+/* QA · telas estreitas (360–390) */
+@media (max-width: 390px) {
+  .bottom-nav a {
+    font-size: 0.55rem;
+    letter-spacing: 0.03em;
+    padding-left: 0.05rem;
+    padding-right: 0.05rem;
+  }
+  .bottom-nav a svg { width: 20px; height: 20px; }
+}
+@media (min-width: 768px) {
+  .bottom-nav a { font-size: 0.68rem; }
+  .bottom-nav a svg { width: 24px; height: 24px; }
 }
 
 
@@ -6506,10 +6541,10 @@ button.header-search-btn,
   margin-right: auto;
 }
 
-/* Bottom nav 3 colunas estável */
+/* Bottom nav 4 colunas estável (Home · Explorar · Tamagotchi · Perfil) */
 .bottom-nav {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
 
@@ -6634,7 +6669,7 @@ html[data-a11y-motion="reduce"] .transit-letreiro-track {
 .map-transit-body { margin-top: 0.75rem; }
 .map-transit-note:not(.is-collapsed) .transit-letreiro-marquee { opacity: 0.7; }
 
-/* bottom-nav: Home · Meow · Perfil */
+/* bottom-nav: Home · Explorar · Tamagotchi · Perfil */
 .bottom-nav a {
   flex: 1;
 }

@@ -1,43 +1,30 @@
-// CRICRI · Tamagotchi da Roda — São Cristóvão / SE
+// CRICRI · Cri Cabrunco — São Cristóvão / SE
 (function () {
   'use strict';
 
   var STORAGE = 'cricri-tama-v3';
   var STORAGE_LEGACY = ['fasc-tama-v2', 'cricri-tama-v2'];
+  var HALL_STORAGE = 'cricri-hall-v1';
   var EVENT_END = new Date('2026-11-23T00:00:00-03:00').getTime();
   var TICK_MS = 30 * 1000;
   var AWAY_DECAY_PER_H = 4;
 
   var SHELLS = {
-    classic: { bezel: '#6b3fa0', accent: '#c9a0ff', bg: '#4a2a78' },
-    rosa: { bezel: '#e33d6b', accent: '#f28aa8', bg: '#7a1f3a' },
-    azul: { bezel: '#1b6f7e', accent: '#5ec4d6', bg: '#0c3a45' },
-    amarelo: { bezel: '#d49a2c', accent: '#ffe066', bg: '#6a4a10' }
+    rosa: { fur: '#e33d6b', furLight: '#f7c9d6', furEar: '#ffe1ea' },
+    ocre: { fur: '#d49a2c', furLight: '#f7e2b4', furEar: '#ffe9b8' },
+    azul: { fur: '#1b6f7e', furLight: '#b8e6ef', furEar: '#d6f4fa' },
+    tuxedo: { fur: '#2a2621', furLight: '#f6efdc', furEar: '#d9d0bd' }
   };
 
   var STAGES = [
-    { id: 'ovo', minAgeH: 0, label: 'Ovo', sprite: 'ovo' },
-    { id: 'bebe', minAgeH: 1, label: 'Gatinho', sprite: 'bebe' },
-    { id: 'filhote', minAgeH: 8, label: 'Filhote', sprite: 'filhote' },
-    { id: 'cria', minAgeH: 36, label: 'Cria', sprite: 'cria' },
-    { id: 'festa', minAgeH: 96, label: 'Festeira', sprite: 'festa' },
-    { id: 'adulta', minAgeH: 168, label: 'Meow', sprite: 'adulta' },
-    { id: 'ancia', minAgeH: 288, label: 'Anciã', sprite: 'ancia' }
+    { id: 'ovo', minAgeH: 0, label: 'Ovo' },
+    { id: 'bebe', minAgeH: 1, label: 'Cabrunquinho' },
+    { id: 'filhote', minAgeH: 8, label: 'Filhote' },
+    { id: 'cria', minAgeH: 36, label: 'Cria' },
+    { id: 'festa', minAgeH: 96, label: 'Festeiro' },
+    { id: 'adulta', minAgeH: 168, label: 'Cri da Praça' },
+    { id: 'ancia', minAgeH: 288, label: 'Anciã' }
   ];
-
-  var CAT_SVG = {
-    ovo: '<svg class="cat-sprite stage-ovo" viewBox="0 0 80 80" aria-hidden="true"><ellipse cx="40" cy="44" rx="22" ry="28" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M40 16v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="40" cy="14" r="2.2" fill="currentColor"/></svg>',
-    bebe: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M28 28c0-10 24-10 24 0v8c0 14-6 24-12 24s-12-10-12-24z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 24 24 14M50 24l6-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="34" cy="34" r="2.2" fill="currentColor"/><circle cx="46" cy="34" r="2.2" fill="currentColor"/><path d="M36 42c2 2 6 2 8 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    filhote: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M26 30c0-12 28-12 28 0v10c0 16-7 26-14 26S26 56 26 40z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 22 22 10M50 22l8-12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="34" cy="36" r="2.4" fill="currentColor"/><circle cx="46" cy="36" r="2.4" fill="currentColor"/><path d="M36 44c2.5 2.5 7.5 2.5 10 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M18 38c-3-.5-5.5-2-7-4M62 38c3-.5 5.5-2 7-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-    cria: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 32c0-14 32-14 32 0v12c0 18-8 28-16 28S24 62 24 44z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M28 20 18 6M52 20l10-14" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="33" cy="36" r="2.6" fill="currentColor"/><circle cx="47" cy="36" r="2.6" fill="currentColor"/><path d="M35 46c3 3 9 3 12 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 40c-4-.6-7-2.5-9-5M66 40c4-.6 7-2.5 9-5M15 48c-3.5.4-7 0-10-1M65 48c3.5.4 7 0 10-1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-    festa: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M22 34c0-15 36-15 36 0v12c0 18-9 28-18 28S22 64 22 46z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M28 18 16 4M52 18l12-14" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="33" cy="36" r="2.6" fill="currentColor"/><circle cx="47" cy="36" r="2.6" fill="currentColor"/><path d="M34 48c4 3.5 10 3.5 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M40 8l2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1z" fill="currentColor" opacity=".85"/><path d="M12 40c-4-.5-8-2-10-5M68 40c4-.5 8-2 10-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-    adulta: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M20 34c0-16 40-16 40 0v14c0 20-10 30-20 30S20 68 20 48z" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M28 16 14 2M52 16l14-14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="36" r="2.8" fill="currentColor"/><circle cx="48" cy="36" r="2.8" fill="currentColor"/><path d="M34 50c4 3.2 10 3.2 14 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M10 42c-4-.6-8-2.5-11-5.5M70 42c4-.6 8-2.5 11-5.5M11 50c-4 .5-8 0-12-1.2M69 50c4 .5 8 0 12-1.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
-    ancia: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M20 36c0-16 40-16 40 0v12c0 20-10 30-20 30S20 68 20 48z" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M28 18 16 4M52 18l12-14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M32 34c1.5 2 4 2 5.5 0M43 34c1.5 2 4 2 5.5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M34 50c4 2.5 10 2.5 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M28 12h24l-3 6H31z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="40" cy="9" r="2.5" fill="currentColor"/><path d="M10 44c-4-.5-8-2-11-5M70 44c4-.5 8-2 11-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-    sleep: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 34c0-14 32-14 32 0v10c0 16-8 26-16 26S24 60 24 44z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 22 22 12M50 22l8-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M31 36c2 1.5 5 1.5 7 0M42 36c2 1.5 5 1.5 7 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M36 46c2.5 2 7.5 2 10 0" fill="none" stroke="currentColor" stroke-width="1.8"/><text x="58" y="22" fill="currentColor" font-size="10" font-family="sans-serif">z</text></svg>',
-    sick: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 34c0-14 32-14 32 0v10c0 16-8 26-16 26S24 60 24 44z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 22 22 12M50 22l8-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M31 34l5 5M36 34l-5 5M44 34l5 5M49 34l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M36 48c2  -1.5 8-1.5 10 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    gone: '<svg class="cat-sprite" viewBox="0 0 80 80" aria-hidden="true"><path d="M24 34c0-14 32-14 32 0v10c0 16-8 26-16 26S24 60 24 44z" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".45"/><path d="M30 22 22 12M50 22l8-10" stroke="currentColor" stroke-width="2" opacity=".45"/><path d="M32 36h6M42 36h6M36 48h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/></svg>'
-  };
-
 
   var CARD_CATALOG = [
     { id: 'c_ovo', name: 'Casca Rosa', rarity: 'comum', emoji: '🥚', how: 'Nascer' },
@@ -45,11 +32,11 @@
     { id: 'c_banho', name: 'Banho de Caneco', rarity: 'comum', emoji: '🧼', how: 'Limpar 3×' },
     { id: 'c_soneca', name: 'Soneca na Praça', rarity: 'comum', emoji: '😴', how: 'Dormir' },
     { id: 'c_mapa', name: 'Mapa do Centro', rarity: 'comum', emoji: '🗺️', how: 'Explorar mapa' },
-    { id: 'r_filhote', name: 'Filhote do Cortejo', rarity: 'raro', emoji: '🐱', how: 'Evoluir p/ Filhote' },
+    { id: 'r_filhote', name: 'Filhote do Cortejo', rarity: 'raro', emoji: '🐤', how: 'Evoluir p/ Filhote' },
     { id: 'r_convento', name: 'Luz do Convento', rarity: 'raro', emoji: '⛪', how: 'Evoluir p/ Cria' },
     { id: 'r_after', name: 'After SE', rarity: 'raro', emoji: '🌙', how: 'After 2×' },
     { id: 'r_scrap', name: 'Scrap de Rua', rarity: 'raro', emoji: '✉️', how: 'Scrap 3×' },
-    { id: 'r_care', name: 'Cuidadora', rarity: 'raro', emoji: '💗', how: 'Care 15' },
+    { id: 'r_care', name: 'Cuidador Cabrunco', rarity: 'raro', emoji: '💗', how: 'Care 15' },
     { id: 'sr_lenda', name: 'Lenda CRICRI', rarity: 'super', emoji: '👑', how: 'Virar Anciã' },
     { id: 'sr_sergipe', name: 'Sergipe Inteiro', rarity: 'super', emoji: '🔶', how: 'Care 40' },
     { id: 'sr_festival', name: 'CRICRI 2026', rarity: 'super', emoji: '🎉', how: 'Últimos 3 dias vivos' },
@@ -57,9 +44,10 @@
   ];
 
   var RARITY_LABEL = { comum: 'Comum', raro: 'Raro', super: 'Super raro' };
-  var FAREWELL = 'A roda está acabando… obrigado por ficar comigo até aqui. Foi lindo.';
-  var FAREWELL_DONE = 'O FASC fechou o portão. Você cuidou de mim até o fim — gratidão de São Cristóvão.';
-  var FAREWELL_LATE = 'Últimos dias juntos. Cada carinho vira memória.';
+  // Farewell strings: easter egg de fim de festival — não revelar em UI de onboarding
+  var FAREWELL = 'Eita cabrunco… a roda está acabando. Obrigado por ficar comigo. Foi lindo.';
+  var FAREWELL_DONE = 'O FASC fechou o portão. Você cuidou do Cri até o fim — gratidão de São Cristóvão.';
+  var FAREWELL_LATE = 'Últimos dias juntos. Cada carinho vira memória do cabrunco.';
 
   function $(id) { return document.getElementById(id); }
   function reducedMotion() {
@@ -76,9 +64,9 @@
   function defaultState() {
     var now = Date.now();
     return {
-      started: false, name: 'Meow', bornAt: now, lastTick: now,
+      started: false, name: 'Cri', bornAt: now, lastTick: now,
       hunger: 85, happy: 85, energy: 85, hygiene: 85, health: 100,
-      shell: 'classic', sleeping: false, sick: false, alive: true,
+      shell: 'rosa', sleeping: false, sick: false, alive: true,
       careScore: 0, feedCount: 0, playCount: 0, cleanCount: 0,
       afterCount: 0, scrapCount: 0, stageId: 'ovo', evolutions: 0,
       cards: {}, log: []
@@ -101,6 +89,8 @@
       if (parsed.started) merged.started = true;
       if (parsed.bornAt) merged.bornAt = parsed.bornAt;
       if (parsed.name) merged.name = parsed.name;
+      var legacyShell = { classic: 'rosa', amarelo: 'ocre', stencil: 'tuxedo' };
+      if (!SHELLS[merged.shell]) merged.shell = legacyShell[merged.shell] || 'rosa';
       return merged;
     } catch (_) { return defaultState(); }
   }
@@ -228,6 +218,105 @@
     if (ms <= 3 * 86400000) return 'late';
     return 'ok';
   }
+
+  /** Hall da Fama local (este aparelho) — sem schema novo */
+  function loadHall() {
+    try {
+      var raw = localStorage.getItem(HALL_STORAGE);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  }
+  function saveHall(entries) {
+    try {
+      localStorage.setItem(HALL_STORAGE, JSON.stringify(entries.slice(0, 12)));
+    } catch (_) {}
+  }
+  function pushHallEntry(s) {
+    var entry = {
+      name: String(s.name || 'Cri').slice(0, 24),
+      careScore: s.careScore || 0,
+      evolutions: s.evolutions || 0,
+      cards: s.cards ? Object.keys(s.cards).length : 0,
+      stageId: s.stageId || 'ovo',
+      at: Date.now()
+    };
+    var hall = loadHall();
+    hall.unshift(entry);
+    hall.sort(function (a, b) { return (b.careScore || 0) - (a.careScore || 0); });
+    saveHall(hall);
+    return entry;
+  }
+
+  /**
+   * Encerramento oculto do festival.
+   * Roda uma vez quando EVENT_END passa (ou pet já morto no fim).
+   * Não é onboarding — só despedida.
+   */
+  function finalizeEnd(s) {
+    if (!s || s.endedAt) return false;
+    if (Date.now() < EVENT_END && s.alive) return false;
+    s.alive = false;
+    s.endedAt = Date.now();
+    s.sleeping = false;
+    if (!s.endSnapshot) {
+      s.endSnapshot = {
+        careScore: s.careScore || 0,
+        evolutions: s.evolutions || 0,
+        cards: s.cards ? Object.keys(s.cards).length : 0,
+        stageId: s.stageId || 'ovo',
+        name: s.name || 'Cri'
+      };
+      pushHallEntry(s);
+      pushLog(s, FAREWELL_DONE);
+      notifyCri('farewell');
+    }
+    return true;
+  }
+
+  function renderFarewell(s) {
+    var panel = $('farewell-panel');
+    if (!panel) return;
+    var phase = lifePhase();
+    var show = !!(s.started && (phase === 'ended' || s.endedAt || (Date.now() >= EVENT_END)));
+    panel.hidden = !show;
+    if (!show) return;
+
+    var body = $('farewell-body');
+    if (body) body.textContent = FAREWELL_DONE;
+
+    var snap = s.endSnapshot || {
+      careScore: s.careScore || 0,
+      evolutions: s.evolutions || 0,
+      cards: s.cards ? Object.keys(s.cards).length : 0,
+      name: s.name || 'Cri'
+    };
+    var stats = $('farewell-stats');
+    if (stats) {
+      stats.innerHTML =
+        '<div><dt>Cuidados</dt><dd>' + (snap.careScore || 0) + '</dd></div>' +
+        '<div><dt>Evoluções</dt><dd>' + (snap.evolutions || 0) + '</dd></div>' +
+        '<div><dt>Photocards</dt><dd>' + (snap.cards || 0) + '</dd></div>' +
+        '<div><dt>Nome</dt><dd>' + String(snap.name || 'Cri').replace(/</g, '&lt;') + '</dd></div>';
+    }
+
+    var hall = loadHall();
+    var list = $('hall-list');
+    var empty = $('hall-empty');
+    if (list) {
+      if (!hall.length) {
+        list.innerHTML = '';
+        if (empty) empty.hidden = false;
+      } else {
+        if (empty) empty.hidden = true;
+        list.innerHTML = hall.slice(0, 8).map(function (e, i) {
+          return '<li><span>' + (i + 1) + '. ' + String(e.name || 'Cri').replace(/</g, '&lt;') +
+            '</span><strong>' + (e.careScore || 0) + ' pts</strong></li>';
+        }).join('');
+      }
+    }
+  }
   function stageForAge(hours) {
     var cur = STAGES[0];
     for (var i = 0; i < STAGES.length; i++) if (hours >= STAGES[i].minAgeH) cur = STAGES[i];
@@ -261,6 +350,19 @@
     showCardToast._t = setTimeout(function () { el.hidden = true; }, 2800);
   }
 
+  function notifyCri(kind, arg) {
+    try {
+      if (!window.CricriNotifs || !window.CricriNotifs.Cri) return;
+      var Cri = window.CricriNotifs.Cri;
+      if (kind === 'born' && Cri.born) Cri.born();
+      else if (kind === 'evolve' && Cri.evolve) Cri.evolve(arg);
+      else if (kind === 'card' && Cri.card) Cri.card(arg);
+      else if (kind === 'hungry' && Cri.hungry) Cri.hungry();
+      else if (kind === 'sick' && Cri.sick) Cri.sick();
+      else if (kind === 'farewell' && Cri.farewell) Cri.farewell();
+    } catch (_) {}
+  }
+
   function grantCard(s, cardId, silent) {
     var card = null;
     for (var i = 0; i < CARD_CATALOG.length; i++) if (CARD_CATALOG[i].id === cardId) card = CARD_CATALOG[i];
@@ -268,7 +370,11 @@
     s.cards = s.cards || {};
     if (s.cards[cardId]) { s.cards[cardId].count += 1; return false; }
     s.cards[cardId] = { count: 1, at: Date.now() };
-    if (!silent) { pushLog(s, 'Photocard: ' + card.name); showCardToast(card); }
+    if (!silent) {
+      pushLog(s, 'Photocard: ' + card.name);
+      showCardToast(card);
+      notifyCri('card', card.name);
+    }
     return true;
   }
 
@@ -297,6 +403,7 @@
     s.stageId = byAge.id;
     s.evolutions = (s.evolutions || 0) + 1;
     pushLog(s, 'Evoluiu → ' + byAge.label);
+    notifyCri('evolve', byAge.label);
     if (byAge.id === 'filhote') grantCard(s, 'r_filhote');
     if (byAge.id === 'cria') grantCard(s, 'r_convento');
     if (byAge.id === 'ancia') grantCard(s, 'sr_lenda');
@@ -326,11 +433,23 @@
     checkCardMilestones(s);
   }
 
+  var _lastCareNotif = 0;
+  function maybeCareNotif(s) {
+    var now = Date.now();
+    if (now - _lastCareNotif < 30 * 60 * 1000) return; // máx. 1 alerta de cuidado / 30 min
+    if (s.sick) {
+      _lastCareNotif = now;
+      notifyCri('sick');
+    } else if (s.hunger < 18) {
+      _lastCareNotif = now;
+      notifyCri('hungry');
+    }
+  }
+
   function tickOpen(s) {
     if (!s.started || !s.alive) return;
     if (Date.now() >= EVENT_END) {
-      s.alive = false;
-      pushLog(s, FAREWELL_DONE);
+      finalizeEnd(s);
       return;
     }
     var decay = s.sleeping ? 0.4 : 1;
@@ -344,18 +463,21 @@
     s.lastTick = Date.now();
     if (checkEvolution(s)) flashEvolve();
     checkCardMilestones(s);
+    maybeCareNotif(s);
   }
 
   var state = load();
   applyAwayDecay(state);
   save(state);
 
-  function spriteFace(s) {
-    if (!s.alive) return CAT_SVG.gone;
-    if (s.sleeping) return CAT_SVG.sleep;
-    if (s.sick) return CAT_SVG.sick;
-    var key = stageForAge(ageHours(s)).sprite;
-    return CAT_SVG[key] || CAT_SVG.bebe;
+  function catExpr(s) {
+    if (!s.alive) return 'dead';
+    if (s.sick) return 'sick';
+    if (s.sleeping) return 'sleep';
+    var m = mood(s);
+    if (m === 'happy') return 'happy';
+    if (m === 'sad') return 'sad';
+    return 'normal';
   }
   function mood(s) {
     if (!s.alive) return 'gone';
@@ -376,11 +498,24 @@
   }
   function flashEvolve() {
     if (reducedMotion()) return;
-    var face = $('tama-face');
-    if (!face) return;
-    face.classList.remove('is-pop');
-    void face.offsetWidth;
-    face.classList.add('is-pop');
+    var stage = $('tama-cat-stage');
+    if (!stage) return;
+    stage.classList.remove('is-pop');
+    void stage.offsetWidth;
+    stage.classList.add('is-pop');
+  }
+  var blinkTimer = null;
+  function scheduleBlink() {
+    clearTimeout(blinkTimer);
+    var delay = 2400 + Math.random() * 2600;
+    blinkTimer = setTimeout(function () {
+      var stage = $('tama-cat-stage');
+      if (stage && !reducedMotion()) {
+        stage.classList.add('is-blink');
+        setTimeout(function () { stage.classList.remove('is-blink'); }, 140);
+      }
+      scheduleBlink();
+    }, delay);
   }
 
   function setTab(name) {
@@ -421,34 +556,23 @@
     if (appMain) appMain.hidden = !s.started;
     if (!s.started) return;
 
-    if (Date.now() >= EVENT_END && s.alive) {
-      s.alive = false;
-      pushLog(s, FAREWELL_DONE);
-      save(s);
-    }
+    if (finalizeEnd(s)) save(s);
     checkEvolution(s);
 
-    var shell = SHELLS[s.shell] || SHELLS.classic;
+    var shell = SHELLS[s.shell] || SHELLS.rosa;
     var device = $('tama-device');
     if (device) {
-      device.style.setProperty('--bezel', shell.bezel);
-      device.style.setProperty('--accent', shell.accent);
-      device.style.setProperty('--shell-bg', shell.bg);
+      device.style.setProperty('--fur', shell.fur);
+      device.style.setProperty('--fur-light', shell.furLight);
+      device.style.setProperty('--fur-ear', shell.furEar);
     }
-    var face = $('tama-face');
-    if (face) {
-      face.innerHTML = spriteFace(s);
-      var m = mood(s);
-      var st = (!s.alive) ? 'gone' : (s.sleeping ? 'sleep' : stageForAge(ageHours(s)).id);
-      face.setAttribute('data-mood', m);
-      face.setAttribute('data-stage', st);
-      face.classList.toggle('is-sleep', m === 'sleep');
-      face.classList.toggle('is-sick', m === 'sick');
-      face.classList.toggle('is-happy', m === 'happy');
-      face.classList.toggle('is-sad', m === 'sad');
+    var catEl = $('tama-cat');
+    if (catEl) {
+      catEl.setAttribute('data-stage', (stageForAge(ageHours(s))).id);
+      catEl.setAttribute('data-expr', catExpr(s));
     }
     var name = $('tama-name');
-    if (name) name.textContent = s.name || 'Roda';
+    if (name) name.textContent = s.name || 'Cri';
     var st = stageForAge(ageHours(s));
     var stageEl = $('tama-stage');
     if (stageEl) stageEl.textContent = st.label;
@@ -467,11 +591,11 @@
       var phase = lifePhase();
       if (!s.alive || phase === 'ended') status.textContent = FAREWELL_DONE;
       else if (phase === 'dying') status.textContent = FAREWELL;
-      else if (s.sleeping) status.textContent = 'Dormindo…';
-      else if (s.sick) status.textContent = 'Passando mal';
+      else if (s.sleeping) status.textContent = 'Descansando o cabrunco…';
+      else if (s.sick) status.textContent = 'Esse cabrunco não tá legal…';
       else if (phase === 'late') status.textContent = FAREWELL_LATE;
-      else if (mood(s) === 'happy') status.textContent = 'Curtindo São Cristóvão';
-      else if (mood(s) === 'sad') status.textContent = 'Precisa de você';
+      else if (mood(s) === 'happy') status.textContent = 'Cabrunco de bem em São Cristóvão';
+      else if (mood(s) === 'sad') status.textContent = 'Se oriente… precisa de você';
       else status.textContent = 'De boa no centro histórico';
     }
     bar($('bar-hunger'), s.hunger);
@@ -493,15 +617,43 @@
     });
     var sleepBtn = document.querySelector('[data-action="sleep"]');
     if (sleepBtn && s.alive) sleepBtn.textContent = s.sleeping ? 'Acordar' : 'Dormir';
+    // Após o festival: só coleção / renascer bloqueado
+    document.querySelectorAll('[data-action="reset"]').forEach(function (b) {
+      if (Date.now() >= EVENT_END) {
+        b.disabled = true;
+        b.title = 'A roda fechou — sem renascer até o próximo FASC';
+      }
+    });
     renderCollection();
+    renderFarewell(s);
   }
 
   function startGame() {
+    // Mecânica oculta: depois do EVENT_END não nasce criatura nova
+    if (Date.now() >= EVENT_END) {
+      var gate = $('start-gate');
+      if (gate) {
+        var sub = gate.querySelector('.start-sub');
+        if (sub) {
+          sub.innerHTML = 'O FASC 2026 fechou o portão.<br>O Cri virou memória — até a próxima roda em São Cristóvão.';
+        }
+        var btn = gate.querySelector('[data-action="start"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Roda encerrada'; }
+      }
+      // Se já tinha pet, mostra despedida
+      if (state.started) {
+        finalizeEnd(state);
+        save(state);
+        render();
+      }
+      return;
+    }
     if (!state.started) {
       state = defaultState();
       state.started = true;
       grantCard(state, 'c_ovo');
       pushLog(state, 'Nasceu em São Cristóvão — CRICRI 2026.');
+      notifyCri('born');
       save(state);
     }
     render();
@@ -527,8 +679,7 @@
     }
     if (!s.started || !s.alive) return;
     if (Date.now() >= EVENT_END) {
-      s.alive = false;
-      pushLog(s, FAREWELL_DONE);
+      finalizeEnd(s);
       save(s);
       render();
       return;
@@ -583,8 +734,8 @@
         s.happy = clamp(s.happy + 14, 0, 100);
         s.scrapCount++; s.careScore++; break;
       case 'rename': {
-        var n = prompt('Nome (máx. 12):', s.name || 'Meow');
-        if (n) s.name = String(n).trim().slice(0, 12) || 'Meow';
+        var n = prompt('Nome (máx. 12):', s.name || 'Cri');
+        if (n) s.name = String(n).trim().slice(0, 12) || 'Cri';
         break;
       }
     }
@@ -592,20 +743,8 @@
     var evo = checkEvolution(s);
     save(s);
     render();
-    if (evo) {
-      flashEvolve();
-      sfx('evolve');
-    } else {
-      if (kind === 'feed') sfx('feed');
-      else if (kind === 'play' || kind === 'after' || kind === 'mapa' || kind === 'scrap') sfx('play');
-      else if (kind === 'sleep') sfx('sleep');
-      else if (kind === 'medicine' || kind === 'clean') sfx('pop');
-      else sfx('click');
-      if (!reducedMotion()) {
-        var face = $('tama-face');
-        if (face) { face.classList.remove('is-pop'); void face.offsetWidth; face.classList.add('is-pop'); }
-      }
-    }
+    if (evo) flashEvolve();
+    else flashEvolve();
   }
 
   function wire() {
@@ -628,6 +767,7 @@
     } catch (_) {}
     wire();
     render();
+    scheduleBlink();
     if (state.started) setTab('play');
     setInterval(function () {
       if (!state.started) return;
@@ -644,4 +784,38 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+
+  // API de leitura (perfil / outros) — mesma instância de load/cloudLoad
+  window.CricriTamaRead = window.CricriTamaRead || {
+    loadLocal: load,
+    cloudLoad: cloudLoad,
+    resolveState: async function () {
+      var local = load();
+      var cloud = null;
+      try { cloud = await cloudLoad(); } catch (_) {}
+      if (cloud && cloud.started) return Object.assign(defaultState(), cloud, { started: true });
+      if (local && local.started) return local;
+      return null;
+    },
+    summarize: function (s) {
+      if (!s || !s.started) return null;
+      var st = stageForAge(ageHours(s));
+      var shellId = s.shell || 'rosa';
+      var labels = { rosa: 'Rosa', ocre: 'Ocre', azul: 'Azul', tuxedo: 'Tuxedo' };
+      var emoji = { ovo: '🥚', bebe: '🐱', filhote: '🐱', cria: '🐱', festa: '🐱', adulta: '🐱', ancia: '🐱' };
+      return {
+        name: String(s.name || 'Cri').slice(0, 24),
+        stageId: st.id,
+        stageLabel: st.label,
+        emoji: emoji[st.id] || '🐾',
+        shellId: shellId,
+        shellLabel: labels[shellId] || shellId,
+        careScore: Math.max(0, Number(s.careScore) || 0),
+        alive: s.alive !== false
+      };
+    },
+    stageOf: function (s) { return stageForAge(ageHours(s)); },
+    defaultState: defaultState
+  };
+
 })();

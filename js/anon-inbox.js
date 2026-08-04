@@ -69,7 +69,7 @@
     }
     var eventEndIso =
       (window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso) ||
-      '2026-11-23T00:00:00-03:00';
+      '2026-11-23T12:00:00-03:00';
 
     var res = await window.fascDb
       .from('inbox_anon')

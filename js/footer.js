@@ -63,17 +63,18 @@
         '</p>' +
         '<div class="cricri-footer-about" id="sobre">' +
           '<p class="cricri-footer-about-eyebrow">Sobre</p>' +
-          '<p class="cricri-footer-about-lead">CRICRI é o mural da cidade.</p>' +
+          '<p class="cricri-footer-about-lead">O CRICRI é o boca a boca da cidade.</p>' +
           '<p class="cricri-footer-text">' +
-            'A camada viva onde São Cristóvão cola seus próprios cartazes — quem tá tocando agora, onde a roda formou, o que rolou na esquina. ' +
-            'O nome vem do som do grilo ao entardecer: o ruído constante de fundo que nunca cala.' +
+            'A camada viva onde São Cristóvão conta suas próprias histórias. ' +
+            'O nosso foco é a vivência e o pulso das ruas: quem tá tocando agora, os encontros do cotidiano, o que tá rolando em cada esquina. ' +
+            'Somos o ruído constante da cidade, a voz que se move junto e nunca se cala.' +
           '</p>' +
           '<p class="cricri-footer-text">' +
-            'Não somos o site oficial — programação e mapa institucional usam como <strong>referência</strong> o portal da prefeitura.' +
+            'Não somos o site oficial — programação e mapa institucional usam como referência o portal da prefeitura.' +
           '</p>' +
         '</div>' +
         '<p class="cricri-footer-pulse">' +
-          'A performance é de quem está na rua — vivência, paixão e o que a cidade cola no mural.' +
+          'A performance é de quem está na rua — vivência, paixão e o pulso do cotidiano.' +
         '</p>' +
         '<div class="cricri-footer-links">' +
           '<a class="cricri-footer-official" href="' + OFFICIAL + '" target="_blank" rel="noopener noreferrer">' +

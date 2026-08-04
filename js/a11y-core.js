@@ -52,13 +52,13 @@
     var s = document.createElement('style');
     s.id = 'cricri-a11y-css';
     s.textContent = [
-      '.a11y-wrap{position:fixed;top:max(0.65rem,env(safe-area-inset-top,0px));right:max(0.65rem,env(safe-area-inset-right,0px));z-index:99990;display:flex;flex-direction:column;align-items:flex-end;gap:0.45rem;pointer-events:none}',
-      'body.page-profile .a11y-wrap,html:has(body.page-profile) .a11y-wrap{top:max(0.65rem,env(safe-area-inset-top,0px))}',
-      '.a11y-toggle{pointer-events:auto!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;border-radius:50%!important;border:2px solid #f2e8d2!important;background:#e33d6b!important;color:#fff!important;display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 18px rgba(0,0,0,0.45),0 0 14px rgba(227,61,107,0.35);transition:transform .15s ease,background .15s ease,border-color .15s ease}',
+      '.a11y-wrap{position:fixed!important;top:auto!important;bottom:calc(72px + env(safe-area-inset-bottom,0px))!important;right:max(0.75rem,env(safe-area-inset-right,0px))!important;left:auto!important;z-index:99990!important;display:flex!important;flex-direction:column-reverse!important;align-items:flex-end!important;gap:0.45rem!important;pointer-events:none!important;margin:0!important}',
+      '/* profile uses same bottom FAB */',
+      '.a11y-toggle{pointer-events:auto!important;width:56px!important;height:56px!important;min-width:56px!important;min-height:56px!important;border-radius:50%!important;border:2.5px solid #f2e8d2!important;background:#e33d6b!important;color:#fff!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 16px rgba(227,61,107,0.4)!important;transition:transform .15s ease,background .15s ease!important;z-index:99991!important;position:relative!important;padding:0!important;margin:0!important;appearance:none!important;-webkit-appearance:none!important}',
       '.a11y-toggle:hover,.a11y-toggle[aria-expanded="true"]{background:#b03a22!important;border-color:#f2e8d2!important;transform:scale(1.05)}',
       '.a11y-toggle:focus-visible{outline:3px solid #d49a2c!important;outline-offset:3px}',
       '.a11y-toggle svg{width:24px;height:24px;pointer-events:none;display:block}',
-      '.a11y-panel{pointer-events:auto!important;position:fixed!important;top:calc(0.65rem + 56px + env(safe-area-inset-top,0px))!important;right:max(0.65rem,env(safe-area-inset-right,0px))!important;left:auto!important;width:min(340px,calc(100vw - 1.25rem))!important;max-height:min(70vh,calc(100dvh - 6rem - env(safe-area-inset-bottom,0px)))!important;overflow:auto;-webkit-overflow-scrolling:touch;background:#1c1511!important;color:#ebe3cf!important;border:2px solid rgba(227,61,107,0.4)!important;border-radius:12px!important;padding:0.9rem 0.85rem 1rem;box-shadow:0 16px 40px rgba(0,0,0,0.5);z-index:99992!important}',
+      '.a11y-panel{pointer-events:auto!important;position:fixed!important;bottom:calc(72px + 56px + env(safe-area-inset-bottom,0px))!important;top:auto!important;right:max(0.75rem,env(safe-area-inset-right,0px))!important;left:auto!important;width:min(340px,calc(100vw - 1.25rem))!important;max-height:min(60vh,calc(100dvh - 9rem - env(safe-area-inset-bottom,0px)))!important;overflow:auto;-webkit-overflow-scrolling:touch;background:#1c1511!important;color:#ebe3cf!important;border:2px solid rgba(227,61,107,0.45)!important;border-radius:12px!important;padding:0.9rem 0.85rem 1rem;box-shadow:0 -8px 40px rgba(0,0,0,0.55);z-index:99992!important}',
       '.a11y-panel[hidden]{display:none!important}',
       '.a11y-panel h2{margin:0 0 0.75rem;font-family:Oswald,system-ui,sans-serif;font-size:0.95rem;letter-spacing:0.1em;text-transform:uppercase}',
       '.a11y-group{margin-bottom:0.75rem;padding-bottom:0.65rem;border-bottom:1px solid rgba(230,220,196,0.1)}',
@@ -225,13 +225,40 @@
     }
     // painel sempre dentro do wrap (posicionamento fixo)
     if (panel.parentNode !== wrap) wrap.appendChild(panel);
-    // toggle pode ficar no header — não mover
-    toggle.style.pointerEvents = 'auto';
-    toggle.style.cursor = 'pointer';
+    // FAB padrão: canto inferior direito (igual Meow) — tira do header se precisar
+    if (toggle.parentNode !== wrap) {
+      wrap.appendChild(toggle);
+    }
+    if (panel.parentNode !== wrap) {
+      wrap.appendChild(panel);
+    }
+    toggle.style.cssText = [
+      'pointer-events:auto', 'cursor:pointer', 'z-index:99991',
+      'width:56px', 'height:56px', 'min-width:56px', 'min-height:56px',
+      'border-radius:50%', 'border:2.5px solid #f2e8d2', 'background:#e33d6b',
+      'color:#fff', 'display:inline-flex', 'align-items:center', 'justify-content:center',
+      'touch-action:manipulation', '-webkit-tap-highlight-color:transparent',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 16px rgba(227,61,107,0.4)',
+      'padding:0', 'margin:0', 'position:relative', 'appearance:none'
+    ].join(';');
     if (!toggle.getAttribute('type')) toggle.setAttribute('type', 'button');
-    wrap.style.zIndex = '99990';
-    wrap.style.pointerEvents = 'none';
+    if (!toggle.querySelector('svg')) {
+      toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><path d="M12 8.5v3.5"/><path d="M8 22l4-10 4 10"/><path d="M6.5 13.5h11"/></svg>';
+    }
+    wrap.style.cssText = [
+      'position:fixed', 'top:auto',
+      'bottom:calc(72px + env(safe-area-inset-bottom, 0px))',
+      'right:max(0.75rem, env(safe-area-inset-right, 0px))',
+      'left:auto', 'z-index:99990', 'display:flex',
+      'flex-direction:column-reverse', 'align-items:flex-end',
+      'gap:0.45rem', 'pointer-events:none', 'margin:0'
+    ].join(';');
     panel.style.pointerEvents = 'auto';
+    panel.style.position = 'fixed';
+    panel.style.bottom = 'calc(72px + 60px + env(safe-area-inset-bottom, 0px))';
+    panel.style.top = 'auto';
+    panel.style.right = 'max(0.75rem, env(safe-area-inset-right, 0px))';
+    panel.style.zIndex = '99992';
     return { wrap: wrap, toggle: toggle, panel: panel };
   }
 
@@ -287,11 +314,28 @@
     } catch (_) {}
   }
 
+  function placePanelAboveFab(panel) {
+    if (!panel) return;
+    // Sempre acima do FAB / bottom-nav — nunca “abre pra baixo”
+    panel.style.setProperty('position', 'fixed', 'important');
+    panel.style.setProperty('top', 'auto', 'important');
+    panel.style.setProperty('bottom', 'calc(72px + 64px + env(safe-area-inset-bottom, 0px))', 'important');
+    panel.style.setProperty('right', 'max(0.75rem, env(safe-area-inset-right, 0px))', 'important');
+    panel.style.setProperty('left', 'auto', 'important');
+    panel.style.setProperty('max-height', 'min(58vh, calc(100dvh - 9.5rem - env(safe-area-inset-bottom, 0px)))', 'important');
+    panel.style.setProperty('width', 'min(92vw, 340px)', 'important');
+    panel.style.setProperty('z-index', '99992', 'important');
+    panel.style.setProperty('overflow-y', 'auto', 'important');
+    panel.style.setProperty('transform', 'none', 'important');
+  }
   function openPanel(toggle, panel) {
+    placePanelAboveFab(panel);
     panel.hidden = false;
     panel.removeAttribute('hidden');
     panel.classList.add('is-open');
     toggle.setAttribute('aria-expanded', 'true');
+    // scroll interno se conteúdo for longo
+    try { panel.scrollTop = 0; } catch (_) {}
   }
   function closePanel(toggle, panel) {
     panel.hidden = true;
@@ -416,11 +460,11 @@
     }
     // click + pointerup (melhor no mobile que só click)
     ui.toggle.addEventListener('click', handleToggleEvent, true);
-    ui.toggle.addEventListener('pointerup', function (e) {
-      if (e.pointerType === 'touch' || e.pointerType === 'pen') {
-        handleToggleEvent(e);
-      }
-    }, true);
+    // Mobile real: touchend é mais confiável que click em alguns WebViews
+    ui.toggle.addEventListener('touchend', function (e) {
+      e.preventDefault();
+      handleToggleEvent(e);
+    }, { capture: true, passive: false });
 
     // Chips de tema/texto/etc. — uma única fonte de verdade (inclui HOME)
     ui.panel.addEventListener('click', function (e) {

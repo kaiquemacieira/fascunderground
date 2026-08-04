@@ -165,15 +165,7 @@
         .eq('user_id', uid)
         .maybeSingle();
       if (res.error || !res.data || !res.data.state) {
-        // fallback coluna em profiles (mesmo que o jogo)
-        try {
-          var fb = await global.fascDb
-            .from('profiles')
-            .select('tama_state')
-            .eq('id', uid)
-            .maybeSingle();
-          if (fb.data && fb.data.tama_state) return fb.data.tama_state;
-        } catch (_) {}
+        // sem fallback em profiles (coluna tama_state não existe lá)
         return null;
       }
       return res.data.state;
