@@ -1,8 +1,38 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
+  <script>
+  /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {}; } catch (_) {}
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      var h = document.documentElement;
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t === 'light' ? 'light' : 'dark');
+      h.style.colorScheme = t;
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      if (metas.length) {
+        for (var i = 0; i < metas.length; i++) {
+          if (!metas[i].getAttribute('media')) {
+            metas[i].setAttribute('content', t === 'light' ? '#f6efdc' : '#0c0a08');
+          }
+        }
+      }
+    } catch (_) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-a11y-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  })();
+  </script>
+
   <title>Área do Usuário · CRICRI</title>
   <meta name="theme-color" content="#0c0a08">
   <meta name="view-transition" content="same-origin">
@@ -2219,6 +2249,17 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   background: transparent; color: #8c8376; cursor: pointer;
 }
 .hero-actions-row .btn-logout-hero:hover { color: #e33d6b; border-color: rgba(227,61,107,0.4); }
+.hero-actions-row .btn-logout-hero {
+  border: 1.5px solid rgba(227,61,107,0.45) !important;
+  color: #f5a3b8 !important;
+  background: rgba(227,61,107,0.1) !important;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem !important;
+}
 
 /* top tools (perfil) — à esquerda do ♿ a11y */
 .cricri-top-tools {
@@ -2942,6 +2983,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
 
 </style>
 
+<style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 </head>
 <body class="page-profile">
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -3045,7 +3087,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
             <span class="presence-seal-text" id="presence-seal-text"></span>
           </div>
           <div class="hero-actions-row">
-            <button type="button" class="btn-logout-hero" id="btn-logout-mini" title="Sair da conta">Sair</button>
+            <button type="button" class="btn-logout-hero" id="btn-logout-mini" title="Sair da conta e trocar de usuário">Sair da conta</button>
           </div>
 
           <!-- Conexões junto da foto -->
@@ -4139,9 +4181,34 @@ window.fascEventEnded = function () {
 
     if ($('btn-logout')) {
       $('btn-logout').onclick = async function () {
-        try { await window.fascAuth.signOut(); } catch (_) {}
+        try {
+          if (window.fascAuth && window.fascAuth.signOut) await window.fascAuth.signOut();
+          else if (window.fascDb && window.fascDb.auth) await window.fascDb.auth.signOut();
+        } catch (_) {}
+        try {
+          localStorage.removeItem('cricri-guest');
+        } catch (_) {}
         showLoggedOut();
-        msg('auth-msg', 'Saiu da conta.', true);
+        msg('auth-msg', 'Saiu da conta. Pode entrar com outra.', true);
+        setTimeout(function () {
+          window.location.href = 'login.html?sair=1';
+        }, 600);
+      };
+    }
+    var miniLo = $('btn-logout-mini');
+    if (miniLo && miniLo.dataset.logoutBound !== '1') {
+      miniLo.dataset.logoutBound = '1';
+      miniLo.onclick = function () {
+        var full = $('btn-logout');
+        if (full) full.click();
+        else {
+          (async function () {
+            try {
+              if (window.fascAuth && window.fascAuth.signOut) await window.fascAuth.signOut();
+            } catch (_) {}
+            window.location.href = 'login.html?sair=1';
+          })();
+        }
       };
     }
 
@@ -5041,9 +5108,9 @@ window.fascEventEnded = function () {
       window.FASC_VAPID_PUBLIC_KEY = window.FASC_CONFIG.vapidPublicKey;
     }
   </script>
-  <script src="js/push.js"></script>
+  <script src="js/push.js?v=20260805g"></script>
 
-  <script src="js/theme.js"></script>
+  <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-core.js" defer></script>
   <script src="js/keyboard-nav.js" defer></script>
   <script src="js/touch-gestures.js" defer></script>
@@ -5249,12 +5316,13 @@ window.fascEventEnded = function () {
   <div id="bottom-nav-slot"></div>
   <script src="js/cri-svg.js"></script>
   <script src="js/guest-mode.js"></script>
-  <script src="js/friends.js"></script>
-  <script src="js/notif-bell.js"></script>
-  <script src="js/install-app.js"></script>
-  <script src="js/sw-register.js"></script>
+  <script src="js/visit-sheet.js?v=20260805i"></script>
+  <script src="js/friends.js?v=20260805g"></script>
+  <script src="js/notif-bell.js?v=20260805g"></script>
+  <script src="js/install-app.js?v=20260805g"></script>
+  <script src="js/sw-register.js?v=20260805g"></script>
   <script src="js/realtime-sync.js"></script>
-  <script src="js/bottom-nav.js"></script>
+  <script src="js/bottom-nav.js?v=20260805k"></script>
   <!-- chip de nick removido do topbar — sininho global em js/notif-bell.js -->
 
 <script>

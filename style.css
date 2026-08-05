@@ -1,3 +1,206 @@
+
+
+/* ===== Scrollbars CRICRI (rosa · ocre · asfalto) ===== */
+:root {
+  --sb-size: 11px;
+  --sb-track: #0c0a08;
+  --sb-thumb: #3d342c;
+  --sb-thumb-top: #5a4e42;
+  --sb-thumb-hover-a: #e33d6b;
+  --sb-thumb-hover-b: #d49a2c;
+  --sb-border: #0c0a08;
+}
+html[data-theme="light"],
+html[data-a11y-theme="light"] {
+  --sb-track: #f3ecdc;
+  --sb-thumb: #a89f90;
+  --sb-thumb-top: #c4b9a6;
+  --sb-thumb-hover-a: #e33d6b;
+  --sb-thumb-hover-b: #d49a2c;
+  --sb-border: #f3ecdc;
+}
+
+html,
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Chrome, Edge, Safari — desktop */
+*::-webkit-scrollbar {
+  width: var(--sb-size);
+  height: var(--sb-size);
+}
+*::-webkit-scrollbar-track {
+  background: var(--sb-track);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(180deg, var(--sb-thumb-top) 0%, var(--sb-thumb) 55%, #2a2420 100%);
+  border-radius: 999px;
+  border: 2px solid var(--sb-border);
+  min-height: 44px;
+  box-shadow: inset 0 1px 0 rgba(235, 227, 207, 0.12);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(165deg, var(--sb-thumb-hover-a) 0%, var(--sb-thumb-hover-b) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(227, 61, 107, 0.35);
+}
+*::-webkit-scrollbar-thumb:active {
+  background: var(--sb-thumb-hover-a);
+  box-shadow: 0 0 12px rgba(227, 61, 107, 0.45);
+}
+*::-webkit-scrollbar-corner {
+  background: var(--sb-track);
+}
+
+/* containers com scroll próprio */
+.feed-wall,
+.vs-card,
+#cricri-notif-panel,
+#cricri-create-sheet .cs-card,
+.tama-confirm-card,
+#roda-evo-sheet > div,
+.notifs-section,
+main {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ===== Scrollbars mobile / touch =====
+   Em touch o sistema desenha overlay; deixamos faixa fina,
+   trilha transparente e polegar semi-transparente com rosa no active.
+*/
+@media (max-width: 768px), (pointer: coarse) {
+  :root {
+    --sb-size: 5px;
+  }
+
+  html,
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(227, 61, 107, 0.55) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(90, 78, 66, 0.75);
+    border: none;
+    border-radius: 999px;
+    min-height: 32px;
+    box-shadow: none;
+  }
+  *::-webkit-scrollbar-thumb:active,
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #e33d6b 0%, #d49a2c 100%);
+    box-shadow: 0 0 8px rgba(227, 61, 107, 0.4);
+  }
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  .feed-wall,
+  .vs-card,
+  #cricri-notif-panel,
+  #cricri-create-sheet .cs-card,
+  .tama-confirm-card,
+  #roda-evo-sheet > div,
+  .notifs-section,
+  main,
+  .bottom-nav {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(227, 61, 107, 0.45) transparent;
+  }
+}
+
+/* iOS Safari: esconde barra nativa grossa em áreas internas,
+   mantém scroll por gesto */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    .feed-wall,
+    .vs-card,
+    #cricri-create-sheet .cs-card,
+    #cricri-notif-panel {
+      scrollbar-width: none;
+    }
+    .feed-wall::-webkit-scrollbar,
+    .vs-card::-webkit-scrollbar,
+    #cricri-create-sheet .cs-card::-webkit-scrollbar,
+    #cricri-notif-panel::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+  }
+}
+
+/* ===== Tema escuro nativo (padrão da marca) ===== */
+:root {
+  color-scheme: dark;
+}
+html[data-theme="dark"],
+html[data-a11y-theme="dark"],
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) {
+  color-scheme: dark;
+  --void: #0c0a08;
+  --ink: #0c0a08;
+  --paper: #f0e6d0;
+  --cream: #1a1612;
+  --text: #f0e6d0;
+  --surface: #1a1612;
+  --muted: #c4b9a6;
+  --asfalto: #1e1a16;
+}
+html[data-theme="dark"] body,
+html[data-a11y-theme="dark"] body,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) body {
+  background: #0c0a08 !important;
+  color: #f0e6d0 !important;
+}
+html[data-theme="light"],
+html[data-a11y-theme="light"] {
+  color-scheme: light;
+  --void: #f3ecdc;
+  --ink: #17120e;
+  --paper: #17120e;
+  --cream: #fffef8;
+  --text: #17120e;
+  --surface: #fffef8;
+  --muted: #5c564e;
+  --asfalto: #e8dfc8;
+}
+html[data-theme="light"] body,
+html[data-a11y-theme="light"] body {
+  background: #f3ecdc !important;
+  color: #17120e !important;
+}
+
+/* Controles nativos (inputs, selects, scrollbar) seguem o tema */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-a11y-theme="dark"] input,
+html[data-a11y-theme="dark"] textarea,
+html[data-a11y-theme="dark"] select {
+  color-scheme: dark;
+}
+html[data-theme="light"] input,
+html[data-theme="light"] textarea,
+html[data-theme="light"] select {
+  color-scheme: light;
+}
+
 /* ============================================================
    FASC+ · São Cristóvão de rua
    Tipografia: Saira Stencil One (principal) + Oswald + Inter
@@ -971,9 +1174,18 @@ html[data-a11y-theme="light"] .header-search input {
 
 .post-name {
   font-weight: 800;
-  color: var(--ink);
+  color: var(--text, var(--paper, #ebe3cf));
   font-size: 0.88rem;
   letter-spacing: 0.2px;
+}
+.post-name a,
+.post-nick {
+  color: inherit;
+  text-decoration: none;
+}
+.post-name a:hover,
+.post-nick:hover {
+  color: var(--rosa, #e33d6b);
 }
 
 .post-status {
@@ -996,10 +1208,11 @@ html[data-a11y-theme="light"] .header-search input {
 
 .post-text {
   margin: 0 0 0.5rem;
-  color: var(--ink);
-  font-size: 0.88rem;
-  line-height: var(--lh-body);
+  color: var(--text, var(--paper, #ebe3cf));
+  font-size: 0.92rem;
+  line-height: 1.45;
   font-weight: 500;
+  -webkit-font-smoothing: antialiased;
 }
 
 .post-meta {
@@ -1014,7 +1227,7 @@ html[data-a11y-theme="light"] .header-search input {
   font-family: var(--font-condensed);
 }
 
-.post-place { font-weight: 700; color: var(--ink); opacity: 0.7; }
+.post-place { font-weight: 700; color: var(--muted, var(--stone, #c4b9a6)); opacity: 0.95; }
 .post-actions { margin-top: 0.65rem; }
 
 .scrap-btn {
@@ -4518,43 +4731,72 @@ html[data-theme="light"] .theme-toggle {
 #market-body.collapsible-body.is-collapsed[hidden] { display: none !important; }
 #market-body.collapsible-body:not([hidden]) { display: block; }
 
-/* contraste texto vs fundo — nunca apagado */
-html[data-theme="dark"] .post-text,
-html[data-a11y-theme="dark"] .post-text,
-html:not([data-theme="light"]) .post-text {
-  color: #e6dcc4 !important;
+
+/* ===== Feed legibilidade (modo escuro) ===== */
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-card,
+html[data-theme="dark"] .post-card,
+html[data-a11y-theme="dark"] .post-card,
+html[data-a11y-theme="default"] .post-card {
+  background: #1a1612 !important;
+  border-color: rgba(230, 220, 196, 0.14) !important;
+  color: #f0e6d0 !important;
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.45);
 }
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-name,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-name a,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-nick,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-text,
+html[data-theme="dark"] .post-name,
+html[data-theme="dark"] .post-text,
+html[data-a11y-theme="dark"] .post-name,
+html[data-a11y-theme="dark"] .post-text {
+  color: #f2e8d2 !important;
+}
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-meta,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-time,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .post-place,
+html[data-theme="dark"] .post-meta,
 html[data-theme="dark"] .post-time,
-html[data-theme="dark"] .post-place,
-html[data-theme="dark"] .market-desc,
-html[data-theme="dark"] .market-meta,
-html[data-a11y-theme="dark"] .post-time,
-html[data-a11y-theme="dark"] .post-place,
-html:not([data-theme="light"]) .post-time,
-html:not([data-theme="light"]) .post-place,
-html:not([data-theme="light"]) .market-desc {
+html[data-theme="dark"] .post-place {
+  color: #cfc5b4 !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .scrap-btn,
+html[data-theme="dark"] .scrap-btn {
+  color: #ebe3cf !important;
+  border-color: rgba(230, 220, 196, 0.28) !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .feed-lead,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .feed-empty,
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .feed-locked-note {
   color: #c4b9a6 !important;
 }
-html[data-theme="light"] .post-text,
-html[data-a11y-theme="light"] .post-text {
-  color: #1c1511 !important;
-}
-html[data-theme="light"] .post-time,
-html[data-theme="light"] .post-place,
-html[data-a11y-theme="light"] .post-time {
-  color: #5c564e !important;
-}
-html[data-theme="light"] .about-text,
-html[data-a11y-theme="light"] .about-text,
-html[data-theme="light"] .feed-empty-sub {
-  color: #4a443c !important;
-}
-html[data-theme="light"] .about-section h2,
-html[data-theme="light"] .about-lead,
-html[data-theme="light"] .feed-empty-title {
-  color: #1c1511 !important;
+html:not([data-theme="light"]):not([data-a11y-theme="light"]) .feed-head h2 {
+  color: #f0e6d0 !important;
 }
 
+/* modo claro: cartaz creme + texto escuro legível */
+html[data-theme="light"] .post-card,
+html[data-a11y-theme="light"] .post-card {
+  background: #fffef8 !important;
+  border-color: rgba(28, 21, 17, 0.14) !important;
+  color: #17120e !important;
+}
+html[data-theme="light"] .post-name,
+html[data-theme="light"] .post-name a,
+html[data-theme="light"] .post-nick,
+html[data-theme="light"] .post-text,
+html[data-a11y-theme="light"] .post-name,
+html[data-a11y-theme="light"] .post-text {
+  color: #17120e !important;
+}
+html[data-theme="light"] .post-meta,
+html[data-theme="light"] .post-time,
+html[data-theme="light"] .post-place,
+html[data-a11y-theme="light"] .post-meta {
+  color: #5c564e !important;
+}
 
 /* ---- mapa interativo camadas (São Cristóvão SE) ---- */
 .map-sub {

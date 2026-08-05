@@ -276,15 +276,17 @@ document.querySelectorAll('.nav-item').forEach(item => {
 
 // --- botão "Marcar meu rolê" (usa posição atual se disponível) ---
 const btnMarcar = document.getElementById('btn-marcar');
-if (btnMarcar) {
+if (btnMarcar && !window.CricriRoleRequest) {
   btnMarcar.addEventListener('click', () => {
+    if (window.CricriRoleRequest && window.CricriRoleRequest.start) {
+      window.CricriRoleRequest.start();
+      return;
+    }
     const api = window.projanoMap;
     const pos = api && api.getPosition ? api.getPosition() : null;
-
     if (pos) {
       const acc = pos.accuracy ? ` ±${Math.round(pos.accuracy)}m` : '';
       showScrapToast(`Rolê marcado na sua posição${acc}`);
-      // centraliza no mapa e abre popup
       if (api.centerOnUser) {
         document.getElementById('mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setTimeout(() => api.centerOnUser(), 400);

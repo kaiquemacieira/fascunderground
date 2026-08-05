@@ -1,8 +1,38 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-a11y-theme="dark">
+<html lang="pt-BR" data-a11y-theme="dark" data-theme="dark" data-a11y-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
+  <script>
+  /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {}; } catch (_) {}
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      var h = document.documentElement;
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t === 'light' ? 'light' : 'dark');
+      h.style.colorScheme = t;
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      if (metas.length) {
+        for (var i = 0; i < metas.length; i++) {
+          if (!metas[i].getAttribute('media')) {
+            metas[i].setAttribute('content', t === 'light' ? '#f6efdc' : '#0c0a08');
+          }
+        }
+      }
+    } catch (_) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-a11y-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  })();
+  </script>
+
   <meta name="theme-color" content="#0c0a09">
   <title>CRICRI · Avisos</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -139,6 +169,7 @@
     html[data-theme="light"] .notifs-section { background: #fffef8; border-color: rgba(28,21,17,0.1); }
     html[data-theme="light"] .np-meta strong { color: #17120e; }
   </style>
+<style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 </head>
 <body class="page-notifs">
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -179,13 +210,15 @@
 
   <div id="bottom-nav-slot"></div>
 
-  <script src="js/config.js"></script>
+  <script src="js/config.js?v=20260805g"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
-  <script src="js/friends.js"></script>
-  <script src="js/push.js"></script>
-  <script src="js/bottom-nav.js"></script>
-  <script src="js/sw-register.js"></script>
+  <script src="js/visit-sheet.js?v=20260805i"></script>
+  <script src="js/friends.js?v=20260805g"></script>
+  <script src="js/push.js?v=20260805g"></script>
+  <script src="js/bottom-nav.js?v=20260805k"></script>
+  <script src="js/sw-register.js?v=20260805g"></script>
+  <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-core.js" defer></script>
   <script>
   (function () {

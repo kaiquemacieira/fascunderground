@@ -4,6 +4,7 @@ window.FASC_CONFIG = {
   supabaseUrl: 'https://bcnbwshwehofncfkdnra.supabase.co',
   supabaseAnonKey: 'sb_publishable_k0iCZgl6qweP16tW3uiGYA_HTJYO1iK',
   env: 'dev',
+  adminEmail: 'kaaiqq@gmail.com',
   // Chave pública VAPID (npx web-push generate-vapid-keys). Privada só no backend.
   vapidPublicKey: 'BBvmr6tIC0YWjrN4C6jmEmcIhGB8ho5DfQI_tZ4wa1-sAayKfF8xUqlw-cZKIN19pS9PzyECL6rcNf521pRESBg',
 

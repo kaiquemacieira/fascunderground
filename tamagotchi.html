@@ -1,8 +1,38 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
+  <script>
+  /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {}; } catch (_) {}
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      var h = document.documentElement;
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t === 'light' ? 'light' : 'dark');
+      h.style.colorScheme = t;
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      if (metas.length) {
+        for (var i = 0; i < metas.length; i++) {
+          if (!metas[i].getAttribute('media')) {
+            metas[i].setAttribute('content', t === 'light' ? '#f6efdc' : '#0c0a08');
+          }
+        }
+      }
+    } catch (_) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-a11y-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  })();
+  </script>
+
   <title>Cri Cabrunco · CRICRI São Cristóvão SE</title>
   <meta name="theme-color" content="#100e0c">
   <meta name="description" content="Cuide do Cri Cabrunco · mascote do Festival de Artes de São Cristóvão · SE.">
@@ -1193,6 +1223,7 @@ button[data-action="reset"]:hover {
 }
 </style>
 
+<style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 </head>
 
 <script>
@@ -1476,22 +1507,23 @@ button[data-action="reset"]:hover {
   <div id="site-footer-slot"></div>
   <div id="bottom-nav-slot"></div>
   <script src="js/guest-mode.js"></script>
-  <script src="js/friends.js"></script>
-  <script src="js/notif-bell.js"></script>
-  <script src="js/install-app.js"></script>
-  <script src="js/sw-register.js"></script>
-  <script src="js/bottom-nav.js"></script>
+  <script src="js/visit-sheet.js?v=20260805i"></script>
+  <script src="js/friends.js?v=20260805g"></script>
+  <script src="js/notif-bell.js?v=20260805g"></script>
+  <script src="js/install-app.js?v=20260805g"></script>
+  <script src="js/sw-register.js?v=20260805g"></script>
+  <script src="js/bottom-nav.js?v=20260805k"></script>
 
-  <script src="js/theme.js"></script>
+  <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-motion.js"></script>
   <!-- notif-bell desligado no Meow (evita FABs fantasmas no mobile) -->
 <script src="js/footer.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-  <script src="js/config.js"></script>
+  <script src="js/config.js?v=20260805g"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/cricri-notifs.js"></script>
-  <script src="js/tamagotchi.js"></script>
+  <script src="js/tamagotchi.js?v=20260805i"></script>
   <script src="js/profile-tama-card.js"></script>
   <script src="js/tama-postcard.js"></script>
   <script src="js/a11y-core.js" defer></script>

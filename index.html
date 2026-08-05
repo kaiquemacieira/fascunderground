@@ -1,10 +1,40 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
+  <script>
+  /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {}; } catch (_) {}
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      var h = document.documentElement;
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t === 'light' ? 'light' : 'dark');
+      h.style.colorScheme = t;
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      if (metas.length) {
+        for (var i = 0; i < metas.length; i++) {
+          if (!metas[i].getAttribute('media')) {
+            metas[i].setAttribute('content', t === 'light' ? '#f6efdc' : '#0c0a08');
+          }
+        }
+      }
+    } catch (_) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-a11y-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  })();
+  </script>
+
   <title>CRICRI — São Cristóvão não tem mapa. Tem roda.</title>
   <meta name="theme-color" content="#0c0a08">
   <meta name="view-transition" content="same-origin">
@@ -405,8 +435,8 @@ html[data-a11y-theme="light"] .fasc-countdown-link {
   <link rel="preload" href="css/critical-home.css" as="style">
   <link rel="stylesheet" href="css/critical-home.css">
   <!-- full CSS async (não bloqueia first paint) -->
-  <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="style.css"></noscript>
+  <link rel="preload" href="style.css?v=20260805n" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="style.css?v=20260805n"></noscript>
   <!-- fonts non-blocking -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1365,12 +1395,25 @@ html[data-a11y-theme="light"] .header-search input {
 .post-card {
   display: flex;
   gap: 0.85rem;
-  background: var(--cream);
+  background: #1a1612;
+  color: #f2e8d2;
   border-radius: var(--radius-card);
   padding: var(--space-card);
-  box-shadow: var(--shadow-cartaz);
-  border: 1.5px solid rgba(28, 21, 17, 0.12);
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(230, 220, 196, 0.14);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+html[data-theme="light"] .post-card,
+html[data-a11y-theme="light"] .post-card {
+  background: #fffef8;
+  color: #17120e;
+  border-color: rgba(28, 21, 17, 0.14);
+}
+html[data-theme="light"] .post-name,
+html[data-theme="light"] .post-text,
+html[data-a11y-theme="light"] .post-name,
+html[data-a11y-theme="light"] .post-text {
+  color: #17120e !important;
 }
 
 .post-card:hover {
@@ -1406,10 +1449,12 @@ html[data-a11y-theme="light"] .header-search input {
 
 .post-name {
   font-weight: 800;
-  color: var(--ink);
-  font-size: 0.88rem;
+  color: var(--text, var(--paper, #f2e8d2));
+  font-size: 0.92rem;
   letter-spacing: 0.2px;
 }
+.post-name a, .post-nick { color: inherit; text-decoration: none; }
+.post-name a:hover, .post-nick:hover { color: var(--rosa, #e33d6b); }
 
 .post-status {
   font-family: var(--font-condensed);
@@ -1431,10 +1476,11 @@ html[data-a11y-theme="light"] .header-search input {
 
 .post-text {
   margin: 0 0 0.5rem;
-  color: var(--ink);
-  font-size: 0.88rem;
-  line-height: var(--lh-body);
+  color: var(--text, var(--paper, #f2e8d2));
+  font-size: 0.95rem;
+  line-height: 1.45;
   font-weight: 500;
+  -webkit-font-smoothing: antialiased;
 }
 
 .post-meta {
@@ -1449,7 +1495,7 @@ html[data-a11y-theme="light"] .header-search input {
   font-family: var(--font-condensed);
 }
 
-.post-place { font-weight: 700; color: var(--ink); opacity: 0.7; }
+.post-place { font-weight: 700; color: var(--muted, #cfc5b4); opacity: 1; }
 .post-actions { margin-top: 0.65rem; }
 
 .scrap-btn {
@@ -1459,8 +1505,8 @@ html[data-a11y-theme="light"] .header-search input {
   appearance: none;
   background: none;
   border: 1.5px solid rgba(28, 21, 17, 0.22);
-  color: var(--ink);
-  opacity: 0.8;
+  color: #ebe3cf;
+  opacity: 1;
   font-family: var(--font-condensed);
   font-weight: 600;
   font-size: 0.78rem;
@@ -1469,7 +1515,13 @@ html[data-a11y-theme="light"] .header-search input {
   padding: 0.38rem 0.7rem;
   border-radius: 3px;
   cursor: pointer;
+  border-color: rgba(230, 220, 196, 0.28);
   transition: opacity 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+html[data-theme="light"] .scrap-btn,
+html[data-a11y-theme="light"] .scrap-btn {
+  color: #17120e;
+  border-color: rgba(28, 21, 17, 0.22);
 }
 
 .scrap-btn svg { width: 13px; height: 13px; }
@@ -3544,6 +3596,8 @@ html[data-a11y-theme="light"] #header-search-btn {
   body.index-mural-only .feed-head { margin-bottom: 0.5rem; }
   body.index-mural-only .feed-lead { display: none; }
 </style>
+<style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
+<style>.post-avatar-link{display:block;text-decoration:none;color:inherit;border-radius:12px}.post-avatar-link:focus-visible{outline:2px solid var(--rosa,#e33d6b);outline-offset:2px}</style>
 </head>
 <body class="index-mural-only">
   <!-- Modo convidado: visualização liberada; interações via js/guest-mode.js -->
@@ -3738,15 +3792,16 @@ html[data-a11y-theme="light"] #header-search-btn {
 
   <div id="bottom-nav-slot"></div>
   <script src="js/guest-mode.js"></script>
-  <script src="js/friends.js"></script>
-  <script src="js/notif-bell.js"></script>
-  <script src="js/install-app.js"></script>
-  <script src="js/sw-register.js"></script>
+  <script src="js/visit-sheet.js?v=20260805i"></script>
+  <script src="js/friends.js?v=20260805g"></script>
+  <script src="js/notif-bell.js?v=20260805g"></script>
+  <script src="js/install-app.js?v=20260805g"></script>
+  <script src="js/sw-register.js?v=20260805g"></script>
   <script src="js/cricri-notifs.js"></script>
   <script src="js/connection-notifs.js"></script>
-  <script src="js/push.js" defer></script>
+  <script src="js/push.js?v=20260805g" defer></script>
   <script src="js/realtime-sync.js"></script>
-  <script src="js/bottom-nav.js"></script>
+  <script src="js/bottom-nav.js?v=20260805k"></script>
 
 <script>
 /* Mural: Programação pública; Agora = privado (amigos) */
@@ -4262,7 +4317,7 @@ html[data-a11y-theme="light"] #header-search-btn {
   <!-- a11y-core ANTES do home-ui (bundle traz a11y legado que quebra o toque no mobile) -->
   <script src="js/a11y-core.js" defer></script>
   <script src="js/bundles/home-ui.js" defer></script>
-  <script src="js/theme.js" defer></script>
+  <script src="js/theme.js?v=20260805n" defer></script>
   <script src="script.js" defer></script>
   <!-- P2/P3.1 — encontro de bichinhos (só conexões mútuas + geofence) -->
   <script src="js/cricri-meet.js" defer></script>
@@ -4387,22 +4442,28 @@ html[data-a11y-theme="light"] #header-search-btn {
     }
     var photo = (p.photo_url || p.avatar || '').toString();
     var name = (p.author_name || p.handle || '?').toString();
+    var handle = (p.handle || p.author_handle || '').toString().replace(/^@/, '');
+    var uid = (p.author_id || p.user_id || '').toString();
     var initial = name.replace(/^@/, '').charAt(0).toUpperCase() || '?';
-    // emoji escolhido no perfil (photo_url = "emoji:🎨")
+    var inner;
     if (photo.indexOf('emoji:') === 0) {
       var em = photo.slice(6) || '🎨';
-      return '<div class="post-avatar is-emoji" style="background:var(--rosa)" aria-hidden="true">' + esc(em) + '</div>';
-    }
-    // URL de foto
-    if (photo && /^https?:\/\//i.test(photo)) {
-      return (
+      inner = '<div class="post-avatar is-emoji" style="background:var(--rosa)" aria-hidden="true">' + esc(em) + '</div>';
+    } else if (photo && /^https?:\/\//i.test(photo)) {
+      inner =
         '<div class="post-avatar" style="background:var(--rosa);padding:0" aria-hidden="true">' +
           '<img src="' + esc(photo) + '" alt="" width="42" height="42" loading="lazy" decoding="async">' +
-        '</div>'
-      );
+        '</div>';
+    } else {
+      inner = '<div class="post-avatar" style="background:var(--rosa)" aria-hidden="true">' + esc(initial) + '</div>';
     }
-    // fallback letra
-    return '<div class="post-avatar" style="background:var(--rosa)" aria-hidden="true">' + esc(initial) + '</div>';
+    if (!handle && !uid) return inner;
+    return (
+      '<a class="post-avatar-link" href="profile.html?u=' + encodeURIComponent(handle || uid) + '"' +
+        (handle ? ' data-visit-handle="' + esc(handle) + '"' : '') +
+        (uid ? ' data-visit-user="' + esc(uid) + '"' : '') +
+        ' aria-label="Ver perfil de ' + esc(name) + '">' + inner + '</a>'
+    );
   }
   function cardHTML(p) {
     var official = isOfficial(p);
@@ -4428,7 +4489,7 @@ html[data-a11y-theme="light"] #header-search-btn {
           '<div class="post-head">' +
             '<span class="post-name">' +
               (handle
-                ? '<a class="post-nick" href="profile.html?u=' + encodeURIComponent(handle) + '">' + esc(nickLabel) + '</a>'
+                ? '<a class="post-nick" href="profile.html?u=' + encodeURIComponent(handle) + '" data-visit-handle="' + esc(handle) + '">' + esc(nickLabel) + '</a>'
                 : esc(name)) +
             '</span>' +
             badge +

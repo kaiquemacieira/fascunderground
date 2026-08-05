@@ -108,8 +108,65 @@
       shell: 'rosa', sleeping: false, sick: false, alive: true,
       careScore: 0, feedCount: 0, playCount: 0, cleanCount: 0,
       afterCount: 0, scrapCount: 0, stageId: 'ovo', evolutions: 0,
-      cards: {}, log: []
+      cards: {}, log: [],
+      // Resonância da Roda — evolução por caminho (único CRICRI)
+      resonance: { afeto: 0, ritual: 0, cortejo: 0, voz: 0 },
+      formId: null,
+      pendingStageId: null,
+      evoPulse: 0
     };
+  }
+
+  var FORM_META = {
+    barroco: { label: 'Barroco', blurb: 'Afeto e excesso — laços da roda', hue: '#e33d6b' },
+    azulejo: { label: 'Azulejo', blurb: 'Ritual e cuidado — azul de São Cristóvão', hue: '#5eb0d4' },
+    cortejo: { label: 'Cortejo', blurb: 'Rua e festa — ocre do centro histórico', hue: '#d49a2c' },
+    lenda: { label: 'Lenda', blurb: 'Voz e scrap — memória da praça', hue: '#b48cff' },
+    total: { label: 'Cabrunco Total', blurb: 'As quatro vozes da roda em uníssono', hue: '#f2e8d2' }
+  };
+
+  function ensureResonance(s) {
+    if (!s.resonance || typeof s.resonance !== 'object') {
+      s.resonance = { afeto: 0, ritual: 0, cortejo: 0, voz: 0 };
+    }
+    ['afeto', 'ritual', 'cortejo', 'voz'].forEach(function (k) {
+      s.resonance[k] = Math.max(0, Math.min(100, Number(s.resonance[k]) || 0));
+    });
+    return s.resonance;
+  }
+
+  function addResonance(s, key, amount) {
+    var r = ensureResonance(s);
+    if (!r[key] && r[key] !== 0) return;
+    r[key] = Math.max(0, Math.min(100, r[key] + (amount || 0)));
+    s.evoPulse = (s.evoPulse || 0) + Math.abs(amount || 0);
+  }
+
+  function dominantForm(s) {
+    var r = ensureResonance(s);
+    var entries = [
+      ['afeto', r.afeto, 'barroco'],
+      ['ritual', r.ritual, 'azulejo'],
+      ['cortejo', r.cortejo, 'cortejo'],
+      ['voz', r.voz, 'lenda']
+    ];
+    var min = Math.min(r.afeto, r.ritual, r.cortejo, r.voz);
+    var max = Math.max(r.afeto, r.ritual, r.cortejo, r.voz);
+    // Cabrunco Total: todas as vozes sintonizadas
+    if (min >= 28 && max >= 40) return 'total';
+    entries.sort(function (a, b) { return b[1] - a[1]; });
+    return entries[0][2];
+  }
+
+  function resonanceTotal(s) {
+    var r = ensureResonance(s);
+    return r.afeto + r.ritual + r.cortejo + r.voz;
+  }
+
+  /** Quanto de resonância mínima pra responder a um estágio */
+  function resonanceNeedForStage(stageId) {
+    var map = { bebe: 8, filhote: 20, cria: 36, festa: 52, adulta: 70, ancia: 90 };
+    return map[stageId] != null ? map[stageId] : 12;
   }
 
   function load() {
@@ -430,25 +487,30 @@
   function recoverPrematureEnd(s) {
     if (!s) return false;
     if (eventIsOver()) return false;
-    if (!s.endedAt && s.alive !== false) return false;
-    // Evento ainda em curso: limpa marca de encerramento prematuro
     var changed = false;
+    var prematureFestival = !!(s.endedAt || s.endSnapshot);
     if (s.endedAt) {
       delete s.endedAt;
+      changed = true;
+    }
+    if (s.endSnapshot) {
       delete s.endSnapshot;
       changed = true;
     }
-    // Pet que "morreu" só por finalizeEnd prematuro volta vivo;
-    // morte real por fome/saúde continua com alive=false e Renascer.
-    if (s.alive === false && (s.health > 0 || s.hunger > 0 || s.happy > 0)) {
-      // se acabou via festival falso, revive; se zerar saúde de verdade, deixa
-      if ((s.health || 0) > 0) {
-        s.alive = true;
-        changed = true;
-      }
+    // Morte marcada como fim de festival (antes da data) → revive com stats mínimos
+    if (prematureFestival && s.alive === false) {
+      s.alive = true;
+      s.sleeping = false;
+      s.sick = false;
+      if ((s.health || 0) < 20) s.health = 40;
+      if ((s.hunger || 0) < 20) s.hunger = 50;
+      if ((s.happy || 0) < 20) s.happy = 50;
+      if ((s.energy || 0) < 20) s.energy = 50;
+      if ((s.hygiene || 0) < 20) s.hygiene = 50;
+      changed = true;
     }
     if (changed) {
-      pushLog(s, 'A roda continua — CRICRI 2026 ainda está rolando.');
+      try { pushLog(s, 'A roda continua — CRICRI 2026 ainda está rolando.'); } catch (_) {}
     }
     return changed;
   }
@@ -575,23 +637,154 @@
 
   function checkEvolution(s) {
     if (!s.alive || !s.started) return false;
+    ensureResonance(s);
     var byAge = stageForAge(ageHours(s));
     var prev = s.stageId || 'ovo';
-    if (byAge.id === prev) return false;
+    if (byAge.id === prev) {
+      // limpa pending se já está no estágio
+      if (s.pendingStageId === prev) s.pendingStageId = null;
+      return false;
+    }
     var prevIdx = 0, nextIdx = 0;
     for (var i = 0; i < STAGES.length; i++) {
       if (STAGES[i].id === prev) prevIdx = i;
       if (STAGES[i].id === byAge.id) nextIdx = i;
     }
-    if (nextIdx <= prevIdx) { s.stageId = byAge.id; return false; }
-    s.stageId = byAge.id;
+    if (nextIdx <= prevIdx) {
+      s.stageId = byAge.id;
+      return false;
+    }
+    // Não evolui no automático: a Roda chama e o humano responde
+    s.pendingStageId = byAge.id;
+    return false;
+  }
+
+  function canAnswerRoda(s) {
+    if (!s || !s.alive || !s.pendingStageId) return false;
+    if (eventIsOver()) return false;
+    var need = resonanceNeedForStage(s.pendingStageId);
+    return resonanceTotal(s) >= need;
+  }
+
+  function applyEvolution(s, formId) {
+    if (!s || !s.pendingStageId) return false;
+    var targetId = s.pendingStageId;
+    var label = targetId;
+    for (var i = 0; i < STAGES.length; i++) {
+      if (STAGES[i].id === targetId) label = STAGES[i].label;
+    }
+    formId = formId || dominantForm(s);
+    s.stageId = targetId;
+    s.pendingStageId = null;
+    s.formId = formId;
     s.evolutions = (s.evolutions || 0) + 1;
-    pushLog(s, 'Evoluiu → ' + byAge.label);
-    notifyCri('evolve', byAge.label);
-    if (byAge.id === 'filhote') grantCard(s, 'r_filhote');
-    if (byAge.id === 'cria') grantCard(s, 'r_convento');
-    if (byAge.id === 'ancia') grantCard(s, 'sr_lenda');
+    // evolução "gasta" um pouco de resonância (a roda ecoa e acalma)
+    var r = ensureResonance(s);
+    ['afeto', 'ritual', 'cortejo', 'voz'].forEach(function (k) {
+      r[k] = Math.max(0, r[k] - 8);
+    });
+    var form = FORM_META[formId];
+    var formTxt = form ? form.label : formId;
+    pushLog(s, 'A Roda respondeu → ' + label + ' · ' + formTxt);
+    notifyCri('evolve', label);
+    if (targetId === 'filhote') grantCard(s, 'r_filhote');
+    if (targetId === 'cria') grantCard(s, 'r_convento');
+    if (targetId === 'ancia') grantCard(s, 'sr_lenda');
+    if (formId === 'total') grantCard(s, 'sr_ouro');
     return true;
+  }
+
+  function openRodaSheet() {
+    var s = state;
+    if (!s || !s.pendingStageId) return;
+    ensureResonance(s);
+    var formId = dominantForm(s);
+    var form = FORM_META[formId] || FORM_META.barroco;
+    var need = resonanceNeedForStage(s.pendingStageId);
+    var total = resonanceTotal(s);
+    var stageLabel = s.pendingStageId;
+    for (var i = 0; i < STAGES.length; i++) {
+      if (STAGES[i].id === s.pendingStageId) stageLabel = STAGES[i].label;
+    }
+    var r = s.resonance;
+    var ready = total >= need;
+
+    var old = document.getElementById('roda-evo-sheet');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    var sheet = document.createElement('div');
+    sheet.id = 'roda-evo-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:100090;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.6);padding-bottom:env(safe-area-inset-bottom,0px)';
+    sheet.innerHTML =
+      '<div style="width:min(100%,400px);background:linear-gradient(165deg,#221a16,#120e0c);border:1.5px solid rgba(227,61,107,0.4);border-radius:18px 18px 0 0;padding:1.2rem 1.1rem 1.4rem;color:#ebe3cf;box-shadow:0 -12px 40px rgba(0,0,0,0.5)">' +
+        '<p style="margin:0 0 0.35rem;font:700 0.72rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.12em;text-transform:uppercase;color:#e33d6b">Resonância da Roda</p>' +
+        '<h2 style="margin:0 0 0.5rem;font:700 1.2rem/1.2 Oswald,system-ui,sans-serif">Evoluir → ' + stageLabel + '</h2>' +
+        '<p style="margin:0 0 0.85rem;font-size:0.85rem;line-height:1.4;color:#cfc5b4">Cada cuidado afina uma voz. Quando a Roda chama, você escolhe a forma do Cri.</p>' +
+        '<div style="display:grid;gap:0.4rem;margin-bottom:0.85rem;font-size:0.75rem">' +
+          barHtml('Afeto', r.afeto, '#e33d6b') +
+          barHtml('Ritual', r.ritual, '#5eb0d4') +
+          barHtml('Cortejo', r.cortejo, '#d49a2c') +
+          barHtml('Voz', r.voz, '#b48cff') +
+        '</div>' +
+        '<p style="margin:0 0 0.75rem;padding:0.65rem 0.75rem;border-radius:12px;background:rgba(227,61,107,0.1);border:1px solid rgba(227,61,107,0.28);font-size:0.82rem;line-height:1.35">' +
+          '<strong style="color:' + form.hue + '">' + form.label + '</strong> — ' + form.blurb +
+          '<br><span style="color:#8c8376">Resonância ' + total + ' / ' + need + ' necessária</span>' +
+        '</p>' +
+        '<div style="display:flex;gap:0.45rem;flex-wrap:wrap">' +
+          (ready
+            ? '<button type="button" id="roda-evo-go" style="flex:1;appearance:none;border:none;border-radius:12px;padding:0.75rem;background:#e33d6b;color:#fff;font:700 0.82rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer">Responder à Roda</button>'
+            : '<button type="button" disabled style="flex:1;appearance:none;border:none;border-radius:12px;padding:0.75rem;background:rgba(230,220,196,0.12);color:#8c8376;font:700 0.78rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.04em;text-transform:uppercase">Ainda afinando…</button>') +
+          '<button type="button" id="roda-evo-close" style="appearance:none;border:1.5px solid rgba(230,220,196,0.22);border-radius:12px;padding:0.75rem 0.9rem;background:transparent;color:#ebe3cf;font:600 0.78rem/1 Oswald,system-ui,sans-serif;cursor:pointer">Depois</button>' +
+        '</div>' +
+      '</div>';
+
+    function barHtml(label, val, color) {
+      var v = Math.max(0, Math.min(100, val || 0));
+      return '<div><div style="display:flex;justify-content:space-between;margin-bottom:0.15rem"><span>' + label + '</span><span>' + Math.round(v) + '</span></div>' +
+        '<div style="height:6px;border-radius:99px;background:rgba(230,220,196,0.1);overflow:hidden"><div style="height:100%;width:' + v + '%;background:' + color + ';border-radius:99px"></div></div></div>';
+    }
+    // fix: barHtml used before defined in template - rebuild properly
+    document.body.appendChild(sheet);
+    // rebuild inner with functions available
+    sheet.innerHTML =
+      '<div style="width:min(100%,400px);background:linear-gradient(165deg,#221a16,#120e0c);border:1.5px solid rgba(227,61,107,0.4);border-radius:18px 18px 0 0;padding:1.2rem 1.1rem 1.4rem;color:#ebe3cf;box-shadow:0 -12px 40px rgba(0,0,0,0.5)">' +
+        '<p style="margin:0 0 0.35rem;font:700 0.72rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.12em;text-transform:uppercase;color:#e33d6b">Resonância da Roda</p>' +
+        '<h2 style="margin:0 0 0.5rem;font:700 1.2rem/1.2 Oswald,system-ui,sans-serif">Evoluir → ' + stageLabel + '</h2>' +
+        '<p style="margin:0 0 0.85rem;font-size:0.85rem;line-height:1.4;color:#cfc5b4">Cada cuidado afina uma voz. Quando a Roda chama, você escolhe a forma do Cri.</p>' +
+        '<div style="display:grid;gap:0.4rem;margin-bottom:0.85rem;font-size:0.75rem">' +
+          barHtml('Afeto', r.afeto, '#e33d6b') +
+          barHtml('Ritual', r.ritual, '#5eb0d4') +
+          barHtml('Cortejo', r.cortejo, '#d49a2c') +
+          barHtml('Voz', r.voz, '#b48cff') +
+        '</div>' +
+        '<p style="margin:0 0 0.75rem;padding:0.65rem 0.75rem;border-radius:12px;background:rgba(227,61,107,0.1);border:1px solid rgba(227,61,107,0.28);font-size:0.82rem;line-height:1.35">' +
+          '<strong style="color:' + form.hue + '">' + form.label + '</strong> — ' + form.blurb +
+          '<br><span style="color:#8c8376">Resonância ' + Math.round(total) + ' / ' + need + ' necessária</span>' +
+        '</p>' +
+        '<div style="display:flex;gap:0.45rem;flex-wrap:wrap">' +
+          (ready
+            ? '<button type="button" id="roda-evo-go" style="flex:1;appearance:none;border:none;border-radius:12px;padding:0.75rem;background:#e33d6b;color:#fff;font:700 0.82rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer">Responder à Roda</button>'
+            : '<button type="button" disabled style="flex:1;appearance:none;border:none;border-radius:12px;padding:0.75rem;background:rgba(230,220,196,0.12);color:#8c8376;font:700 0.78rem/1 Oswald,system-ui,sans-serif">Ainda afinando…</button>') +
+          '<button type="button" id="roda-evo-close" style="appearance:none;border:1.5px solid rgba(230,220,196,0.22);border-radius:12px;padding:0.75rem 0.9rem;background:transparent;color:#ebe3cf;font:600 0.78rem/1 Oswald,system-ui,sans-serif;cursor:pointer">Depois</button>' +
+        '</div>' +
+      '</div>';
+
+    sheet.addEventListener('click', function (e) {
+      if (e.target === sheet) sheet.remove();
+    });
+    var closeBtn = document.getElementById('roda-evo-close');
+    if (closeBtn) closeBtn.addEventListener('click', function () { sheet.remove(); });
+    var go = document.getElementById('roda-evo-go');
+    if (go) {
+      go.addEventListener('click', function () {
+        if (applyEvolution(state, formId)) {
+          save(state);
+          render();
+          flashEvolve();
+        }
+        sheet.remove();
+      });
+    }
   }
 
   function applyAwayDecay(s) {
@@ -769,7 +962,10 @@
     if (name) name.textContent = s.name || 'Cri';
     var st = stageForAge(ageHours(s));
     var stageEl = $('tama-stage');
-    if (stageEl) stageEl.textContent = st.label;
+    if (stageEl) {
+      var formBit = (s.formId && FORM_META[s.formId]) ? (' · ' + FORM_META[s.formId].label) : '';
+      stageEl.textContent = st.label + formBit;
+    }
     var ageEl = $('tama-age');
     if (ageEl) ageEl.textContent = formatAge(s);
     var life = $('tama-life');
@@ -778,20 +974,67 @@
       var ph = lifePhase();
       life.classList.toggle('is-late', ph === 'late');
       life.classList.toggle('is-dying', ph === 'dying');
-      life.classList.toggle('is-ended', ph === 'ended' || !s.alive);
+      life.classList.toggle('is-ended', eventIsOver() && (ph === 'ended' || !s.alive));
     }
     var status = $('tama-status');
     if (status) {
       var phase = lifePhase();
-      if (!s.alive || phase === 'ended') status.textContent = FAREWELL_DONE;
-      else if (phase === 'dying') status.textContent = FAREWELL;
-      else if (s.sleeping) status.textContent = 'Descansando o cabrunco…';
-      else if (s.sick) status.textContent = 'Esse cabrunco não tá legal…';
-      else if (phase === 'late') status.textContent = FAREWELL_LATE;
+      if (eventIsOver() && (!s.alive || phase === 'ended')) {
+        status.textContent = FAREWELL_DONE;
+      } else if (!s.alive) {
+        status.textContent = 'Cri precisa de um renascer — use Renascer abaixo.';
+      } else if (phase === 'dying' && eventIsOver()) {
+        status.textContent = FAREWELL;
+      } else if (s.sleeping) {
+        status.textContent = 'Descansando o cabrunco…';
+      } else if (s.sick) {
+        status.textContent = 'Esse cabrunco não tá legal…';
+      } else if (phase === 'late') {
+        status.textContent = FAREWELL_LATE;
+      }
       else if (mood(s) === 'happy') status.textContent = 'Cabrunco de bem em São Cristóvão';
       else if (mood(s) === 'sad') status.textContent = 'Se oriente… precisa de você';
       else status.textContent = 'De boa no centro histórico';
     }
+    // CTA Resonância da Roda
+    try {
+      var evoCta = document.getElementById('tama-roda-cta');
+      if (s.alive && s.pendingStageId && !eventIsOver()) {
+        if (!evoCta) {
+          var host = $('tama-status') && $('tama-status').parentNode;
+          if (host) {
+            evoCta = document.createElement('button');
+            evoCta.type = 'button';
+            evoCta.id = 'tama-roda-cta';
+            evoCta.setAttribute('data-action', 'evolve-ritual');
+            evoCta.textContent = canAnswerRoda(s) ? '✨ A Roda chama — evoluir' : '✨ A Roda sussurra…';
+            evoCta.style.cssText = 'display:block;margin:0.5rem auto 0;padding:0.5rem 1rem;border-radius:999px;border:1.5px solid rgba(227,61,107,0.55);background:rgba(227,61,107,0.18);color:#f5a3b8;font:700 0.75rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 18px rgba(227,61,107,0.25)';
+            host.appendChild(evoCta);
+          }
+        } else {
+          evoCta.textContent = canAnswerRoda(s) ? '✨ A Roda chama — evoluir' : '✨ A Roda sussurra…';
+        }
+      } else if (evoCta && evoCta.parentNode) {
+        evoCta.parentNode.removeChild(evoCta);
+      }
+    } catch (_) {}
+    // CTA Renascer quando morto (mobile: mais fácil de achar)
+    try {
+      var deadCta = document.getElementById('tama-renascer-cta');
+      if (!s.alive && !eventIsOver()) {
+        if (!deadCta && status && status.parentNode) {
+          deadCta = document.createElement('button');
+          deadCta.type = 'button';
+          deadCta.id = 'tama-renascer-cta';
+          deadCta.setAttribute('data-action', 'reset');
+          deadCta.textContent = 'Renascer agora';
+          deadCta.style.cssText = 'display:block;margin:0.55rem auto 0;padding:0.55rem 1.15rem;border-radius:999px;border:none;background:#e33d6b;color:#fff;font:700 0.8rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 16px rgba(227,61,107,0.45);z-index:5;position:relative;';
+          status.parentNode.appendChild(deadCta);
+        }
+      } else if (deadCta && deadCta.parentNode) {
+        deadCta.parentNode.removeChild(deadCta);
+      }
+    } catch (_) {}
     bar($('bar-hunger'), s.hunger);
     bar($('bar-happy'), s.happy);
     bar($('bar-energy'), s.energy);
@@ -816,6 +1059,18 @@
       if (eventIsOver()) {
         b.disabled = true;
         b.title = 'A roda fechou — sem renascer até o próximo FASC';
+      } else {
+        b.disabled = false;
+        b.removeAttribute('disabled');
+        b.title = 'Começar de novo com um ovo';
+        // destaque quando o pet morreu
+        if (s && !s.alive) {
+          b.style.outline = '2px solid #e33d6b';
+          b.style.boxShadow = '0 0 14px rgba(227,61,107,0.35)';
+        } else {
+          b.style.outline = '';
+          b.style.boxShadow = '';
+        }
       }
     });
     renderCollection();
@@ -859,9 +1114,101 @@
     setTab('play');
   }
 
+
+  function openTamaConfirm(opts) {
+    opts = opts || {};
+    // remove overlay anterior
+    try {
+      var old = document.getElementById('tama-confirm');
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+    } catch (_) {}
+
+    var overlay = document.createElement('div');
+    overlay.id = 'tama-confirm';
+    overlay.className = 'tama-confirm-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'tama-confirm-title');
+    overlay.innerHTML =
+      '<div class="tama-confirm-card">' +
+        '<div class="tama-confirm-icon" aria-hidden="true">↺</div>' +
+        '<h2 id="tama-confirm-title">' + String(opts.title || 'Confirmar') + '</h2>' +
+        '<p class="tama-confirm-body">' + String(opts.body || '') + '</p>' +
+        '<div class="tama-confirm-actions">' +
+          '<button type="button" class="tama-btn-cancel" data-tama-cancel>' +
+            String(opts.cancelLabel || 'Cancelar') +
+          '</button>' +
+          '<button type="button" class="tama-btn-danger" data-tama-ok>' +
+            String(opts.confirmLabel || 'Confirmar') +
+          '</button>' +
+        '</div>' +
+      '</div>';
+
+    function close() {
+      try {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      } catch (_) {}
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+    }
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) close();
+      var cancel = e.target.closest('[data-tama-cancel]');
+      if (cancel) { close(); return; }
+      var ok = e.target.closest('[data-tama-ok]');
+      if (ok) {
+        close();
+        try {
+          if (typeof opts.onConfirm === 'function') opts.onConfirm();
+        } catch (err) {
+          console.warn('[CRICRI] confirm', err);
+        }
+      }
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    try {
+      var focusBtn = overlay.querySelector('[data-tama-ok]');
+      if (focusBtn) focusBtn.focus();
+    } catch (_) {}
+  }
+
+  function doRenascer() {
+    var now = Date.now();
+    state = defaultState();
+    state.started = true;
+    state.alive = true;
+    state.bornAt = now;
+    state.started_at = now;
+    state.lastTick = now;
+    state.name = 'Cri';
+    try { grantCard(state, 'c_ovo'); } catch (_) {}
+    try { pushLog(state, 'Renascido em São Cristóvão — CRICRI 2026.'); } catch (_) {}
+    try { notifyCri('born'); } catch (_) {}
+    // limpa marcas de fim
+    delete state.endedAt;
+    delete state.endSnapshot;
+    save(state);
+    // esconde farewell se existir
+    try {
+      var panel = $('farewell-panel');
+      if (panel) { panel.hidden = true; panel.style.display = 'none'; }
+    } catch (_) {}
+    render();
+    setTab('play');
+  }
+
   function act(action) {
     var s = state;
     if (action === 'start') { startGame(); return; }
+    if (action === 'evolve-ritual') {
+      checkEvolution(state);
+      openRodaSheet();
+      return;
+    }
     if (action === 'reset') {
       openTamaConfirm({
         title: 'Renascer?',
@@ -869,9 +1216,7 @@
         confirmLabel: 'Sim, renascer',
         cancelLabel: 'Cancelar',
         onConfirm: function () {
-          state = defaultState();
-          save(state);
-          render();
+          doRenascer();
         }
       });
       return;
@@ -897,18 +1242,19 @@
       case 'feed':
         s.hunger = clamp(s.hunger + 28, 0, 100);
         s.hygiene = clamp(s.hygiene - 3, 0, 100);
-        s.feedCount++; s.careScore++; break;
+        s.feedCount++; s.careScore++; addResonance(s, 'afeto', 6); break;
       case 'play':
         if (s.energy < 12) { pushLog(s, 'Sem energia.'); break; }
         s.happy = clamp(s.happy + 24, 0, 100);
         s.energy = clamp(s.energy - 14, 0, 100);
         s.hunger = clamp(s.hunger - 5, 0, 100);
-        s.playCount++; s.careScore++; break;
+        s.playCount++; s.careScore++; addResonance(s, 'afeto', 7); break;
       case 'clean':
         s.hygiene = clamp(s.hygiene + 35, 0, 100);
         s.happy = clamp(s.happy + 5, 0, 100);
-        s.cleanCount++; s.careScore++; break;
+        s.cleanCount++; s.careScore++; addResonance(s, 'ritual', 6); break;
       case 'sleep':
+        addResonance(s, 'ritual', 4);
         s.sleeping = !s.sleeping;
         if (s.sleeping) grantCard(s, 'c_soneca', true);
         break;
@@ -916,34 +1262,38 @@
         if (!s.sick && s.health > 70) break;
         s.sick = false;
         s.health = clamp(s.health + 40, 0, 100);
-        s.careScore += 2; break;
+        s.careScore += 2;
+        addResonance(s, 'ritual', 8);
+        break;
       case 'after':
         if (s.energy < 20) { pushLog(s, 'Cansada demais.'); break; }
         s.happy = clamp(s.happy + 28, 0, 100);
         s.energy = clamp(s.energy - 20, 0, 100);
         s.hunger = clamp(s.hunger - 8, 0, 100);
         s.hygiene = clamp(s.hygiene - 6, 0, 100);
-        s.afterCount++; s.careScore += 2; break;
+        s.afterCount++; s.careScore += 2;
+        addResonance(s, 'cortejo', 9);
+        break;
       case 'mapa':
+        addResonance(s, 'cortejo', 7);
         s.happy = clamp(s.happy + 12, 0, 100);
         s.energy = clamp(s.energy - 5, 0, 100);
         s.careScore++;
         grantCard(s, 'c_mapa', true); break;
       case 'scrap':
+        addResonance(s, 'voz', 8);
         s.happy = clamp(s.happy + 14, 0, 100);
         s.scrapCount++; s.careScore++; break;
-      case 'rename': {
+      case 'rename':
+        addResonance(s, 'voz', 5);
         var n = prompt('Nome (máx. 12):', s.name || 'Cri');
         if (n) s.name = String(n).trim().slice(0, 12) || 'Cri';
         break;
-      }
     }
     checkCardMilestones(s);
-    var evo = checkEvolution(s);
+    checkEvolution(s);
     save(s);
     render();
-    if (evo) flashEvolve();
-    else flashEvolve();
   }
 
   function wire() {
@@ -1012,6 +1362,8 @@
       var shellId = s.shell || 'rosa';
       var labels = { rosa: 'Rosa', ocre: 'Ocre', azul: 'Azul', tuxedo: 'Tuxedo' };
       var emoji = { ovo: '🥚', bebe: '🐱', filhote: '🐱', cria: '🐱', festa: '🐱', adulta: '🐱', ancia: '🐱' };
+      var formId = s.formId || null;
+      var form = formId && FORM_META[formId] ? FORM_META[formId].label : '';
       return {
         name: String(s.name || 'Cri').slice(0, 24),
         stageId: st.id,
@@ -1020,7 +1372,11 @@
         shellId: shellId,
         shellLabel: labels[shellId] || shellId,
         careScore: Math.max(0, Number(s.careScore) || 0),
-        alive: s.alive !== false
+        alive: s.alive !== false,
+        formId: formId,
+        formLabel: form,
+        evolutions: Math.max(0, Number(s.evolutions) || 0),
+        resonance: ensureResonance(s)
       };
     },
     stageOf: function (s) { return stageForAge(ageHours(s)); },

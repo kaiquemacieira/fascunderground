@@ -1,8 +1,38 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-a11y-theme="dark">
+<html lang="pt-BR" data-a11y-theme="dark" data-theme="dark" data-a11y-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
+  <script>
+  /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {}; } catch (_) {}
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      var h = document.documentElement;
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t === 'light' ? 'light' : 'dark');
+      h.style.colorScheme = t;
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      if (metas.length) {
+        for (var i = 0; i < metas.length; i++) {
+          if (!metas[i].getAttribute('media')) {
+            metas[i].setAttribute('content', t === 'light' ? '#f6efdc' : '#0c0a08');
+          }
+        }
+      }
+    } catch (_) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-a11y-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  })();
+  </script>
+
   <meta name="theme-color" content="#0c0a08">
   <title>CRICRI · Explorar — mapa &amp; suporte</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,6 +84,9 @@
       padding-right: var(--space-page-x, 1rem);
     }
   </style>
+<style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 <body class="page-explorar">
   <!-- Modo convidado — visualização liberada -->
@@ -161,8 +194,13 @@
     </div>
     
     <div class="map-role-cta" id="map-role-cta">
-      <button type="button" class="btn primary big" id="btn-marcar">Marcar meu rolê</button>
-      <p class="map-role-hint">Usa sua localização pra pintar o ponto no mapa ao vivo.</p>
+      <button type="button" class="btn primary big btn-role" id="btn-marcar">Marcar Rolê/After</button>
+      <p class="map-role-desc" id="map-role-desc">
+        Aqui você deixa o público ciente de que seu <strong>rolê está garantido no mapa</strong>.
+        Toque no botão, <strong>clique no mapa</strong> no ponto do rolê e envie a solicitação.
+        Peça o quanto antes — o admin precisa <strong>aceitar</strong> antes de aparecer pra geral.
+      </p>
+      <p class="map-role-hint">A solicitação chega no e-mail do admin. Só entra no mapa depois do aceite.</p>
     </div>
 
     <ul class="map-places-list" id="map-places-list" role="listbox" aria-label="Lista de lugares no mapa"></ul>
@@ -280,19 +318,22 @@
   <div id="site-footer-slot"></div>
   <div id="bottom-nav-slot"></div>
 
-  <script src="js/config.js"></script>
+  <script src="js/config.js?v=20260805g"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="js/supabase-client.js" defer></script>
-  <script src="js/theme.js" defer></script>
+  <script src="js/theme.js?v=20260805n" defer></script>
+  <script src="js/spots-api.js" defer></script>
+  <script src="mock.js" defer></script>
   <script src="js/map-lazy.js" defer></script>
   <script type="module" src="js/denuncia.js" defer></script>
   <script src="js/footer.js" defer></script>
   <script src="js/guest-mode.js"></script>
-  <script src="js/friends.js"></script>
-  <script src="js/notif-bell.js"></script>
-  <script src="js/bottom-nav.js"></script>
-  <script src="js/install-app.js"></script>
-  <script src="js/sw-register.js"></script>
+  <script src="js/friends.js?v=20260805g"></script>
+  <script src="js/notif-bell.js?v=20260805g"></script>
+  <script src="js/role-request.js?v=20260805r"></script>
+  <script src="js/bottom-nav.js?v=20260805k"></script>
+  <script src="js/install-app.js?v=20260805g"></script>
+  <script src="js/sw-register.js?v=20260805g"></script>
   <script src="js/a11y-core.js" defer></script>
 
   <script>

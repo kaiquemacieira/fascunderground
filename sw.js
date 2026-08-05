@@ -10,8 +10,8 @@
  */
 /* eslint-disable no-restricted-globals */
 
-var SHELL = 'cricri-shell-v3';
-var RUNTIME = 'cricri-runtime-v3';
+var SHELL = 'cricri-shell-v6';
+var RUNTIME = 'cricri-runtime-v6';
 var MAP = 'cricri-map-v1';
 
 var PRECACHE = [
@@ -21,6 +21,7 @@ var PRECACHE = [
   './login.html',
   './profile.html',
   './tamagotchi.html',
+  './notifications.html',
   './explorar.html',
   './manifest.webmanifest',
   './style.css',
@@ -171,6 +172,11 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
+  // JS sempre network-first (evita mobile preso em build antigo)
+  if (/\.js$/i.test(url.pathname)) {
+    event.respondWith(networkFirst(req, RUNTIME, null));
+    return;
+  }
   if (isStaticAsset(url)) {
     event.respondWith(staleWhileRevalidate(req, RUNTIME));
     return;
