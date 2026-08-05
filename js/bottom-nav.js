@@ -31,10 +31,10 @@
     },
     {
       id: 'notifs',
-      href: '#notifs',
+      href: 'notifications.html',
       label: 'Avisos',
-      match: [],
-      isAction: true,
+      match: [/notifications\.html/i],
+      isAction: false,
       icon:
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
         '<path d="M15.5 17h5.2l-1.5-1.5a2.1 2.1 0 0 1-.6-1.5V11a6.1 6.1 0 1 0-12.2 0v3a2.1 2.1 0 0 1-.6 1.5L4.3 17H9.5"/>' +
@@ -74,8 +74,10 @@
   }
 
   function isActive(item) {
-    if (item.isAction) return false;
     var loc = currentPath();
+    if (item.id === 'notifs') {
+      return /notifications\.html/i.test((window.location.pathname || ''));
+    }
     if (item.id === 'explorar') {
       var pe = (window.location.pathname || '').split('/').pop() || '';
       return /explorar\.html/i.test(pe);

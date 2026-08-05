@@ -139,14 +139,14 @@
 
     var key = vapidKey();
     if (!key) {
-      setStatus('Local ativo (falta VAPID pública)');
-      setMsg('Avisos locais ok. Para Web Push, coloque vapidPublicKey em js/config.js e secrets no Supabase.', true);
+      setStatus('Alertas locais ativos');
+      setMsg('Avisos locais ativos neste aparelho.', true);
       refreshUi();
       return true;
     }
 
     if (!('PushManager' in window)) {
-      setStatus('Local ativo (sem PushManager)');
+      setStatus('Alertas locais ativos');
       setMsg('Notificações locais ok neste aparelho.', true);
       refreshUi();
       return true;
@@ -164,15 +164,15 @@
       var saved = await saveSub(sub);
       setStatus(saved ? 'Web Push ativo' : 'Push no aparelho (cloud pendente)');
       setMsg(saved
-        ? 'Notificações push ativadas.'
-        : 'Push no browser ok. Login + tabela push_subscriptions pra sincronizar.',
+        ? 'Alertas ativados neste aparelho.'
+        : 'Alertas ok neste aparelho. Entre na conta pra sincronizar.',
         true);
       refreshUi();
       return true;
     } catch (e) {
       console.warn('[push]', e);
-      setStatus('Local ativo');
-      setMsg((e && e.message) || 'Falha no Web Push — locais ainda funcionam.', false);
+      setStatus('Alertas locais');
+      setMsg((e && e.message) || 'Não deu pra ativar o alerta completo. Locais ainda funcionam.', false);
       refreshUi();
       return false;
     }
@@ -207,7 +207,7 @@
     var perm = Notification.permission;
     var sub = await currentSub();
     if (perm === 'granted' && sub) {
-      setStatus('Web Push ativo');
+      setStatus('Alertas ativos');
       if (btnOn) btnOn.hidden = true;
       if (btnOff) btnOff.hidden = false;
     } else if (perm === 'granted') {

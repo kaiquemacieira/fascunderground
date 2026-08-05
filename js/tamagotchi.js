@@ -31,11 +31,14 @@
     return EVENT_END_FALLBACK_MS;
   })();
   function eventIsOver() {
-    // Defesa: se o relógio do aparelho estiver absurdo, não encerra a roda
     var now = Date.now();
-    if (!isFinite(EVENT_END) || EVENT_END <= 0) return false;
+    var end = isFinite(EVENT_END) && EVENT_END > Date.UTC(2025, 0, 1)
+      ? EVENT_END
+      : EVENT_END_FALLBACK_MS;
+    // trava de segurança: NUNCA considera acabado antes de 23/11/2026 12:00 -03
+    if (now < EVENT_END_FALLBACK_MS) return false;
     if (!isFinite(now) || now < Date.UTC(2020, 0, 1)) return false;
-    return now >= EVENT_END;
+    return now >= end;
   }
   // expõe pra debug no mobile
   try {
@@ -227,6 +230,13 @@
 
   function mergeCloudIntoLocal(local, cloud) {
     if (!cloud || !cloud.started) return local;
+    // se o festival ainda não acabou, nuvem não pode impor fim da roda
+    if (!eventIsOver() && cloud) {
+      try {
+        delete cloud.endedAt;
+        delete cloud.endSnapshot;
+      } catch (_) {}
+    }
     if (!local || !local.started) {
       return Object.assign(defaultState(), cloud, { started: true });
     }

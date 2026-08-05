@@ -1194,6 +1194,35 @@ button[data-action="reset"]:hover {
 </style>
 
 </head>
+
+<script>
+/* CRICRI · trava anti "fim da roda" prematuro (mobile) */
+(function () {
+  try {
+    var END = Date.UTC(2026, 10, 23, 15, 0, 0);
+    if (Date.now() < END) {
+      var keys = ['cricri-tama-v3', 'cricri-tama-v2', 'fasc-tama-v2'];
+      keys.forEach(function (k) {
+        try {
+          var raw = localStorage.getItem(k);
+          if (!raw) return;
+          var s = JSON.parse(raw);
+          if (s && (s.endedAt || s.endSnapshot)) {
+            delete s.endedAt;
+            delete s.endSnapshot;
+            localStorage.setItem(k, JSON.stringify(s));
+          }
+        } catch (_) {}
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        var p = document.getElementById('farewell-panel');
+        if (p) { p.hidden = true; p.style.display = 'none'; }
+      });
+    }
+  } catch (_) {}
+})();
+</script>
+
 <body class="tama-page-bg">
   <a class="skip-link" href="#tama-main">Ir para o conteúdo</a>
   <div class="top">
@@ -1222,14 +1251,6 @@ button[data-action="reset"]:hover {
       <button type="button" data-tab="collection" role="tab" aria-selected="false">Coleção</button>
     </div>
 
-    
-    <!-- PASSO 5 · cartão + álbum do bichinho (movidos do profile) -->
-    <section class="tama-card" id="tama-profile-card" aria-label="Seu CRICRI" hidden>
-      <div class="tama-card-inner" id="tama-card-body">
-        <!-- preenchido por js/profile-tama-card.js -->
-      </div>
-    </section>
-    <section class="tama-album" id="tama-album" aria-label="Álbum de figurinhas" hidden></section>
 
 <div data-panel="play">
       <div class="device" id="tama-device">
@@ -1418,7 +1439,11 @@ button[data-action="reset"]:hover {
       </div>
     </div>
 
-    <div data-panel="collection" hidden>
+        <div data-panel="collection" hidden>
+      <!-- Resumo + figurinhas só na aba Coleção (não no Jogo) -->
+      <section class="tama-card" id="tama-profile-card" aria-label="Seu CRICRI" hidden>
+        <div class="tama-card-inner" id="tama-card-body"></div>
+      </section>
       <div class="collection-head">
         <span>Photocards CRICRI</span>
         <strong id="collection-stats">0/14</strong>

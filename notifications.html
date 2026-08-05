@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-a11y-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0a09">
+  <title>CRICRI · Avisos</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Saira+Stencil+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.page-notifs {
+      margin: 0;
+      min-height: 100dvh;
+      background: #0c0a09;
+      color: #ebe3cf;
+      padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+      font-family: Inter, system-ui, sans-serif;
+    }
+    .notifs-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem 0.65rem;
+      border-bottom: 1px solid rgba(230, 220, 196, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(12, 10, 9, 0.94);
+      backdrop-filter: blur(10px);
+    }
+    .notifs-top .logo {
+      font-family: "Saira Stencil One", Impact, sans-serif;
+      font-size: 1.15rem;
+      color: #ebe3cf;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+    }
+    .notifs-top .logo span { color: #e33d6b; }
+    .notifs-top .back {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #cfc5b4;
+      text-decoration: none;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1.5px solid transparent;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .notifs-top .back:hover {
+      color: #e33d6b;
+      background: rgba(227, 61, 107, 0.12);
+      border-color: rgba(227, 61, 107, 0.45);
+    }
+    .notifs-hero {
+      padding: 1.25rem 1.1rem 0.75rem;
+    }
+    .notifs-hero h1 {
+      margin: 0 0 0.35rem;
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: clamp(1.45rem, 5vw, 1.85rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .notifs-hero h1 span { color: #e33d6b; }
+    .notifs-hero p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: #a89f90;
+    }
+    .notifs-section {
+      margin: 0.75rem 1rem 1rem;
+      padding: 1rem;
+      border-radius: 14px;
+      border: 1.5px solid rgba(230, 220, 196, 0.12);
+      background: #14110f;
+    }
+    .notifs-section h2 {
+      margin: 0 0 0.65rem;
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #e33d6b;
+    }
+    #notif-page-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .np-item {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      padding: 0.7rem;
+      border-radius: 12px;
+      background: rgba(230, 220, 196, 0.05);
+      border: 1px solid rgba(230, 220, 196, 0.08);
+    }
+    .np-item.is-request {
+      border-color: rgba(227, 61, 107, 0.3);
+      background: rgba(227, 61, 107, 0.08);
+    }
+    .np-ico { flex: none; width: 28px; text-align: center; font-size: 1.15rem; }
+    .np-av {
+      flex: none; width: 40px; height: 40px; border-radius: 11px; overflow: hidden;
+      background: rgba(227, 61, 107, 0.25); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-family: Oswald, system-ui, sans-serif;
+    }
+    .np-av img { width: 100%; height: 100%; object-fit: cover; }
+    .np-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.82rem; line-height: 1.35; color: #cfc5b4; }
+    .np-meta strong { color: #ebe3cf; font-size: 0.88rem; }
+    .np-actions { display: flex; gap: 0.4rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .np-btn {
+      appearance: none; border-radius: 8px; padding: 0.4rem 0.75rem;
+      font: 600 0.72rem/1 Oswald, system-ui, sans-serif; letter-spacing: 0.05em;
+      text-transform: uppercase; cursor: pointer; border: 1.5px solid transparent;
+    }
+    .np-accept { background: #e33d6b; color: #fff; border-color: #e33d6b; }
+    .np-reject { background: transparent; color: #cfc5b4; border-color: rgba(230, 220, 196, 0.22); }
+    .np-empty { margin: 0.5rem 0; font-size: 0.88rem; color: #8c8376; line-height: 1.4; }
+    .push-box p { margin: 0 0 0.5rem; font-size: 0.85rem; line-height: 1.4; color: #cfc5b4; }
+    .push-box .hint { font-size: 0.75rem; color: #8c8376; }
+    .push-row { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    html[data-theme="light"] body.page-notifs,
+    html[data-a11y-theme="light"] body.page-notifs { background: #f3ecdc; color: #17120e; }
+    html[data-theme="light"] .notifs-section { background: #fffef8; border-color: rgba(28,21,17,0.1); }
+    html[data-theme="light"] .np-meta strong { color: #17120e; }
+  </style>
+</head>
+<body class="page-notifs">
+  <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
+
+  <header class="notifs-top">
+    <a class="logo" href="index.html">CRI<span>CRI</span></a>
+    <a class="back" href="index.html">← Home</a>
+  </header>
+
+  <main id="conteudo-principal" tabindex="-1">
+    <div class="notifs-hero">
+      <h1>Avisos <span>CRICRI</span></h1>
+      <p>Pedidos de amizade, recados e novidades da roda.</p>
+    </div>
+
+    <section class="notifs-section" aria-labelledby="req-title">
+      <h2 id="req-title">Pedidos de amizade</h2>
+      <ul id="notif-requests"></ul>
+      <p class="np-empty" id="notif-requests-empty">Nenhum pedido por agora.</p>
+    </section>
+
+    <section class="notifs-section" aria-labelledby="list-title">
+      <h2 id="list-title">Atividade</h2>
+      <ul id="notif-page-list"></ul>
+      <p class="np-empty" id="notif-page-empty">Nada por agora. A roda avisa quando rolar.</p>
+    </section>
+
+    <section class="notifs-section push-box" aria-labelledby="push-title">
+      <h2 id="push-title">Alertas no celular</h2>
+      <p id="push-page-status">Receba avisos mesmo com a aba fechada, se o navegador permitir.</p>
+      <div class="push-row">
+        <button type="button" class="np-btn np-accept" id="btn-push-page">Ativar alertas</button>
+        <button type="button" class="np-btn np-reject" id="btn-clear-notifs">Limpar avisos</button>
+      </div>
+      <p class="hint" id="push-page-hint">Funciona melhor no Chrome (Android) e Safari (iPhone), com o site em HTTPS.</p>
+    </section>
+  </main>
+
+  <div id="bottom-nav-slot"></div>
+
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/friends.js"></script>
+  <script src="js/push.js"></script>
+  <script src="js/bottom-nav.js"></script>
+  <script src="js/sw-register.js"></script>
+  <script src="js/a11y-core.js" defer></script>
+  <script>
+  (function () {
+    'use strict';
+    var STORAGE = 'cricri-notifs-v1';
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function loadLocal() {
+      try {
+        var raw = localStorage.getItem(STORAGE);
+        if (!raw) return [];
+        var a = JSON.parse(raw);
+        return Array.isArray(a) ? a : [];
+      } catch (_) { return []; }
+    }
+
+    function saveLocal(list) {
+      try { localStorage.setItem(STORAGE, JSON.stringify((list || []).slice(0, 40))); } catch (_) {}
+    }
+
+    function avatar(pr) {
+      pr = pr || {};
+      var photo = (pr.photo_url || '').toString();
+      if (photo.indexOf('emoji:') === 0) {
+        return '<span class="np-av">' + esc(photo.slice(6) || '🎨') + '</span>';
+      }
+      if (/^https?:\/\//i.test(photo)) {
+        return '<span class="np-av"><img src="' + esc(photo) + '" alt=""></span>';
+      }
+      var letter = ((pr.handle || pr.name || '?') + '').replace(/^@/, '').charAt(0).toUpperCase();
+      return '<span class="np-av">' + esc(letter) + '</span>';
+    }
+
+    async function renderRequests() {
+      var ul = document.getElementById('notif-requests');
+      var empty = document.getElementById('notif-requests-empty');
+      if (!ul) return;
+      ul.innerHTML = '';
+      var list = [];
+      try {
+        if (window.CricriFriends && window.CricriFriends.listIncomingRequests) {
+          list = await window.CricriFriends.listIncomingRequests();
+        }
+      } catch (_) {}
+      list.forEach(function (req) {
+        var pr = req.profile || {};
+        var nick = pr.handle ? '@' + pr.handle : (pr.name || 'alguém');
+        var li = document.createElement('li');
+        li.className = 'np-item is-request';
+        li.dataset.fromId = req.from_id || '';
+        li.dataset.rowId = req.id || '';
+        li.innerHTML =
+          avatar(pr) +
+          '<span class="np-meta">' +
+            '<strong>Pedido de amizade</strong>' +
+            '<span>' + esc(nick) + ' quer conectar com você</span>' +
+            '<span class="np-actions">' +
+              '<button type="button" class="np-btn np-accept" data-act="accept">Aceitar</button>' +
+              '<button type="button" class="np-btn np-reject" data-act="reject">Recusar</button>' +
+            '</span>' +
+          '</span>';
+        ul.appendChild(li);
+      });
+      if (empty) empty.hidden = list.length > 0;
+      if (window.CricriBottomNav && window.CricriBottomNav.updateNotifBadge) {
+        window.CricriBottomNav.updateNotifBadge(list.length + loadLocal().length);
+      }
+    }
+
+    function renderLocal() {
+      var ul = document.getElementById('notif-page-list');
+      var empty = document.getElementById('notif-page-empty');
+      if (!ul) return;
+      ul.innerHTML = '';
+      var list = loadLocal();
+      list.forEach(function (n) {
+        var li = document.createElement('li');
+        li.className = 'np-item';
+        li.innerHTML =
+          '<span class="np-ico" aria-hidden="true">' + esc(n.ico || '•') + '</span>' +
+          '<span class="np-meta"><strong>' + esc(n.title || '') + '</strong><span>' +
+          esc(n.body || '') + '</span></span>';
+        ul.appendChild(li);
+      });
+      if (empty) empty.hidden = list.length > 0;
+    }
+
+    function refreshPushStatus() {
+      var st = document.getElementById('push-page-status');
+      if (!st) return;
+      if (!('Notification' in window)) {
+        st.textContent = 'Este navegador não suporta alertas.';
+        return;
+      }
+      var perm = Notification.permission;
+      if (perm === 'granted') st.textContent = 'Alertas ativos neste aparelho.';
+      else if (perm === 'denied') st.textContent = 'Alertas bloqueados. Libere nas configurações do navegador.';
+      else st.textContent = 'Ative para receber avisos de amizade e novidades da roda.';
+    }
+
+    document.getElementById('notif-requests').addEventListener('click', async function (e) {
+      var btn = e.target.closest('[data-act]');
+      if (!btn) return;
+      var item = btn.closest('.is-request');
+      if (!item || !window.CricriFriends) return;
+      var fromId = item.dataset.fromId;
+      var rowId = item.dataset.rowId || null;
+      btn.disabled = true;
+      try {
+        if (btn.getAttribute('data-act') === 'accept') {
+          await window.CricriFriends.acceptRequest(fromId, rowId);
+          var local = loadLocal();
+          local.unshift({ ico: '🤝', title: 'Amizade aceita', body: 'Vocês estão conectados na roda', kind: 'friend', at: Date.now() });
+          saveLocal(local);
+        } else {
+          await window.CricriFriends.rejectRequest(fromId, rowId);
+        }
+        await renderRequests();
+        renderLocal();
+      } catch (err) {
+        console.warn(err);
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('btn-clear-notifs').addEventListener('click', function () {
+      saveLocal([]);
+      renderLocal();
+    });
+
+    document.getElementById('btn-push-page').addEventListener('click', async function () {
+      var st = document.getElementById('push-page-status');
+      try {
+        if (window.CricriPush && window.CricriPush.enable) {
+          await window.CricriPush.enable();
+        } else if ('Notification' in window) {
+          var perm = await Notification.requestPermission();
+          if (perm !== 'granted') {
+            if (st) st.textContent = 'Permissão não concedida.';
+            return;
+          }
+        }
+        if (st) st.textContent = 'Alertas ativos neste aparelho.';
+      } catch (e) {
+        if (st) st.textContent = 'Não foi possível ativar agora. Tente de novo em instantes.';
+      }
+      refreshPushStatus();
+    });
+
+    function boot() {
+      renderRequests();
+      renderLocal();
+      refreshPushStatus();
+      setInterval(function () {
+        if (document.visibilityState === 'visible') renderRequests();
+      }, 45000);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+  })();
+  </script>
+</body>
+</html>
