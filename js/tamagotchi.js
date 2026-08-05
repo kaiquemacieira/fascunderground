@@ -5,7 +5,43 @@
   var STORAGE = 'cricri-tama-v3';
   var STORAGE_LEGACY = ['fasc-tama-v2', 'cricri-tama-v2'];
   var HALL_STORAGE = 'cricri-hall-v1';
-  var EVENT_END = new Date('2026-11-23T12:00:00-03:00').getTime();
+  // Fim oficial do FASC 2026 — a roda só encerra DEPOIS desta data (UTC ms)
+  // Fallback numérico evita parse ISO quebrado em alguns WebViews mobile
+  var EVENT_END_FALLBACK_MS = Date.UTC(2026, 10, 23, 15, 0, 0); // 23/11/2026 12:00 -03
+  var EVENT_END = (function () {
+    var candidates = [];
+    try {
+      if (typeof window !== 'undefined' && window.FASC_EVENT_END_MS != null) {
+        candidates.push(Number(window.FASC_EVENT_END_MS));
+      }
+    } catch (_) {}
+    try {
+      var iso = (typeof window !== 'undefined' && window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso)
+        || '2026-11-23T12:00:00-03:00';
+      candidates.push(new Date(iso).getTime());
+      // Safari antigo: sem offset
+      candidates.push(new Date('2026-11-23T15:00:00Z').getTime());
+    } catch (_) {}
+    candidates.push(EVENT_END_FALLBACK_MS);
+    for (var i = 0; i < candidates.length; i++) {
+      var v = candidates[i];
+      // só aceita datas no futuro razoável do festival (após 2025 e antes de 2030)
+      if (isFinite(v) && v > Date.UTC(2025, 0, 1) && v < Date.UTC(2030, 0, 1)) return v;
+    }
+    return EVENT_END_FALLBACK_MS;
+  })();
+  function eventIsOver() {
+    // Defesa: se o relógio do aparelho estiver absurdo, não encerra a roda
+    var now = Date.now();
+    if (!isFinite(EVENT_END) || EVENT_END <= 0) return false;
+    if (!isFinite(now) || now < Date.UTC(2020, 0, 1)) return false;
+    return now >= EVENT_END;
+  }
+  // expõe pra debug no mobile
+  try {
+    window.__CRICRI_EVENT_END = EVENT_END;
+    window.__CRICRI_EVENT_IS_OVER = eventIsOver;
+  } catch (_) {}
   var TICK_MS = 30 * 1000;
   var AWAY_DECAY_PER_H = 4;
 
@@ -122,15 +158,23 @@
     } catch (_) { return null; }
   }
 
+  // evita eco do próprio upsert via Realtime
+  var _lastLocalSyncAt = 0;
+  var _applyingRemote = false;
+
   async function cloudSave(s) {
     try {
       var uid = await currentUserId();
       if (!uid || !window.fascDb) return;
+      if (_applyingRemote) return;
+      var nowIso = new Date().toISOString();
+      s.syncedAt = nowIso;
+      _lastLocalSyncAt = Date.now();
       // tabela opcional tama_state (user_id PK, state jsonb, updated_at)
       var payload = {
         user_id: uid,
         state: s,
-        updated_at: new Date().toISOString()
+        updated_at: nowIso
       };
       var res = await window.fascDb.from('tama_state').upsert(payload, { onConflict: 'user_id' });
       if (res.error) {
@@ -163,8 +207,99 @@
       if (!uid || !window.fascDb) return null;
       var res = await window.fascDb.from('tama_state').select('state,updated_at').eq('user_id', uid).maybeSingle();
       if (res.error || !res.data || !res.data.state) return null;
-      return res.data.state;
+      var st = res.data.state;
+      if (st && typeof st === 'object' && res.data.updated_at) {
+        st._cloudUpdatedAt = res.data.updated_at;
+      }
+      return st;
     } catch (_) { return null; }
+  }
+
+  /** Score simples pra decidir quem ganha no merge local vs nuvem */
+  function stateScore(s) {
+    if (!s || !s.started) return -1;
+    var care = Number(s.careScore) || 0;
+    var evo = Number(s.evolutions) || 0;
+    var cards = s.cards ? Object.keys(s.cards).length : 0;
+    var tick = Number(s.lastTick) || 0;
+    return care * 1000 + evo * 100 + cards * 10 + (tick / 1e12);
+  }
+
+  function mergeCloudIntoLocal(local, cloud) {
+    if (!cloud || !cloud.started) return local;
+    if (!local || !local.started) {
+      return Object.assign(defaultState(), cloud, { started: true });
+    }
+    // se nuvem é claramente mais avançada, adota
+    if (stateScore(cloud) > stateScore(local) + 0.5) {
+      return Object.assign(defaultState(), cloud, { started: true });
+    }
+    // se nuvem tem lastTick mais recente e care parecido, prefere nuvem (outro device)
+    var localTick = Number(local.lastTick) || 0;
+    var cloudTick = Number(cloud.lastTick) || 0;
+    if (cloudTick > localTick + 5000 && stateScore(cloud) >= stateScore(local) - 1) {
+      return Object.assign(defaultState(), cloud, { started: true });
+    }
+    return local;
+  }
+
+  /**
+   * Aplica estado remoto (Realtime postgres_changes).
+   * payload: { eventType, new: { state, updated_at, user_id } }
+   */
+  function applyRemoteTama(payload) {
+    if (!payload) return;
+    var row = payload.new || payload.record || null;
+    if (!row || !row.state) return;
+    // ignora eco do próprio save (~2.5s)
+    if (Date.now() - _lastLocalSyncAt < 2500) return;
+    var remote = row.state;
+    if (typeof remote === 'string') {
+      try { remote = JSON.parse(remote); } catch (_) { return; }
+    }
+    if (!remote || typeof remote !== 'object') return;
+    _applyingRemote = true;
+    try {
+      var next = mergeCloudIntoLocal(state, remote);
+      if (next !== state && stateScore(next) !== stateScore(state)) {
+        state = next;
+        recoverPrematureEnd(state);
+        applyAwayDecay(state);
+        // grava local SEM re-disparar cloud logo (schedule ainda roda, mas _applyingRemote bloqueia)
+        try {
+          localStorage.setItem(STORAGE, JSON.stringify(state));
+        } catch (_) {}
+        if (typeof render === 'function') render();
+        console.info('[tama] sync remoto aplicado · care=', state.careScore);
+      }
+    } finally {
+      setTimeout(function () { _applyingRemote = false; }, 800);
+    }
+  }
+  window.__cricriApplyRemoteTama = applyRemoteTama;
+
+  async function syncFromCloudOnBoot() {
+    try {
+      var cloud = await cloudLoad();
+      if (!cloud) return false;
+      var merged = mergeCloudIntoLocal(state, cloud);
+      if (merged !== state) {
+        state = merged;
+        recoverPrematureEnd(state);
+        applyAwayDecay(state);
+        try { localStorage.setItem(STORAGE, JSON.stringify(state)); } catch (_) {}
+        if (typeof render === 'function') render();
+        console.info('[tama] boot: estado da nuvem aplicado');
+        return true;
+      }
+      // se local ganhou, empurra pra nuvem
+      if (state.started && stateScore(state) > stateScore(cloud)) {
+        scheduleCloudSave(state);
+      }
+    } catch (e) {
+      console.info('[tama] boot cloud skip', e && e.message);
+    }
+    return false;
   }
 
   function registerBgSync() {
@@ -253,12 +388,13 @@
 
   /**
    * Encerramento oculto do festival.
-   * Roda uma vez quando EVENT_END passa (ou pet já morto no fim).
-   * Não é onboarding — só despedida.
+   * Só roda quando o EVENT_END realmente passou.
+   * Não encerra a roda por pet morto antes da data — use Renascer.
    */
   function finalizeEnd(s) {
     if (!s || s.endedAt) return false;
-    if (Date.now() < EVENT_END && s.alive) return false;
+    // Só fecha a roda depois do fim oficial do festival
+    if (!eventIsOver()) return false;
     s.alive = false;
     s.endedAt = Date.now();
     s.sleeping = false;
@@ -277,11 +413,47 @@
     return true;
   }
 
+  /**
+   * Se o estado ficou marcado como "fim da roda" antes da data real
+   * (teste, fuso, localStorage antigo), reabre o jogo.
+   */
+  function recoverPrematureEnd(s) {
+    if (!s) return false;
+    if (eventIsOver()) return false;
+    if (!s.endedAt && s.alive !== false) return false;
+    // Evento ainda em curso: limpa marca de encerramento prematuro
+    var changed = false;
+    if (s.endedAt) {
+      delete s.endedAt;
+      delete s.endSnapshot;
+      changed = true;
+    }
+    // Pet que "morreu" só por finalizeEnd prematuro volta vivo;
+    // morte real por fome/saúde continua com alive=false e Renascer.
+    if (s.alive === false && (s.health > 0 || s.hunger > 0 || s.happy > 0)) {
+      // se acabou via festival falso, revive; se zerar saúde de verdade, deixa
+      if ((s.health || 0) > 0) {
+        s.alive = true;
+        changed = true;
+      }
+    }
+    if (changed) {
+      pushLog(s, 'A roda continua — CRICRI 2026 ainda está rolando.');
+    }
+    return changed;
+  }
+
   function renderFarewell(s) {
     var panel = $('farewell-panel');
     if (!panel) return;
     var phase = lifePhase();
-    var show = !!(s.started && (phase === 'ended' || s.endedAt || (Date.now() >= EVENT_END)));
+    // Despedida só depois do fim real do festival
+    // Nunca mostrar despedida antes da data real do FASC
+    if (!eventIsOver()) {
+      panel.hidden = true;
+      return;
+    }
+    var show = !!(s.started && (phase === 'ended' || s.endedAt));
     panel.hidden = !show;
     if (!show) return;
 
@@ -450,7 +622,7 @@
 
   function tickOpen(s) {
     if (!s.started || !s.alive) return;
-    if (Date.now() >= EVENT_END) {
+    if (eventIsOver()) {
       finalizeEnd(s);
       return;
     }
@@ -469,7 +641,15 @@
   }
 
   var state = load();
+  if (recoverPrematureEnd(state)) {
+    // reabre se localStorage ficou com fim prematuro (comum no mobile)
+    try { console.info('[CRICRI] recoverPrematureEnd', new Date(window.__CRICRI_EVENT_END || 0).toISOString()); } catch (_) {}
+  }
   applyAwayDecay(state);
+  // sempre limpa marca de fim se o evento ainda não acabou
+  if (state && !eventIsOver()) {
+    if (state.endedAt) { delete state.endedAt; delete state.endSnapshot; }
+  }
   save(state);
 
   function catExpr(s) {
@@ -551,6 +731,8 @@
   }
 
   function render() {
+    if (state) recoverPrematureEnd(state);
+
     var s = state;
     var startGate = $('start-gate');
     var appMain = $('tama-app');
@@ -621,7 +803,7 @@
     if (sleepBtn && s.alive) sleepBtn.textContent = s.sleeping ? 'Acordar' : 'Dormir';
     // Após o festival: só coleção / renascer bloqueado
     document.querySelectorAll('[data-action="reset"]').forEach(function (b) {
-      if (Date.now() >= EVENT_END) {
+      if (eventIsOver()) {
         b.disabled = true;
         b.title = 'A roda fechou — sem renascer até o próximo FASC';
       }
@@ -632,7 +814,7 @@
 
   function startGame() {
     // Mecânica oculta: depois do EVENT_END não nasce criatura nova
-    if (Date.now() >= EVENT_END) {
+    if (eventIsOver()) {
       var gate = $('start-gate');
       if (gate) {
         var sub = gate.querySelector('.start-sub');
@@ -685,7 +867,7 @@
       return;
     }
     if (!s.started || !s.alive) return;
-    if (Date.now() >= EVENT_END) {
+    if (eventIsOver()) {
       finalizeEnd(s);
       save(s);
       render();
@@ -773,9 +955,16 @@
         document.documentElement.setAttribute('data-a11y-motion', 'reduce');
     } catch (_) {}
     wire();
+    wireBgMessages();
     render();
     scheduleBlink();
     if (state.started) setTab('play');
+    // sync nuvem + realtime
+    syncFromCloudOnBoot().then(function () {
+      if (window.CricriRealtime && typeof window.CricriRealtime.start === 'function') {
+        window.CricriRealtime.start();
+      }
+    });
     setInterval(function () {
       if (!state.started) return;
       tickOpen(state); save(state); render();

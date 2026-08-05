@@ -30,14 +30,17 @@ window.FASC_CONFIG = {
   ]
 };
 
-/** Epoch ms do fim do CRICRI — alinhado a tamagotchi.js */
+/** Epoch ms do fim do CRICRI — alinhado a tamagotchi.js (fallback UTC fixo p/ mobile) */
 window.FASC_EVENT_END_MS = (function () {
+  var FALLBACK = Date.UTC(2026, 10, 23, 15, 0, 0); // 23/11/2026 12:00 -03
   try {
     var iso = (window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso) || '2026-11-23T12:00:00-03:00';
-    return new Date(iso).getTime();
-  } catch (_) {
-    return new Date('2026-11-23T12:00:00-03:00').getTime();
-  }
+    var t = new Date(iso).getTime();
+    if (isFinite(t) && t > Date.UTC(2025, 0, 1) && t < Date.UTC(2030, 0, 1)) return t;
+    t = new Date('2026-11-23T15:00:00Z').getTime();
+    if (isFinite(t)) return t;
+  } catch (_) {}
+  return FALLBACK;
 })();
 
 /** true se o festival já acabou (Meow / caixinha expirados) */

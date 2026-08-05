@@ -65,20 +65,30 @@
     updateBadge();
   }
 
+  function notifCount() {
+    return pendingRequests.length + loadLocal().length;
+  }
+
+  function openPanel() {
+    ensureMounted();
+    var panel = document.getElementById('cricri-notif-panel');
+    var btn = document.getElementById('cricri-notif-bell');
+    if (panel) {
+      panel.hidden = false;
+      // âncora inferior (menu) no mobile
+      panel.classList.add('cnb-from-bottom');
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      refreshAll();
+    }
+  }
+
   window.CricriNotifBell = {
     push: pushNotif,
     refresh: function () {
       return refreshAll();
     },
-    open: function () {
-      var panel = document.getElementById('cricri-notif-panel');
-      var btn = document.getElementById('cricri-notif-bell');
-      if (panel) {
-        panel.hidden = false;
-        if (btn) btn.setAttribute('aria-expanded', 'true');
-        refreshAll();
-      }
-    }
+    open: openPanel,
+    count: notifCount
   };
 
   var pendingRequests = [];
@@ -156,15 +166,22 @@
   }
 
   function updateBadge() {
-    var badge = document.getElementById('cricri-notif-badge');
-    if (!badge) return;
     var n = pendingRequests.length + loadLocal().length;
-    if (n > 0) {
-      badge.hidden = false;
-      badge.textContent = String(Math.min(n, 9));
-    } else {
-      badge.hidden = true;
+    var badge = document.getElementById('cricri-notif-badge');
+    if (badge) {
+      if (n > 0) {
+        badge.hidden = false;
+        badge.textContent = String(Math.min(n, 9));
+      } else {
+        badge.hidden = true;
+      }
     }
+    if (window.CricriBottomNav && window.CricriBottomNav.updateNotifBadge) {
+      window.CricriBottomNav.updateNotifBadge(n);
+    }
+    try {
+      window.dispatchEvent(new CustomEvent('cricri:notifs-changed', { detail: { count: n } }));
+    } catch (_) {}
   }
 
   function renderIfOpen() {
@@ -228,6 +245,7 @@
       '#cricri-notif-bell svg{width:22px;height:22px}',
       '#cricri-notif-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#e33d6b;color:#fff;font:700 0.65rem/18px system-ui,sans-serif;text-align:center}',
       '#cricri-notif-panel{width:min(92vw,320px);max-height:min(70vh,420px);overflow:auto;background:#14110f;border:1.5px solid rgba(230,220,196,0.14);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,0.5);padding:0.75rem;color:#ebe3cf}',
+      '#cricri-notif-panel.cnb-from-bottom{position:fixed;left:50%;right:auto;bottom:calc(4.75rem + env(safe-area-inset-bottom,0px));top:auto;transform:translateX(-50%);width:min(94vw,360px);z-index:100060;max-height:min(62vh,440px)}',
       '#cricri-notif-panel h2{margin:0 0 0.5rem;font:700 0.85rem/1.2 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase}',
       '#cricri-notif-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.45rem}',
       '.cnb-item{display:flex;gap:0.55rem;align-items:flex-start;padding:0.55rem;border-radius:10px;background:rgba(230,220,196,0.05);border:1px solid rgba(230,220,196,0.08)}',
@@ -251,6 +269,10 @@
       'html[data-theme="light"] .cnb-meta strong,html[data-a11y-theme="light"] .cnb-meta strong{color:#17120e}'
     ].join('\n');
     document.head.appendChild(s);
+  }
+
+  function ensureMounted() {
+    if (!document.getElementById('cricri-notif-panel')) mount();
   }
 
   function mount() {
@@ -295,6 +317,10 @@
         '<p style="margin-top:0.45rem;font-size:0.68rem;color:#8c8376">HTTPS + VAPID pra push com aba fechada · docs/PUSH.md</p>' +
       '</div>';
 
+    // Sininho flutuante desligado — entrada pelo menu inferior "Avisos"
+    bellBtn.hidden = true;
+    bellBtn.setAttribute('aria-hidden', 'true');
+    bellBtn.style.display = 'none';
     wrap.appendChild(bellBtn);
     wrap.appendChild(panel);
     document.body.appendChild(wrap);
@@ -386,11 +412,12 @@
       invalidateAndRefresh();
     });
     window.addEventListener('cricri:notifs-changed', function () {
-      updateBadge();
+      // não chama updateBadge de novo (evita loop com dispatch)
       renderIfOpen();
     });
 
     subscribeConnections();
+    window.addEventListener('cricri:open-notifs', function () { openPanel(); });
     setTimeout(refreshAll, 600);
     setInterval(function () {
       if (document.visibilityState === 'visible') refreshRequests().then(updateBadge);
