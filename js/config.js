@@ -5,7 +5,7 @@ window.FASC_CONFIG = {
   supabaseAnonKey: 'sb_publishable_k0iCZgl6qweP16tW3uiGYA_HTJYO1iK',
   env: 'dev',
   // Chave pública VAPID (npx web-push generate-vapid-keys). Privada só no backend.
-  vapidPublicKey: '',
+  vapidPublicKey: 'BM7GeS-AZY3O3WZKIz_OZ8RTHUacS1PeeeVzVyNsfuhU6KZ60nv6kHb9kR-RlgBduopq87blNlPnf0XErxoWYDg',
 
   // Fim do festival (mesmo padrão de js/tamagotchi.js EVENT_END)
   // Após esta data: caixinha Meow não lista recados; envio bloqueado no front.

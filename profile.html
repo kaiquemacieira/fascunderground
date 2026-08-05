@@ -427,6 +427,33 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
     .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Fix imagens de perfil quebradas / overflow */
+    .avatar-wrap {
+      overflow: hidden;
+      background: radial-gradient(circle at 35% 30%, #23324a, #101823 70%);
+    }
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .avatar-wrap img[src=""],
+    .avatar-wrap img:not([src]) {
+      display: none;
+    }
+    .conn-avatar img,
+    .photo-upload-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    img[data-profile-photo] {
+      background: #1a1512;
+    }
+
     .display-name-row {
       display: flex;
       align-items: center;
@@ -2834,6 +2861,7 @@ html[data-theme="light"] .meow-public-btn {
   <div class="page">
     <header class="topbar profile-topbar" role="banner">
       <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
+      <a class="back" href="index.html" style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8c8376;text-decoration:none;margin-right:0.5rem">← Home</a>
       <div class="profile-topbar-actions">
         <a class="auth-chip" id="profile-auth-chip" href="login.html">Entrar</a>
       </div>
@@ -3476,6 +3504,11 @@ window.FASC_CONFIG = {
             if (input) input.value = '';
           }
           await loadConnections();
+          if (window.CricriFriends && window.CricriFriends.invalidate) window.CricriFriends.invalidate();
+          
+          if (window.CricriConnectionNotifs && window.CricriConnectionNotifs.onIConnected) {
+            try { await window.CricriConnectionNotifs.onIConnected(profile); } catch (_) {}
+          }
           if (typeof window.__cricriLoadFriendsOnline === 'function') {
             window.__cricriLoadFriendsOnline();
           }
@@ -3508,6 +3541,7 @@ window.FASC_CONFIG = {
           if (del.error) throw del.error;
           msg('conn-msg', 'Removido.', true);
           await loadConnections();
+          if (window.CricriFriends && window.CricriFriends.invalidate) window.CricriFriends.invalidate();
           if (typeof window.__cricriLoadFriendsOnline === 'function') {
             window.__cricriLoadFriendsOnline();
           }
@@ -4883,6 +4917,7 @@ window.FASC_CONFIG = {
 
   <!-- Notifs locais + Web Push opcional -->
   <script src="js/cricri-notifs.js"></script>
+  <script src="js/connection-notifs.js"></script>
   <script>
     // Gere com: npx web-push generate-vapid-keys
     // window.FASC_VAPID_PUBLIC_KEY = 'SUA_CHAVE_PUBLICA';
@@ -5081,6 +5116,8 @@ window.FASC_CONFIG = {
 
   <div id="bottom-nav-slot"></div>
   <script src="js/cri-svg.js"></script>
+  <script src="js/guest-mode.js"></script>
+  <script src="js/friends.js"></script>
   <script src="js/bottom-nav.js"></script>
   <script>
   (function () {
@@ -5136,6 +5173,53 @@ window.FASC_CONFIG = {
 })();
 </script>
 
+
+<script>
+/* Perfil · fallback de imagens quebradas */
+(function () {
+  function fallback(img) {
+    if (!img || img.dataset.fallbackApplied) return;
+    img.dataset.fallbackApplied = '1';
+    img.removeAttribute('src');
+    img.alt = img.alt || 'sem foto';
+    img.style.display = 'none';
+    var wrap = img.closest('.avatar-wrap, .conn-avatar, .photo-upload-preview');
+    if (wrap && !wrap.querySelector('.avatar-fallback')) {
+      var span = document.createElement('span');
+      span.className = 'avatar-fallback';
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = '🐾';
+      span.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.6rem';
+      wrap.appendChild(span);
+    }
+  }
+  document.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'IMG') fallback(t);
+  }, true);
+  // sanear srcs vazios / inválidos já no DOM
+  function scrub() {
+    document.querySelectorAll('img').forEach(function (img) {
+      var s = img.getAttribute('src') || '';
+      if (!s || s === 'null' || s === 'undefined' || s === 'about:blank') fallback(img);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scrub);
+  else scrub();
+  // re-scrunch após updates de perfil
+  var obs = new MutationObserver(function () { scrub(); });
+  if (document.body) obs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+})();
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {});
+  });
+}
+</script>
 </body>
 
 </html>

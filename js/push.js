@@ -1,12 +1,12 @@
 /**
- * CRICRI · Web Push (opcional)
+ * CRICRI · Web Push client
  *
- * Se window.FASC_VAPID_PUBLIC_KEY estiver definida e houver service worker,
- * tenta subscribe. Caso contrário, só atualiza UI do #push-card e delega
- * avisos locais ao CricriNotifs.
+ * - Pede permissão Notification
+ * - Subscribe com VAPID (FASC_CONFIG.vapidPublicKey)
+ * - Grava em public.push_subscriptions (endpoint, p256dh, auth)
+ * - Fallback: CricriNotifs local se não houver VAPID/SW
  *
- * Não inventa tabela Supabase — só registra subscription se fascDb + tabela
- * push_subscriptions existir (best effort).
+ * UI opcional: #push-card #btn-push-enable #btn-push-disable #push-status #push-msg
  */
 (function () {
   'use strict';
@@ -40,6 +40,16 @@
       || '').trim();
   }
 
+  function ensureSw() {
+    if (!('serviceWorker' in navigator)) return Promise.reject(new Error('Sem Service Worker'));
+    return navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (reg) return reg;
+      return navigator.serviceWorker.register('./sw.js', { scope: './' });
+    }).then(function () {
+      return navigator.serviceWorker.ready;
+    });
+  }
+
   async function currentSub() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
     try {
@@ -50,83 +60,130 @@
     }
   }
 
+  function keysFromSub(sub) {
+    var json = sub.toJSON();
+    var keys = json.keys || {};
+    return {
+      endpoint: json.endpoint || sub.endpoint,
+      p256dh: keys.p256dh || '',
+      auth: keys.auth || ''
+    };
+  }
+
+  async function saveSub(sub) {
+    if (!window.fascDb || !window.fascAuth) return false;
+    var user = null;
+    try { user = await window.fascAuth.user(); } catch (_) {}
+    if (!user || !user.id) return false;
+    var k = keysFromSub(sub);
+    if (!k.endpoint || !k.p256dh || !k.auth) {
+      console.warn('[push] subscription incompleta');
+      return false;
+    }
+    var payload = {
+      user_id: user.id,
+      endpoint: k.endpoint,
+      p256dh: k.p256dh,
+      auth: k.auth,
+      user_agent: (navigator.userAgent || '').slice(0, 240),
+      updated_at: new Date().toISOString()
+    };
+    var res = await window.fascDb
+      .from('push_subscriptions')
+      .upsert(payload, { onConflict: 'endpoint' });
+    if (res.error) {
+      console.warn('[push] upsert', res.error.message || res.error);
+      return false;
+    }
+    return true;
+  }
+
+  async function removeSubCloud(sub) {
+    if (!window.fascDb || !sub) return;
+    try {
+      var endpoint = sub.endpoint;
+      await window.fascDb.from('push_subscriptions').delete().eq('endpoint', endpoint);
+    } catch (_) {}
+  }
+
   async function enable() {
     setMsg('');
     if (!('Notification' in window)) {
       setMsg('Este navegador não suporta notificações.', false);
-      return;
+      return false;
     }
-    var perm = await Notification.requestPermission();
+
+    var perm = Notification.permission;
+    if (perm !== 'granted') {
+      perm = await Notification.requestPermission();
+    }
     if (perm !== 'granted') {
       setMsg('Permissão negada. Ative nas configurações do navegador.', false);
       setStatus('Bloqueado');
-      return;
+      return false;
     }
 
-    // Sempre libera notificações locais via CricriNotifs
-    if (window.CricriNotifs) {
-      window.CricriNotifs.push({
-        ico: '🔔',
-        title: 'Notificações ativas',
-        body: 'O Cri e o festival podem te avisar por aqui.',
-        kind: 'system'
-      });
+    // locais sempre
+    if (window.CricriNotifs && window.CricriNotifs.push) {
+      try {
+        window.CricriNotifs.push({
+          ico: '🔔',
+          title: 'Notificações ativas',
+          body: 'Avisos do CRICRI neste aparelho.',
+          kind: 'system'
+        });
+      } catch (_) {}
     }
 
     var key = vapidKey();
     if (!key) {
-      setStatus('Local ativo (sem Web Push — falta VAPID)');
-      setMsg('Avisos locais ok. Web Push precisa da chave VAPID em config.js.', true);
+      setStatus('Local ativo (falta VAPID pública)');
+      setMsg('Avisos locais ok. Para Web Push, coloque vapidPublicKey em js/config.js e secrets no Supabase.', true);
       refreshUi();
-      return;
+      return true;
     }
 
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    if (!('PushManager' in window)) {
       setStatus('Local ativo (sem PushManager)');
       setMsg('Notificações locais ok neste aparelho.', true);
       refreshUi();
-      return;
+      return true;
     }
 
     try {
-      var reg = await navigator.serviceWorker.ready;
-      var sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(key)
-      });
-
-      // Best effort: grava se tabela existir
-      try {
-        if (window.fascAuth && window.fascDb) {
-          var user = await window.fascAuth.user();
-          if (user && user.id) {
-            await window.fascDb.from('push_subscriptions').upsert({
-              user_id: user.id,
-              endpoint: sub.endpoint,
-              subscription: sub.toJSON(),
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'endpoint' });
-          }
-        }
-      } catch (e) {
-        console.info('[push] skip cloud save', e && e.message);
+      var reg = await ensureSw();
+      var sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(key)
+        });
       }
-
-      setStatus('Web Push ativo');
-      setMsg('Notificações ativadas.', true);
+      var saved = await saveSub(sub);
+      setStatus(saved ? 'Web Push ativo' : 'Push no aparelho (cloud pendente)');
+      setMsg(saved
+        ? 'Notificações push ativadas.'
+        : 'Push no browser ok. Login + tabela push_subscriptions pra sincronizar.',
+        true);
+      refreshUi();
+      return true;
     } catch (e) {
       console.warn('[push]', e);
       setStatus('Local ativo');
       setMsg((e && e.message) || 'Falha no Web Push — locais ainda funcionam.', false);
+      refreshUi();
+      return false;
     }
-    refreshUi();
   }
 
   async function disable() {
     setMsg('');
     try {
       var sub = await currentSub();
-      if (sub) await sub.unsubscribe();
+      if (sub) {
+        await removeSubCloud(sub);
+        await sub.unsubscribe();
+      }
     } catch (_) {}
     setStatus('Desativado');
     setMsg('Notificações desativadas neste aparelho.', true);
@@ -135,7 +192,6 @@
 
   async function refreshUi() {
     var card = $('push-card');
-    // UI existe mas estava forçada hidden no CSS legado — só mostra se #push-card não estiver permanentemente display:none via outras regras de página
     if (card) card.hidden = false;
 
     var btnOn = $('btn-push-enable');
@@ -155,7 +211,7 @@
       if (btnOn) btnOn.hidden = true;
       if (btnOff) btnOff.hidden = false;
     } else if (perm === 'granted') {
-      setStatus(vapidKey() ? 'Permissão ok — ative o Push' : 'Local disponível');
+      setStatus(vapidKey() ? 'Permissão ok — toque em Ativar' : 'Local (sem VAPID)');
       if (btnOn) btnOn.hidden = false;
       if (btnOff) btnOff.hidden = true;
     } else if (perm === 'denied') {
@@ -163,25 +219,48 @@
       if (btnOn) btnOn.hidden = false;
       if (btnOff) btnOff.hidden = true;
     } else {
-      setStatus('Ainda não ativado');
+      setStatus('Aguardando permissão');
       if (btnOn) btnOn.hidden = false;
       if (btnOff) btnOff.hidden = true;
     }
   }
 
-  function wire() {
-    var btnOn = $('btn-push-enable');
-    var btnOff = $('btn-push-disable');
-    if (btnOn) btnOn.addEventListener('click', function () { enable(); });
-    if (btnOff) btnOff.addEventListener('click', function () { disable(); });
+  function bind() {
+    var on = $('btn-push-enable');
+    var off = $('btn-push-disable');
+    if (on && on.dataset.bound !== '1') {
+      on.dataset.bound = '1';
+      on.addEventListener('click', function () { enable(); });
+    }
+    if (off && off.dataset.bound !== '1') {
+      off.dataset.bound = '1';
+      off.addEventListener('click', function () { disable(); });
+    }
     refreshUi();
   }
 
-  window.CricriPush = { enable: enable, disable: disable, refresh: refreshUi };
+  // API pública
+  window.CricriPush = {
+    enable: enable,
+    disable: disable,
+    refresh: refreshUi,
+    currentSub: currentSub,
+    vapidKey: vapidKey
+  };
+
+  function boot() {
+    // registra SW cedo
+    if ('serviceWorker' in navigator) {
+      ensureSw().catch(function () {});
+    }
+    bind();
+    // re-bind se o card for injetado tarde
+    setTimeout(bind, 800);
+  }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wire);
+    document.addEventListener('DOMContentLoaded', boot);
   } else {
-    wire();
+    boot();
   }
 })();

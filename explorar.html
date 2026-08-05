@@ -56,75 +56,59 @@
   </style>
 </head>
 <body class="page-explorar">
-  <!-- PASSO 2/4 · gate de sessão (mesmo contrato do index) -->
-  <style id="cricri-session-gate-css">html.session-pending body > *:not(script):not(style){visibility:hidden!important}</style>
-  <script>
-  (function () {
-    'use strict';
-    var KEEP_KEY = 'cricri-keep-session';
-    var SAVED_KEY = 'cricri-saved-user';
-    var LOGIN = 'login.html';
-    function goLogin() {
-      try { window.location.replace(LOGIN); } catch (_) { window.location.href = LOGIN; }
-    }
-    function pass() {
-      try { document.documentElement.classList.remove('session-pending'); } catch (_) {}
-      var css = document.getElementById('cricri-session-gate-css');
-      if (css && css.parentNode) css.parentNode.removeChild(css);
-    }
-    function keepOn() {
-      try { return localStorage.getItem(KEEP_KEY) !== '0'; } catch (_) { return true; }
-    }
-    function hasSavedUser() {
-      try {
-        var raw = localStorage.getItem(SAVED_KEY);
-        if (!raw) return false;
-        var u = JSON.parse(raw);
-        return !!(u && (u.id || u.email || u.name));
-      } catch (_) { return false; }
-    }
-    function hasSupabaseToken() {
-      try {
-        for (var i = 0; i < localStorage.length; i++) {
-          var k = localStorage.key(i);
-          if (!k) continue;
-          if (/auth-token|supabase\.auth\.token/i.test(k)) {
-            var v = localStorage.getItem(k);
-            if (v && v.length > 40) return true;
-          }
-        }
-      } catch (_) {}
-      return false;
-    }
-    function hasLocalSession() {
-      return keepOn() && (hasSavedUser() || hasSupabaseToken());
-    }
-    document.documentElement.classList.add('session-pending');
-    if (!hasLocalSession()) { goLogin(); return; }
-    pass();
-    var tries = 0;
-    var timer = setInterval(function () {
-      tries++;
-      if (window.fascAuth && typeof window.fascAuth.session === 'function') {
-        clearInterval(timer);
-        window.fascAuth.session().then(function (s) {
-          if (s && s.user) return;
-          if (!(keepOn() && hasSavedUser())) goLogin();
-        }).catch(function () {
-          if (!(keepOn() && hasSavedUser())) goLogin();
-        });
-        return;
-      }
-      if (tries >= 50) clearInterval(timer);
-    }, 100);
-  })();
-  </script>
+  <!-- Modo convidado — visualização liberada -->
+  <style>
+  .cricri-guest-banner{
+    margin:0.65rem 1rem 0;padding:0.75rem 0.9rem;border-radius:10px;
+    border:1.5px dashed rgba(212,154,44,.55);
+    background:linear-gradient(180deg,rgba(212,154,44,.14),rgba(227,61,107,.06));
+    color:#ebe3cf;font-size:.82rem;line-height:1.4;
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.6rem 1rem;
+  }
+  .cricri-guest-banner p{margin:0;flex:1;min-width:12rem}
+  .cricri-guest-banner strong{color:#d49a2c}
+  .cricri-guest-cta{
+    font-family:Oswald,system-ui,sans-serif;font-weight:600;font-size:.72rem;
+    letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+    color:#f6efdc;background:linear-gradient(180deg,#e33d6b,#b01f4c);
+    padding:.55rem 1rem;border-radius:999px;white-space:nowrap;
+  }
+  body.is-guest .is-guest-locked{opacity:.45;pointer-events:none}
+  body.page-explorar .page-top{
+    display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+    padding:0.65rem 0.85rem 0.45rem;
+  }
+  body.page-explorar .page-top .back{
+    font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+    color:#8c8376;text-decoration:none;white-space:nowrap;
+  }
+  body.page-explorar .page-top .back:hover{color:#e33d6b}
+  /* chips mais compactos — menos scroll lateral */
+  body.page-explorar .map-layers,
+  body.page-explorar .map-prox-row{
+    display:flex;flex-wrap:wrap;gap:0.35rem;overflow-x:visible;
+  }
+  body.page-explorar .map-layer-chip,
+  body.page-explorar .map-prox-chip{
+    flex:0 1 auto;font-size:0.68rem;padding:0.4rem 0.55rem;
+  }
+  /* bottom-nav esconde ao rolar */
+  body.page-explorar nav.bottom-nav{
+    transition:transform .25s ease, opacity .25s ease;
+  }
+  body.page-explorar.nav-hidden nav.bottom-nav{
+    transform:translateY(110%);
+    opacity:0;
+    pointer-events:none;
+  }
+  </style>
 
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
 
   <header class="page-top">
     <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
     <span class="page-label">Explorar</span>
+    <a class="back" href="index.html">← Home</a>
   </header>
 
   <main id="conteudo-principal" tabindex="-1">
@@ -300,6 +284,7 @@
   <script src="js/map-lazy.js" defer></script>
   <script type="module" src="js/denuncia.js" defer></script>
   <script src="js/footer.js" defer></script>
+  <script src="js/guest-mode.js"></script>
   <script src="js/bottom-nav.js"></script>
   <script src="js/a11y-core.js" defer></script>
 
@@ -337,6 +322,29 @@
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) setTimeout(fix, 200);
     });
+  })();
+  </script>
+
+  <script>
+  /* Explorar: bottom-nav some ao rolar */
+  (function () {
+    var lastY = window.scrollY || 0;
+    var ticking = false;
+    function onScroll() {
+      var y = window.scrollY || 0;
+      var dy = y - lastY;
+      if (Math.abs(dy) < 8) { ticking = false; return; }
+      if (dy > 0 && y > 48) document.body.classList.add('nav-hidden');
+      else document.body.classList.remove('nav-hidden');
+      lastY = y;
+      ticking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(onScroll);
+      }
+    }, { passive: true });
   })();
   </script>
 </body>

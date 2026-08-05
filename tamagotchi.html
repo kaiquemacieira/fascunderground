@@ -1085,6 +1085,18 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       margin-right: auto;
       max-width: 22rem;
     }
+
+    .cricri-guest-banner{
+      margin:0.5rem 0 0.75rem;padding:0.7rem 0.85rem;border-radius:10px;
+      border:1.5px dashed rgba(212,154,44,.55);
+      background:rgba(212,154,44,.1);color:var(--paper);font-size:.8rem;
+      display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;
+    }
+    .cricri-guest-cta{
+      font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      text-decoration:none;color:#f6efdc;background:var(--rosa);padding:.45rem .85rem;border-radius:999px;
+    }
+    body.is-guest .is-guest-locked{opacity:.45;pointer-events:none}
 </style>
 
 <style id="tama-alert-style">
@@ -1438,6 +1450,7 @@ button[data-action="reset"]:hover {
   <div class="tama-footer-spacer" style="height:1.5rem" aria-hidden="true"></div>
   <div id="site-footer-slot"></div>
   <div id="bottom-nav-slot"></div>
+  <script src="js/guest-mode.js"></script>
   <script src="js/bottom-nav.js"></script>
 
   <script src="js/theme.js"></script>

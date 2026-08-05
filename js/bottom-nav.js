@@ -119,6 +119,12 @@
     } else {
       root.appendChild(nav);
     }
+    // garante fixo em todas as páginas
+    nav.style.position = 'fixed';
+    nav.style.left = '0';
+    nav.style.right = '0';
+    nav.style.bottom = '0';
+    nav.style.zIndex = '50';
     return nav;
   }
 
