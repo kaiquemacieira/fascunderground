@@ -119,12 +119,43 @@
     } else {
       root.appendChild(nav);
     }
-    // garante fixo em todas as páginas
+    // garante fixo em todas as páginas (fallback se CSS da página faltar)
     nav.style.position = 'fixed';
     nav.style.left = '0';
     nav.style.right = '0';
     nav.style.bottom = '0';
-    nav.style.zIndex = '50';
+    nav.style.zIndex = '5600';
+    nav.style.display = 'grid';
+    nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    nav.style.height = 'calc(64px + env(safe-area-inset-bottom, 0px))';
+    nav.style.paddingBottom = 'env(safe-area-inset-bottom, 0px)';
+    nav.style.background = nav.style.background || '#0c0a09';
+    nav.style.borderTop = nav.style.borderTop || '2px solid rgba(230,220,196,0.12)';
+    nav.style.boxShadow = '0 -8px 24px rgba(0,0,0,0.35)';
+    var links = nav.querySelectorAll('a');
+    for (var li = 0; li < links.length; li++) {
+      var a = links[li];
+      a.style.display = 'flex';
+      a.style.flexDirection = 'column';
+      a.style.alignItems = 'center';
+      a.style.justifyContent = 'center';
+      a.style.gap = '0.2rem';
+      a.style.textDecoration = 'none';
+      a.style.fontSize = '0.62rem';
+      a.style.textTransform = 'uppercase';
+      a.style.letterSpacing = '0.05em';
+      a.style.fontWeight = '600';
+      a.style.opacity = a.classList.contains('active') ? '1' : '0.55';
+      a.style.color = a.classList.contains('active') ? '#e33d6b' : '#ebe3cf';
+      a.style.padding = '0.45rem 0.15rem';
+    }
+    // padding no body para não cobrir conteúdo
+    try {
+      var pb = window.getComputedStyle(document.body).paddingBottom;
+      if (!pb || pb === '0px') {
+        document.body.style.paddingBottom = 'calc(4.5rem + env(safe-area-inset-bottom, 0px))';
+      }
+    } catch (_) {}
     return nav;
   }
 

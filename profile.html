@@ -372,8 +372,25 @@
       background: rgba(212, 154, 44, 0.12);
       color: var(--ochre);
     }
-    .back { color: #e8dfd0; text-decoration: none; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
-    .back:hover { color: var(--rosa); }
+    .back, .profile-back {
+      color: #cfc5b4;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1.5px solid transparent;
+      transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+    .back:hover, .profile-back:hover {
+      color: #e33d6b;
+      background: rgba(227, 61, 107, 0.12);
+      border-color: rgba(227, 61, 107, 0.45);
+      transform: translateY(-1px);
+    }
+    .back:active, .profile-back:active { transform: translateY(0); }
     .logo { color: var(--rosa); font-weight: 800; letter-spacing: 0.08em; }
 
     .title {
@@ -2946,10 +2963,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
   <div class="page">
     <header class="topbar profile-topbar" role="banner">
       <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
-      <a class="back" href="index.html" style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8c8376;text-decoration:none;margin-right:0.5rem">← Home</a>
-      <div class="profile-topbar-actions">
-        <a class="auth-chip" id="profile-auth-chip" href="login.html">Entrar</a>
-      </div>
+      <a class="back profile-back" href="index.html">← Home</a>
     </header>
 
 <main id="conteudo-principal" tabindex="-1">
@@ -5241,38 +5255,8 @@ window.fascEventEnded = function () {
   <script src="js/sw-register.js"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/bottom-nav.js"></script>
-  <script>
-  (function () {
-    // Chip do header: logado → @nick / nome; senão → Entrar (login.html)
-    async function syncProfileChip() {
-      var chip = document.getElementById('profile-auth-chip');
-      if (!chip) return;
-      try {
-        if (!window.fascAuth || !window.fascAuth.user) return;
-        var user = await window.fascAuth.user();
-        if (!user) {
-          chip.textContent = 'Entrar';
-          chip.href = 'login.html';
-          chip.classList.remove('is-user');
-          return;
-        }
-        var name = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name)) || '';
-        var handleEl = document.getElementById('handle-line');
-        var handle = handleEl ? handleEl.textContent.replace(/^@/, '').trim() : '';
-        var label = handle ? '@' + handle : (name || 'Conta');
-        chip.textContent = label;
-        chip.href = 'profile.html';
-        chip.classList.add('is-user');
-      } catch (_) {}
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () { setTimeout(syncProfileChip, 600); });
-    } else {
-      setTimeout(syncProfileChip, 600);
-    }
-    window.addEventListener('focus', function () { setTimeout(syncProfileChip, 300); });
-  })();
-  </script>
+  <!-- chip de nick removido do topbar — sininho global em js/notif-bell.js -->
+
 <script>
 (function () {
   // Feedback se voltou do OAuth com erro na query/hash

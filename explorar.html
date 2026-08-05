@@ -92,14 +92,17 @@
   body.page-explorar .map-prox-chip{
     flex:0 1 auto;font-size:0.68rem;padding:0.4rem 0.55rem;
   }
-  /* bottom-nav esconde ao rolar */
+  /* bottom-nav sempre visível em Explorar */
   body.page-explorar nav.bottom-nav{
-    transition:transform .25s ease, opacity .25s ease;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 5600 !important;
   }
   body.page-explorar.nav-hidden nav.bottom-nav{
-    transform:translateY(110%);
-    opacity:0;
-    pointer-events:none;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
   </style>
 
@@ -285,7 +288,11 @@
   <script type="module" src="js/denuncia.js" defer></script>
   <script src="js/footer.js" defer></script>
   <script src="js/guest-mode.js"></script>
+  <script src="js/friends.js"></script>
+  <script src="js/notif-bell.js"></script>
   <script src="js/bottom-nav.js"></script>
+  <script src="js/install-app.js"></script>
+  <script src="js/sw-register.js"></script>
   <script src="js/a11y-core.js" defer></script>
 
   <script>
@@ -325,27 +332,6 @@
   })();
   </script>
 
-  <script>
-  /* Explorar: bottom-nav some ao rolar */
-  (function () {
-    var lastY = window.scrollY || 0;
-    var ticking = false;
-    function onScroll() {
-      var y = window.scrollY || 0;
-      var dy = y - lastY;
-      if (Math.abs(dy) < 8) { ticking = false; return; }
-      if (dy > 0 && y > 48) document.body.classList.add('nav-hidden');
-      else document.body.classList.remove('nav-hidden');
-      lastY = y;
-      ticking = false;
-    }
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(onScroll);
-      }
-    }, { passive: true });
-  })();
-  </script>
+  <!-- bottom-nav fixa — não esconde ao rolar -->
 </body>
 </html>

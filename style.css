@@ -126,7 +126,7 @@
   --z-a11y-btn: 210;
   --z-a11y-panel: 400;
   --z-mobile-menu: 300;
-  --z-bottom-nav: 50;
+  --z-bottom-nav: 5600;
   --z-bottom-cta: 45;
   --z-toast: 60;
   --z-map-overlay: 80;
@@ -1339,17 +1339,19 @@ html[data-a11y-theme="light"] .header-search input {
 }
 
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--ink);
   border-top: 2px solid rgba(230, 220, 196, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: var(--z-bottom-nav);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .nav-item {
