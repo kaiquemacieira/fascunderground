@@ -16,6 +16,8 @@
   function setStatus(text) {
     var el = $('push-status');
     if (el) el.textContent = text || '';
+    var el2 = document.getElementById('cnb-push-status');
+    if (el2) el2.textContent = text || '';
   }
   function setMsg(text, ok) {
     var el = $('push-msg');
@@ -191,9 +193,7 @@
   }
 
   async function refreshUi() {
-    var card = $('push-card');
-    if (card) card.hidden = false;
-
+    // não força o card do perfil (UI vive no sininho)
     var btnOn = $('btn-push-enable');
     var btnOff = $('btn-push-disable');
 
@@ -239,13 +239,59 @@
     refreshUi();
   }
 
+  /**
+   * Dispara push pra outro usuário via Edge Function send-push.
+   * Requer login + function deployada + secrets VAPID.
+   */
+  async function notifyUser(toUserId, opts) {
+    opts = opts || {};
+    if (!toUserId) return { ok: false, error: 'to_user_id' };
+    if (!window.fascDb || !window.fascAuth) return { ok: false, error: 'no client' };
+    try {
+      var session = await window.fascAuth.session();
+      if (!session || !session.access_token) return { ok: false, error: 'no session' };
+      var base = (window.FASC_CONFIG && window.FASC_CONFIG.supabaseUrl) || '';
+      if (!base) return { ok: false, error: 'no url' };
+      var url = base.replace(/\/$/, '') + '/functions/v1/send-push';
+      var res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + session.access_token,
+          apikey: (window.FASC_CONFIG && window.FASC_CONFIG.supabaseAnonKey) || ''
+        },
+        body: JSON.stringify({
+          to_user_id: toUserId,
+          title: opts.title || 'CRICRI',
+          body: opts.body || opts.message || '',
+          url: opts.url || opts.href || '/index.html',
+          tag: opts.tag || 'cricri'
+        })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) return { ok: false, error: data.error || res.status, data: data };
+      return { ok: true, data: data };
+    } catch (e) {
+      return { ok: false, error: (e && e.message) || 'fetch failed' };
+    }
+  }
+
+  async function sync() {
+    var sub = await currentSub();
+    if (sub) return saveSub(sub);
+    return false;
+  }
+
   // API pública
   window.CricriPush = {
     enable: enable,
     disable: disable,
     refresh: refreshUi,
     currentSub: currentSub,
-    vapidKey: vapidKey
+    vapidKey: vapidKey,
+    notifyUser: notifyUser,
+    sync: sync,
+    saveSub: saveSub
   };
 
   function boot() {

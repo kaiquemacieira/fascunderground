@@ -1,142 +1,125 @@
-// FASC+ · Edge Function — envio Web Push (API backend only)
-// Deploy: supabase functions deploy send-push
-// Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT
-//          FASC_PUSH_HOOK_SECRET (opcional mas recomendado)
-//          FASC_CORS_ORIGINS (csv, opcional)
-//
-// Auth obrigatória: Bearer service_role OU header x-fasc-hook-secret.
-// Nunca chame esta function do browser com a anon key.
+/**
+ * CRICRI · Edge Function send-push
+ *
+ * Secrets (Dashboard → Edge Functions → Secrets ou CLI):
+ *   VAPID_PUBLIC_KEY
+ *   VAPID_PRIVATE_KEY
+ *   VAPID_SUBJECT=mailto:voce@dominio.com
+ *   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (injetados pelo runtime)
+ *
+ * Body JSON (Authorization: Bearer <user access token>):
+ * {
+ *   "to_user_id": "uuid",   // obrigatório
+ *   "title": "CRICRI",
+ *   "body": "texto",
+ *   "url": "/profile.html",
+ *   "tag": "friend-request"
+ * }
+ */
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import webpush from 'npm:web-push@3.6.7';
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import webpush from "npm:web-push@3.6.7";
-import {
-  assertBackendAuth,
-  corsHeaders,
-  isUuid,
-  jsonResponse,
-  readJsonLimited,
-  safeNotifyText,
-  safeUrlPath,
-} from "../_shared/security.ts";
-
-interface PushBody {
-  user_id?: string;
-  user_ids?: string[];
-  title?: string;
-  body?: string;
-  url?: string;
-  tag?: string;
-  icon?: string;
-  data?: Record<string, unknown>;
-}
-
-const MAX_RECIPIENTS = 50;
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders(req) });
-  }
-
-  if (req.method !== "POST") {
-    return jsonResponse({ error: "method not allowed" }, 405, req);
-  }
-
-  const auth = assertBackendAuth(req);
-  if (!auth.ok) {
-    return jsonResponse({ error: auth.error }, auth.status, req);
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: cors });
   }
 
   try {
-    const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY") || "";
-    const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY") || "";
-    const vapidSubject =
-      Deno.env.get("VAPID_SUBJECT") || "mailto:security@localhost";
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY') || '';
+    const vapidPrivate = Deno.env.get('VAPID_PRIVATE_KEY') || '';
+    const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:cricri@localhost';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
-    if (!vapidPublic || !vapidPrivate || !supabaseUrl || !serviceKey) {
-      console.error("[send-push] missing env");
-      return jsonResponse({ error: "server misconfigured" }, 500, req);
+    if (!vapidPublic || !vapidPrivate) {
+      return json({ error: 'VAPID secrets missing' }, 500);
     }
+    if (!supabaseUrl || !serviceKey) {
+      return json({ error: 'Supabase env missing' }, 500);
+    }
+
+    const authHeader = req.headers.get('Authorization') || '';
+    if (!authHeader.startsWith('Bearer ')) {
+      return json({ error: 'Unauthorized' }, 401);
+    }
+
+    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') || serviceKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userData?.user) {
+      return json({ error: 'Invalid session' }, 401);
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const toUserId = String(body.to_user_id || body.user_id || '').trim();
+    if (!toUserId) {
+      return json({ error: 'to_user_id required' }, 400);
+    }
+
+    const title = String(body.title || 'CRICRI').slice(0, 80);
+    const message = String(body.body || body.message || 'Nova atividade na roda').slice(0, 180);
+    const url = String(body.url || body.href || '/index.html').slice(0, 300);
+    const tag = String(body.tag || 'cricri').slice(0, 64);
 
     webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
 
-    const parsed = await readJsonLimited<PushBody>(req, 32_768);
-    if (!parsed.ok) {
-      return jsonResponse({ error: parsed.error }, 400, req);
-    }
-    const payload = parsed.data;
+    const admin = createClient(supabaseUrl, serviceKey);
+    const { data: subs, error: subErr } = await admin
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth')
+      .eq('user_id', toUserId);
 
-    const ids = new Set<string>();
-    if (payload.user_id && isUuid(payload.user_id)) ids.add(payload.user_id);
-    if (Array.isArray(payload.user_ids)) {
-      for (const id of payload.user_ids) {
-        if (isUuid(id)) ids.add(id);
-        if (ids.size > MAX_RECIPIENTS) break;
-      }
+    if (subErr) {
+      return json({ error: subErr.message }, 500);
     }
-    if (!ids.size) {
-      return jsonResponse({ error: "user_id or user_ids required" }, 400, req);
-    }
-    if (ids.size > MAX_RECIPIENTS) {
-      return jsonResponse({ error: "too many recipients" }, 400, req);
+    if (!subs || !subs.length) {
+      return json({ ok: true, sent: 0, detail: 'no subscriptions' });
     }
 
-    const notification = {
-      title: safeNotifyText(payload.title, 80) || "FASC+",
-      body: safeNotifyText(payload.body, 180),
-      url: safeUrlPath(payload.url, "/profile.html"),
-      tag: safeNotifyText(payload.tag, 40) || "fasc",
-      icon: "/favicon.ico",
-    };
+    const payload = JSON.stringify({ title, body: message, url, tag });
+    let sent = 0;
+    const stale: string[] = [];
 
-    const admin = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-
-    const { data: rows, error } = await admin
-      .from("push_subscriptions")
-      .select("id, endpoint, p256dh, auth, user_id")
-      .in("user_id", [...ids]);
-
-    if (error) {
-      console.error("[send-push] db", error.message);
-      return jsonResponse({ error: "db error" }, 500, req);
-    }
-
-    const results: Array<{ user_id: string; ok: boolean; code?: number }> = [];
-
-    for (const row of rows || []) {
-      const subscription = {
-        endpoint: row.endpoint,
-        keys: { p256dh: row.p256dh, auth: row.auth },
-      };
+    for (const s of subs) {
       try {
-        const res = await webpush.sendNotification(
-          subscription,
-          JSON.stringify(notification),
-          { TTL: 60 * 60, urgency: "normal" },
+        await webpush.sendNotification(
+          {
+            endpoint: s.endpoint,
+            keys: { p256dh: s.p256dh, auth: s.auth },
+          },
+          payload,
+          { TTL: 60 * 60 }
         );
-        results.push({ user_id: row.user_id, ok: true, code: res.statusCode });
-      } catch (err: unknown) {
-        const e = err as { statusCode?: number };
-        if (e.statusCode === 404 || e.statusCode === 410) {
-          await admin.from("push_subscriptions").delete().eq("id", row.id);
+        sent++;
+      } catch (e: unknown) {
+        const status = (e as { statusCode?: number })?.statusCode;
+        if (status === 404 || status === 410) {
+          stale.push(s.endpoint);
         }
-        results.push({ user_id: row.user_id, ok: false, code: e.statusCode });
+        console.warn('[send-push] fail', status, (e as Error)?.message);
       }
     }
 
-    return jsonResponse(
-      {
-        sent: results.filter((r) => r.ok).length,
-        failed: results.filter((r) => !r.ok).length,
-      },
-      200,
-      req,
-    );
-  } catch (err) {
-    console.error("[send-push]", (err as Error).message || err);
-    return jsonResponse({ error: "internal error" }, 500, req);
+    if (stale.length) {
+      await admin.from('push_subscriptions').delete().in('endpoint', stale);
+    }
+
+    return json({ ok: true, sent, stale: stale.length, from: userData.user.id });
+  } catch (e) {
+    console.error(e);
+    return json({ error: (e as Error)?.message || 'server error' }, 500);
   }
 });
+
+function json(obj: unknown, status = 200) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
+}

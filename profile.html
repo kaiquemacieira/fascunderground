@@ -3038,8 +3038,8 @@ html[data-a11y-theme="light"] .bottom-nav a {
           <div class="hero-conn" id="connections-card">
             <p class="hero-conn-title">Conexões</p>
             <div class="conn-add-row">
-              <input class="input" id="conn-query" type="text" maxlength="80" placeholder="@nick ou UUID" autocomplete="off" aria-label="Nick ou ID para conectar">
-              <button type="button" class="btn btn-primary" id="btn-conn-add">Add</button>
+              <input class="input" id="conn-query" type="text" maxlength="80" placeholder="@nick ou UUID" autocomplete="off" aria-label="Nick ou ID para pedir amizade">
+              <button type="button" class="btn btn-primary" id="btn-conn-add">Pedir</button>
             </div>
             <p class="msg" id="conn-msg" role="status"></p>
             <ul class="conn-list" id="conn-list" aria-live="polite"></ul>
@@ -3153,16 +3153,12 @@ html[data-a11y-theme="light"] .bottom-nav a {
         <div id="inbox-share-row" class="inbox-share-row"></div>
       </section>
 
-      <section class="card" id="push-card" hidden>
-        <h2>Notificações</h2>
-        <p class="lead">Receba avisos de recados e novidades no navegador (mesmo com a aba fechada, se o SO permitir).</p>
-        <p class="hint" id="push-status">Verificando…</p>
-        <div class="actions">
-          <button type="button" class="btn btn-primary" id="btn-push-enable">Ativar notificações</button>
-          <button type="button" class="btn btn-ghost" id="btn-push-disable" hidden>Desativar</button>
-        </div>
-        <p class="msg" id="push-msg" role="status"></p>
-        <p class="hint">Precisa de HTTPS (ou localhost) e da chave pública VAPID em <code>window.FASC_VAPID_PUBLIC_KEY</code>. Veja <code>docs/PUSH.md</code>.</p>
+      <!-- Push UI movida pro sininho (#cricri-notif-bell). Hooks ocultos pro js/push.js -->
+      <section class="card" id="push-card" hidden aria-hidden="true" style="display:none!important">
+        <p class="hint" id="push-status" hidden>Verificando…</p>
+        <button type="button" id="btn-push-enable" hidden>Ativar</button>
+        <button type="button" id="btn-push-disable" hidden>Desativar</button>
+        <p class="msg" id="push-msg" hidden role="status"></p>
       </section>
 
     </div>
@@ -3220,7 +3216,7 @@ window.FASC_CONFIG = {
   supabaseUrl: 'https://bcnbwshwehofncfkdnra.supabase.co',
   supabaseAnonKey: 'sb_publishable_k0iCZgl6qweP16tW3uiGYA_HTJYO1iK',
   env: 'dev',
-  vapidPublicKey: '',
+  vapidPublicKey: 'BBvmr6tIC0YWjrN4C6jmEmcIhGB8ho5DfQI_tZ4wa1-sAayKfF8xUqlw-cZKIN19pS9PzyECL6rcNf521pRESBg',
   eventEndIso: '2026-11-23T12:00:00-03:00'
 };
 window.FASC_EVENT_END_MS = (function () {
@@ -3528,6 +3524,7 @@ window.fascEventEnded = function () {
     });
   }
 
+  window.__cricriReloadConnections = function () { return loadConnections(); };
   async function loadConnections() {
     if (!window.fascDb || !window.fascAuth) return;
     var user = await window.fascAuth.user();
@@ -3585,27 +3582,21 @@ window.fascEventEnded = function () {
           var profile = await resolveProfile(q);
           if (!profile || !profile.id) throw new Error('Perfil sem ID — tente de novo');
           if (profile.id === user.id) throw new Error('Você não pode adicionar a si mesmo');
-          var ins = await window.fascDb.from('connections').insert({
-            from_id: user.id,
-            to_id: profile.id
-          }).select('id').maybeSingle();
-          if (ins.error) {
-            if (/duplicate|unique/i.test(ins.error.message || '')) {
-              msg('conn-msg', 'Essa pessoa já está nas suas conexões.', true);
-            } else if (/relation.*connections|schema cache/i.test(ins.error.message || '')) {
-              throw new Error('Tabela connections ausente — rode STEP_E_connections.sql no Supabase');
-            } else {
-              throw ins.error;
-            }
-          } else {
-            msg('conn-msg', 'Conexão adicionada: @' + (profile.handle || profile.id.slice(0, 8)), true);
-            if (input) input.value = '';
+          if (!window.CricriFriends || !window.CricriFriends.requestFriend) {
+            throw new Error('Módulo de amizade indisponível — recarregue a página');
           }
+          await window.CricriFriends.requestFriend(profile.id);
+          msg('conn-msg', 'Pedido enviado pra @' + (profile.handle || profile.id.slice(0, 8)) + ' — espere aceitar no sininho', true);
+          if (input) input.value = '';
           await loadConnections();
-          if (window.CricriFriends && window.CricriFriends.invalidate) window.CricriFriends.invalidate();
-          
-          if (window.CricriConnectionNotifs && window.CricriConnectionNotifs.onIConnected) {
-            try { await window.CricriConnectionNotifs.onIConnected(profile); } catch (_) {}
+          if (window.CricriFriends.invalidate) window.CricriFriends.invalidate();
+          if (window.CricriNotifBell && window.CricriNotifBell.push) {
+            window.CricriNotifBell.push({
+              ico: '📨',
+              title: 'Pedido enviado',
+              body: 'Para @' + (profile.handle || 'usuário'),
+              kind: 'friend'
+            });
           }
           if (typeof window.__cricriLoadFriendsOnline === 'function') {
             window.__cricriLoadFriendsOnline();
@@ -5218,6 +5209,9 @@ window.fascEventEnded = function () {
   <script src="js/cri-svg.js"></script>
   <script src="js/guest-mode.js"></script>
   <script src="js/friends.js"></script>
+  <script src="js/notif-bell.js"></script>
+  <script src="js/install-app.js"></script>
+  <script src="js/sw-register.js"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/bottom-nav.js"></script>
   <script>

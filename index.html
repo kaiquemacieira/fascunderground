@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>CRICRI — São Cristóvão não tem mapa. Tem roda.</title>
@@ -1247,6 +1249,64 @@ html[data-a11y-theme="light"] .header-search input {
   max-width: 640px;
   margin: 0 auto;
   font-family: var(--font-ui);
+}
+
+
+/* mural audience + feed note */
+.mural-audience {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0.35rem;
+}
+.mural-aud-btn {
+  appearance: none;
+  border: 1.5px solid rgba(230, 220, 196, 0.22);
+  background: rgba(230, 220, 196, 0.06);
+  color: var(--paper, #ebe3cf);
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity .15s ease, border-color .15s ease, background .15s ease, color .15s ease;
+}
+.mural-aud-btn.is-on {
+  opacity: 1;
+  border-color: rgba(227, 61, 107, 0.55);
+  background: rgba(227, 61, 107, 0.14);
+  color: var(--rosa, #e33d6b);
+}
+.feed-wall-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--stone, #8c8376);
+}
+.post-avatar {
+  overflow: hidden;
+}
+.post-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+.post-avatar.is-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.post-aud-pill {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-left: 0.35rem;
 }
 
 .feed-tabs {
@@ -3642,6 +3702,10 @@ html[data-a11y-theme="light"] #header-search-btn {
         <div class="scrap-composer-footer">
           <span class="hint" id="mural-post-hint">Até 140 caracteres · scrap na roda</span>
           <span id="mural-post-count" aria-live="polite">0 / 140</span>
+          <div class="mural-audience" role="group" aria-label="Quem vê o scrap">
+            <button type="button" class="mural-aud-btn is-on" data-audience="public" id="mural-aud-public">Geral · público</button>
+            <button type="button" class="mural-aud-btn" data-audience="friends" id="mural-aud-friends">Amigos</button>
+          </div>
           <div class="scrap-composer-buttons">
             <button type="button" class="btn btn-primary" id="mural-post-btn">Publicar</button>
           </div>
@@ -3649,18 +3713,20 @@ html[data-a11y-theme="light"] #header-search-btn {
         <p class="mural-composer-msg" id="mural-post-msg" role="status" aria-live="polite"></p>
       </div>
       <div class="feed-tabs" role="tablist" aria-label="Filtro do mural">
-        <button type="button" class="feed-tab" data-feed-tab="agora" data-private="friends" role="tab" aria-selected="false">Agora <span class="tab-lock" aria-hidden="true">🔒</span></button>
-        <button type="button" class="feed-tab active" data-feed-tab="programacao" role="tab" aria-selected="true">Programação</button>
+        <button type="button" class="feed-tab active" data-feed-tab="geral" role="tab" aria-selected="true">Geral</button>
+        <button type="button" class="feed-tab" data-feed-tab="agora" role="tab" aria-selected="false">Amigos</button>
+        <button type="button" class="feed-tab" data-feed-tab="programacao" role="tab" aria-selected="false">Programação</button>
+      </div>
+      <div class="feed-wall" id="feed-wall-geral" data-feed-panel="geral" role="tabpanel">
+        <div id="feed-list-geral"></div>
+        <p class="feed-empty" id="feed-empty-geral" hidden>Nada no mural geral ainda. Seja o primeiro a scrapar a roda.</p>
       </div>
       <div class="feed-wall" id="feed-wall-agora" data-feed-panel="agora" role="tabpanel" hidden>
-        <div class="feed-wall-locked" id="feed-agora-locked">
-          <p><strong>Agora</strong> é privado — só amigos veem e postam aqui.</p>
-          <p><a href="login.html">Entre na conta</a> e conecte amigos pra desbloquear.</p>
-        </div>
-        <div id="feed-list-agora" hidden></div>
-        <p class="feed-empty" id="feed-empty-agora" hidden>Nada entre amigos ainda. Envie um scrap.</p>
+        <p class="feed-wall-note" id="feed-agora-note">Mural só com interações entre você e amigos — sem cadeado; se estiver vazio, conecte gente ou mande um scrap pra Amigos.</p>
+        <div id="feed-list-agora"></div>
+        <p class="feed-empty" id="feed-empty-agora" hidden>Nada entre amigos ainda. Publique com destino <strong>Amigos</strong> ou conecte a galera.</p>
       </div>
-      <div class="feed-wall" id="feed-wall-programacao" data-feed-panel="programacao" role="tabpanel">
+      <div class="feed-wall" id="feed-wall-programacao" data-feed-panel="programacao" role="tabpanel" hidden>
         <div id="feed-list-programacao"></div>
         <p class="feed-empty" id="feed-empty-programacao" hidden>Sem avisos de programação no momento.</p>
       </div>
@@ -3673,6 +3739,9 @@ html[data-a11y-theme="light"] #header-search-btn {
   <div id="bottom-nav-slot"></div>
   <script src="js/guest-mode.js"></script>
   <script src="js/friends.js"></script>
+  <script src="js/notif-bell.js"></script>
+  <script src="js/install-app.js"></script>
+  <script src="js/sw-register.js"></script>
   <script src="js/cricri-notifs.js"></script>
   <script src="js/connection-notifs.js"></script>
   <script src="js/push.js" defer></script>
@@ -3696,25 +3765,11 @@ html[data-a11y-theme="light"] #header-search-btn {
     var tab = e.target.closest('[data-feed-tab]');
     if (!tab) return;
     var id = tab.getAttribute('data-feed-tab');
-    if (id === 'agora') {
-      var locked = document.getElementById('feed-agora-locked');
-      var list = document.getElementById('feed-list-agora');
-      var guest = document.body.classList.contains('is-guest') ||
-        (window.CricriGuest && window.CricriGuest.isGuest && window.CricriGuest.isGuest());
-      if (guest) {
-        if (locked) {
-          locked.hidden = false;
-          locked.innerHTML = '<p><strong>Agora</strong> é privado — só amigos veem e postam aqui.</p><p><a href="login.html">Entre na conta</a> e conecte amigos pra desbloquear.</p>';
-        }
-        if (list) list.hidden = true;
-      } else if (typeof window.__cricriLoadFeed === 'function') {
-        window.__cricriLoadFeed();
-      }
-    }
     showPanel(id);
+    if (typeof window.__cricriLoadFeed === 'function') window.__cricriLoadFeed();
   });
-  // default público
-  showPanel('programacao');
+  // default: mural geral (público)
+  showPanel('geral');
 })();
 </script>
 
@@ -4118,6 +4173,24 @@ html[data-a11y-theme="light"] #header-search-btn {
     try { return await window.fascAuth.user(); } catch (_) { return null; }
   }
 
+  var audience = 'public';
+  function setAudience(a) {
+    audience = a === 'friends' ? 'friends' : 'public';
+    document.querySelectorAll('[data-audience]').forEach(function (b) {
+      b.classList.toggle('is-on', b.getAttribute('data-audience') === audience);
+    });
+    if (hint) {
+      hint.textContent = audience === 'friends'
+        ? 'Até 140 · só amigos veem no mural Amigos'
+        : 'Até 140 · todo mundo vê no mural Geral';
+    }
+  }
+  document.querySelectorAll('[data-audience]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      setAudience(b.getAttribute('data-audience'));
+    });
+  });
+
   btn.addEventListener('click', async function () {
     var body = (ta.value || '').trim().slice(0, 140);
     if (!body) { setMsg('Escreve algo pro scrap.', false); return; }
@@ -4125,7 +4198,7 @@ html[data-a11y-theme="light"] #header-search-btn {
     var user = await ensureSession();
     if (!user) {
       setMsg('Entra na conta pra enviar um scrap.', false);
-      window.location.href = 'profile.html';
+      window.location.href = 'login.html';
       return;
     }
     btn.disabled = true;
@@ -4134,7 +4207,7 @@ html[data-a11y-theme="light"] #header-search-btn {
       var ins = await window.fascDb.from('posts').insert({
         author_id: user.id,
         content: body,
-        audience: 'friends'
+        audience: audience
       }).select('id').single();
       if (ins.error) {
         // fallback se coluna audience ainda não existe
@@ -4148,8 +4221,13 @@ html[data-a11y-theme="light"] #header-search-btn {
       }
       ta.value = '';
       syncCount();
-      setMsg('Scrap enviado pra rede de amigos 🐾', true);
+      setMsg(audience === 'friends'
+        ? 'Scrap no mural de Amigos 🐾'
+        : 'Scrap no mural Geral — a roda toda vê ✨', true);
       if (typeof window.__cricriLoadFeed === 'function') window.__cricriLoadFeed();
+      // abre a aba correspondente
+      var tab = document.querySelector('[data-feed-tab="' + (audience === 'friends' ? 'agora' : 'geral') + '"]');
+      if (tab) tab.click();
     } catch (err) {
       var m = (err && err.message) || 'Falha ao postar';
       if (/author_id|schema|RLS|policy|row-level/i.test(m)) {
@@ -4164,7 +4242,7 @@ html[data-a11y-theme="light"] #header-search-btn {
   ensureSession().then(function (u) {
     if (hint) {
       hint.textContent = u
-        ? 'Até 140 caracteres · visível só pra amigos'
+        ? 'Até 140 · escolha Geral (público) ou Amigos'
         : 'Entra na conta pra enviar um scrap. Precisa de nick no perfil.';
     }
   });
@@ -4303,27 +4381,49 @@ html[data-a11y-theme="light"] #header-search-btn {
   function isOfficial(p) {
     return !!(p.is_official || p.source === 'fasc' || p.kind === 'programacao' || p.author_name === 'Programação FASC');
   }
+  function avatarHTML(p, official) {
+    if (official) {
+      return '<div class="post-avatar" style="background:var(--ochre)" aria-hidden="true">F</div>';
+    }
+    var photo = (p.photo_url || p.avatar || '').toString();
+    var name = (p.author_name || p.handle || '?').toString();
+    var initial = name.replace(/^@/, '').charAt(0).toUpperCase() || '?';
+    // emoji escolhido no perfil (photo_url = "emoji:🎨")
+    if (photo.indexOf('emoji:') === 0) {
+      var em = photo.slice(6) || '🎨';
+      return '<div class="post-avatar is-emoji" style="background:var(--rosa)" aria-hidden="true">' + esc(em) + '</div>';
+    }
+    // URL de foto
+    if (photo && /^https?:\/\//i.test(photo)) {
+      return (
+        '<div class="post-avatar" style="background:var(--rosa);padding:0" aria-hidden="true">' +
+          '<img src="' + esc(photo) + '" alt="" width="42" height="42" loading="lazy" decoding="async">' +
+        '</div>'
+      );
+    }
+    // fallback letra
+    return '<div class="post-avatar" style="background:var(--rosa)" aria-hidden="true">' + esc(initial) + '</div>';
+  }
   function cardHTML(p) {
     var official = isOfficial(p);
     var name = official ? 'Programação FASC' : (p.author_name || p.handle || 'alguém').toString();
     var handle = official ? '' : (p.handle || p.author_handle || '').toString().replace(/^@/, '');
-    var initial = official ? 'F' : name.charAt(0).toUpperCase();
     var text = p.content || p.body || p.text || '';
     var place = p.place || p.spot_name || '';
     var when = timeAgo(p.created_at);
     var nickLabel = handle ? '@' + handle : name;
+    var aud = p.audience || '';
     var badge = official
       ? '<span class="post-status progresso">Programação FASC</span>'
-      : '';
+      : (aud === 'friends' ? '<span class="post-aud-pill">amigos</span>' : '');
     var meowBtn = (!official && handle)
       ? '<a class="meow-chip" href="profile.html?u=' + encodeURIComponent(handle) + '" title="Mandar Meow anônimo pra @' + esc(handle) + '">' +
           '<span aria-hidden="true">🐾</span> Meow' +
         '</a>'
       : '';
-    var avStyle = official ? 'background:var(--ochre)' : 'background:var(--rosa)';
     return (
       '<article class="post-card' + (official ? ' post-card--official' : '') + '" data-post-id="' + esc(p.id) + '">' +
-        '<div class="post-avatar" style="' + avStyle + '">' + esc(initial) + '</div>' +
+        avatarHTML(p, official) +
         '<div class="post-body">' +
           '<div class="post-head">' +
             '<span class="post-name">' +
@@ -4350,124 +4450,122 @@ html[data-a11y-theme="light"] #header-search-btn {
       { id: 'fasc-prog-3', content: 'Noites de shows e artes · 19–22/11 · confira horários nos spots do mapa.', place: 'Centro histórico', created_at: new Date().toISOString(), is_official: true, author_name: 'Programação FASC' }
     ];
   }
-  function renderLists(friendPosts, progPosts) {
-    var list = document.getElementById('feed-list-agora');
-    var empty = document.getElementById('feed-empty-agora');
-    var locked = document.getElementById('feed-agora-locked');
-    var listProg = document.getElementById('feed-list-programacao');
-    var emptyProg = document.getElementById('feed-empty-programacao');
-    var prog = (progPosts && progPosts.length) ? progPosts : curatedProgram();
-    // Programação: só oficial/curadoria
-    if (listProg) {
-      if (!prog.length) { listProg.innerHTML = ''; if (emptyProg) emptyProg.hidden = false; }
-      else { if (emptyProg) emptyProg.hidden = true; listProg.innerHTML = prog.map(cardHTML).join(''); }
+  function fillList(listId, emptyId, rows) {
+    var list = document.getElementById(listId);
+    var empty = document.getElementById(emptyId);
+    if (!list) return;
+    rows = rows || [];
+    if (!rows.length) {
+      list.innerHTML = '';
+      if (empty) empty.hidden = false;
+    } else {
+      if (empty) empty.hidden = true;
+      list.innerHTML = rows.map(cardHTML).join('');
     }
-    // Agora: só amigos (nunca mistura programação pública)
-    if (list) {
-      var rows = friendPosts || [];
-      if (!rows.length) {
-        list.innerHTML = '';
-        if (empty) empty.hidden = false;
+  }
+  function renderLists(publicPosts, friendPosts, progPosts) {
+    fillList('feed-list-geral', 'feed-empty-geral', publicPosts);
+    fillList('feed-list-agora', 'feed-empty-agora', friendPosts);
+    var prog = (progPosts && progPosts.length) ? progPosts : curatedProgram();
+    fillList('feed-list-programacao', 'feed-empty-programacao', prog);
+    // nota amigos
+    var note = document.getElementById('feed-agora-note');
+    if (note) {
+      var guest = document.body.classList.contains('is-guest') ||
+        (window.CricriGuest && window.CricriGuest.isGuest && window.CricriGuest.isGuest());
+      if (guest) {
+        note.innerHTML = 'Mural de amigos: <a href="login.html">entre na conta</a> pra ver e postar interações só com a sua rede.';
       } else {
-        if (empty) empty.hidden = true;
-        list.innerHTML = rows.map(cardHTML).join('');
+        note.textContent = 'Mural só com interações entre você e amigos — sem cadeado; publique com destino Amigos ou conecte a galera.';
       }
     }
   }
+  function mapRow(r) {
+    var pr = r.profiles || {};
+    return {
+      id: r.id,
+      content: r.content,
+      created_at: r.created_at,
+      author_name: pr.name || pr.handle || 'alguém',
+      handle: pr.handle || '',
+      photo_url: pr.photo_url || '',
+      place: r.place_name || '',
+      is_official: false,
+      author_id: r.author_id,
+      audience: r.audience || 'public'
+    };
+  }
   async function loadFeed() {
-    var list = document.getElementById('feed-list-agora');
-    if (!list) return;
     var db = window.fascDb;
-    var locked = document.getElementById('feed-agora-locked');
-    // Programação sempre disponível (curadoria local + oficiais)
-    renderLists([], curatedProgram());
-
     if (!db) {
-      console.info('[CRICRI feed] sem Supabase — só programação');
+      renderLists([], [], curatedProgram());
       return;
     }
     try {
-      // 1) Quem pode ver no Agora
+      var me = null;
+      try {
+        if (window.fascAuth && window.fascAuth.user) me = await window.fascAuth.user();
+      } catch (_) {}
+
       var allowed = [];
-      if (window.CricriFriends && window.CricriFriends.visibleAuthorIds) {
-        allowed = await window.CricriFriends.visibleAuthorIds();
-      }
-      var me = window.CricriFriends && window.CricriFriends.currentUserId
-        ? await window.CricriFriends.currentUserId()
-        : null;
-
-      if (!me) {
-        // convidado: Agora trancado
-        if (locked) locked.hidden = false;
-        list.hidden = true;
-        return;
+      if (me && window.CricriFriends && typeof window.CricriFriends.visibleAuthorIds === 'function') {
+        try { allowed = await window.CricriFriends.visibleAuthorIds(); } catch (_) { allowed = []; }
+      } else if (me && window.CricriFriends && typeof window.CricriFriends.listMutualFriendIds === 'function') {
+        try {
+          allowed = await window.CricriFriends.listMutualFriendIds();
+          if (me.id) allowed = [me.id].concat(allowed || []);
+        } catch (_) { allowed = me ? [me.id] : []; }
+      } else if (me) {
+        allowed = [me.id];
       }
 
-      // logado: tenta feed friends
-      if (locked) {
-        if (!allowed || allowed.length <= 1) {
-          locked.hidden = false;
-          locked.innerHTML = '<p><strong>Agora</strong> · só amigos mútuos.</p><p>Adicione pessoas no Perfil e peça pra te adicionarem de volta.</p>';
-          list.hidden = true;
-        } else {
-          locked.hidden = true;
-          list.hidden = false;
-        }
-      }
-
-      var q = db.from('posts')
-        .select('id, content, place_name, status, created_at, author_id, audience, profiles:author_id(name, handle)')
+      var selectCols = 'id, content, place_name, status, created_at, author_id, audience, profiles:author_id(name, handle, photo_url)';
+      var res = await db.from('posts')
+        .select(selectCols)
         .order('created_at', { ascending: false })
-        .limit(60);
+        .limit(80);
 
-      // prefer audience=friends when column exists
-      var res = await q;
-      if (res.error && /audience|column/i.test(res.error.message || '')) {
-        // coluna ainda não migrada — filtra no client
+      if (res.error && /audience|column|schema/i.test(res.error.message || '')) {
         res = await db.from('posts')
-          .select('id, content, place_name, status, created_at, author_id, profiles:author_id(name, handle)')
+          .select('id, content, place_name, status, created_at, author_id, profiles:author_id(name, handle, photo_url)')
           .order('created_at', { ascending: false })
-          .limit(60);
+          .limit(80);
+      }
+      if (res.error && /photo_url/i.test(res.error.message || '')) {
+        res = await db.from('posts')
+          .select('id, content, place_name, status, created_at, author_id, audience, profiles:author_id(name, handle)')
+          .order('created_at', { ascending: false })
+          .limit(80);
       }
       if (res.error) throw res.error;
 
       var allowSet = {};
       (allowed || []).forEach(function (id) { allowSet[id] = 1; });
 
-      var friendRows = (res.data || []).filter(function (r) {
-        // só audience friends (ou legado sem campo = trata como não entra no Agora público)
+      var publicRows = [];
+      var friendRows = [];
+      (res.data || []).forEach(function (r) {
+        if (r.status === 'programacao') return;
         var aud = r.audience || 'public';
-        if (aud === 'public' && r.status === 'programacao') return false;
-        if (aud === 'public') return false; // públicos não vão pro Agora privado
-        if (!allowSet[r.author_id]) return false;
-        return true;
-      }).map(function (r) {
-        var pr = r.profiles || {};
-        return {
-          id: r.id,
-          content: r.content,
-          created_at: r.created_at,
-          author_name: pr.handle || pr.name || 'amigo',
-          handle: pr.handle || '',
-          place: r.place_name || '',
-          is_official: false,
-          author_id: r.author_id
-        };
+        var row = mapRow(r);
+        // Geral: posts públicos (e legados sem audience)
+        if (aud === 'public' || !r.audience) {
+          publicRows.push(row);
+        }
+        // Amigos: audience friends + autor é eu ou amigo
+        if (aud === 'friends') {
+          if (!me) return;
+          if (allowSet[r.author_id]) friendRows.push(row);
+        }
       });
 
-      // se não há amigos ainda, mostra locked; senão lista
-      if (friendRows.length) {
-        if (locked) locked.hidden = true;
-        list.hidden = false;
-        var emptyEl = document.getElementById('feed-empty-agora'); if (emptyEl) emptyEl.hidden = true;
-      }
-      renderLists(friendRows, curatedProgram());
+      renderLists(publicRows, friendRows, curatedProgram());
     } catch (e) {
       console.warn('[CRICRI feed] API:', e.message || e);
-      renderLists([], curatedProgram());
+      renderLists([], [], curatedProgram());
     }
   }
-  function wireFeedTabs() {
+    function wireFeedTabs() {
     var tabs = document.querySelectorAll('[data-feed-tab]');
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
