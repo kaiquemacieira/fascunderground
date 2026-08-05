@@ -52,7 +52,10 @@ console.log('Mock carregado');
         `<span class="popup-cat spot">Spot</span><br>` +
         `<strong>${spot.name}</strong><br>` +
         `<span style="opacity:0.85">${spot.status}</span><br>` +
-        `<span class="popup-meta">São Cristóvão · SE · zona ${spot.radius} m</span>`
+        `<span class="popup-meta">São Cristóvão · SE · zona ${spot.radius} m</span>` +
+        (window.CricriRatings && window.CricriRatings.popupBlock
+          ? window.CricriRatings.popupBlock('spot', spot.id || spot.name)
+          : '')
       );
 
     const fence = L.circle([spot.lat, spot.lng], {
@@ -165,7 +168,10 @@ console.log('Mock carregado');
         '<span class="popup-cat ' + catClass + '">' + catLabel + '</span><br>' +
         '<strong>' + p.name + '</strong><br>' +
         '<span style="opacity:0.88">' + p.desc + '</span><br>' +
-        '<span class="popup-meta">' + p.extra + ' · São Cristóvão, SE</span>'
+        '<span class="popup-meta">' + p.extra + ' · São Cristóvão, SE</span>' +
+        (window.CricriRatings && window.CricriRatings.popupBlock
+          ? window.CricriRatings.popupBlock('poi', p.id || p.name)
+          : '')
       );
     layerGroups[p.layer].addLayer(marker);
     poiMarkers.push({ marker: marker, data: p });
@@ -209,7 +215,10 @@ console.log('Mock carregado');
           '<span style="opacity:0.88">' + (ev.category || '') +
             (ev.place ? ' · ' + ev.place : '') + '</span><br>' +
           '<span class="popup-meta">' + (when || 'horário a confirmar') +
-            ' · ' + (ev.status || 'programado') + ' · SC/SE</span>'
+            ' · ' + (ev.status || 'programado') + ' · SC/SE</span>' +
+          (window.CricriRatings && window.CricriRatings.popupBlock
+            ? window.CricriRatings.popupBlock('event', ev.id || ev.title)
+            : '')
         );
       layerGroups.eventos.addLayer(marker);
       eventMarkers.push({ marker: marker, data: ev });
@@ -872,7 +881,10 @@ console.log('Mock carregado');
           '<span class="popup-cat spot">Spot</span><br>' +
           '<strong>' + Lyr.spot.name + '</strong><br>' +
           '<span style="opacity:0.85">' + Lyr.spot.status + '</span><br>' +
-          '<span class="popup-meta">' + formatDist(dist) + ' · zona ' + Lyr.spot.radius + ' m · SC/SE</span>'
+          '<span class="popup-meta">' + formatDist(dist) + ' · zona ' + Lyr.spot.radius + ' m · SC/SE</span>' +
+          (window.CricriRatings && window.CricriRatings.popupBlock
+            ? window.CricriRatings.popupBlock('spot', Lyr.spot.id || Lyr.spot.name)
+            : '')
         );
       } else {
         if (layerGroups.spots.hasLayer(Lyr.marker)) layerGroups.spots.removeLayer(Lyr.marker);
@@ -899,7 +911,10 @@ console.log('Mock carregado');
           '<strong>' + p.name + '</strong><br>' +
           '<span style="opacity:0.88">' + (p.desc || '') + '</span><br>' +
           '<span class="popup-meta">' + formatDist(dist) + ' · ' + linesStr + (p.extra || '') + ' · SC/SE' +
-            (sched ? '<br>Próximas: ' + sched : '') + '</span>'
+            (sched ? '<br>Próximas: ' + sched : '') + '</span>' +
+          (window.CricriRatings && window.CricriRatings.popupBlock
+            ? window.CricriRatings.popupBlock('poi', p.id || p.name)
+            : '')
         );
       } else {
         if (layerGroups[p.layer].hasLayer(item.marker)) layerGroups[p.layer].removeLayer(item.marker);
@@ -921,7 +936,10 @@ console.log('Mock carregado');
             '<span style="opacity:0.88">' + (p.category || '') +
               (p.place ? ' · ' + p.place : '') + '</span><br>' +
             '<span class="popup-meta">' + formatDist(dist) + ' · ' + (when || 'horário a confirmar') +
-              ' · ' + (p.status || 'programado') + ' · SC/SE</span>'
+              ' · ' + (p.status || 'programado') + ' · SC/SE</span>' +
+            (window.CricriRatings && window.CricriRatings.popupBlock
+              ? window.CricriRatings.popupBlock('event', p.id || p.title)
+              : '')
           );
         } else {
           if (layerGroups.eventos.hasLayer(item.marker)) layerGroups.eventos.removeLayer(item.marker);
@@ -2188,6 +2206,53 @@ console.log('Mock carregado');
       }).addTo(map).bindPopup('<strong>Última posição</strong><br><span style="opacity:.8">cache do aparelho</span>');
     } catch (_) {}
   }
+
+  
+  // ---- filtro por nota (CricriRatings) ----
+  var ratingMinFilter = 0;
+  async function applyRatingFilter() {
+    if (!window.CricriRatings || !window.CricriRatings.summary) return;
+    ratingMinFilter = window.CricriRatings.getMinFilter ? window.CricriRatings.getMinFilter() : 0;
+    // spots
+    Object.keys(spotLayers).forEach(async function (id) {
+      var Lyr = spotLayers[id];
+      if (!Lyr || !Lyr.marker) return;
+      if (!ratingMinFilter) {
+        if (layerOn.spots && layerGroups.spots && !layerGroups.spots.hasLayer(Lyr.marker)) {
+          layerGroups.spots.addLayer(Lyr.marker);
+        }
+        return;
+      }
+      var ok = await window.CricriRatings.passesFilter('spot', Lyr.spot.id || Lyr.spot.name);
+      if (ok) {
+        if (layerOn.spots && !layerGroups.spots.hasLayer(Lyr.marker)) layerGroups.spots.addLayer(Lyr.marker);
+      } else {
+        if (layerGroups.spots.hasLayer(Lyr.marker)) layerGroups.spots.removeLayer(Lyr.marker);
+      }
+    });
+    poiMarkers.forEach(async function (item) {
+      var p = item.data;
+      if (!ratingMinFilter) return;
+      var ok = await window.CricriRatings.passesFilter('poi', p.id || p.name);
+      if (!ok && layerGroups[p.layer] && layerGroups[p.layer].hasLayer(item.marker)) {
+        layerGroups[p.layer].removeLayer(item.marker);
+      }
+    });
+    if (typeof eventMarkers !== 'undefined') {
+      eventMarkers.forEach(async function (item) {
+        if (!ratingMinFilter) return;
+        var p = item.data;
+        var ok = await window.CricriRatings.passesFilter('event', p.id || p.title);
+        if (!ok && layerGroups.eventos && layerGroups.eventos.hasLayer(item.marker)) {
+          layerGroups.eventos.removeLayer(item.marker);
+        }
+      });
+    }
+  }
+  window.addEventListener('cricri:rating-filter', function () {
+    applyRatingFilter();
+    if (typeof applyProximityFilter === 'function') applyProximityFilter();
+  });
 
   window.projanoMap = {
     map: map,
