@@ -184,6 +184,8 @@
       color: var(--text, #e8dfd0);
       line-height: 1.45;
       min-height: 100dvh;
+      /* espaço para bottom-nav fixo (menu estilo rede social) */
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
     /* estado inicial: deslogado até o JS decidir */
     body:not([data-auth]) #profile-wrap { display: none !important; }
@@ -2838,6 +2840,89 @@ html[data-theme="light"] .meow-public-btn {
   margin-left: auto;
 }
 
+
+/* ===== Bottom nav fixo (perfil) — menu estilo rede social ===== */
+#bottom-nav-slot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+#bottom-nav-slot .bottom-nav {
+  pointer-events: auto;
+}
+.bottom-nav {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #0c0a09;
+  border-top: 2px solid rgba(230, 220, 196, 0.12);
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 0 !important;
+  align-items: stretch;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+}
+.bottom-nav a {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.45rem 0.15rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ebe3cf;
+  opacity: 0.55;
+  text-decoration: none;
+  font-family: Oswald, system-ui, sans-serif;
+  font-weight: 600;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-nav a svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  stroke: currentColor;
+}
+.bottom-nav a:hover { opacity: 0.9; }
+.bottom-nav a:focus-visible {
+  opacity: 1;
+  outline: 2px solid #d49a2c;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.bottom-nav a.active {
+  opacity: 1;
+  color: #e33d6b;
+  background: rgba(227, 61, 107, 0.12);
+}
+.bottom-nav a.active svg { stroke-width: 2.1; }
+html[data-theme="light"] .bottom-nav,
+html[data-a11y-theme="light"] .bottom-nav {
+  background: #f3ecdc;
+  border-top-color: rgba(28, 21, 17, 0.12);
+}
+html[data-theme="light"] .bottom-nav a,
+html[data-a11y-theme="light"] .bottom-nav a {
+  color: #17120e;
+}
+/* evita conteúdo colado no menu */
+.page, main#conteudo-principal {
+  padding-bottom: 0.5rem;
+}
+.site-footer, #site-footer-slot, .cricri-footer {
+  margin-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
 </style>
 
 </head>
@@ -3135,7 +3220,20 @@ window.FASC_CONFIG = {
   supabaseUrl: 'https://bcnbwshwehofncfkdnra.supabase.co',
   supabaseAnonKey: 'sb_publishable_k0iCZgl6qweP16tW3uiGYA_HTJYO1iK',
   env: 'dev',
-  vapidPublicKey: ''
+  vapidPublicKey: '',
+  eventEndIso: '2026-11-23T12:00:00-03:00'
+};
+window.FASC_EVENT_END_MS = (function () {
+  try {
+    var iso = (window.FASC_CONFIG && window.FASC_CONFIG.eventEndIso) || '2026-11-23T12:00:00-03:00';
+    var t = new Date(iso).getTime();
+    return isFinite(t) ? t : new Date('2026-11-23T12:00:00-03:00').getTime();
+  } catch (_) {
+    return new Date('2026-11-23T12:00:00-03:00').getTime();
+  }
+})();
+window.fascEventEnded = function () {
+  return Date.now() >= (window.FASC_EVENT_END_MS || 0);
 };
 
   </script>
@@ -3938,6 +4036,7 @@ window.FASC_CONFIG = {
       }
       showLoggedIn(user);
       await loadProfile(user.id);
+      window.__cricriReloadInbox = loadInbox;
       loadInbox();
       loadKindnessWall();
       updateShareHint();
@@ -5092,6 +5191,7 @@ window.FASC_CONFIG = {
 
   window.__cricriPresenceBeat = loop;
   window.__cricriLoadFriendsOnline = loadFriendsOnline;
+  window.__cricriReloadInbox = typeof loadInbox === 'function' ? loadInbox : null;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
@@ -5118,6 +5218,7 @@ window.FASC_CONFIG = {
   <script src="js/cri-svg.js"></script>
   <script src="js/guest-mode.js"></script>
   <script src="js/friends.js"></script>
+  <script src="js/realtime-sync.js"></script>
   <script src="js/bottom-nav.js"></script>
   <script>
   (function () {
