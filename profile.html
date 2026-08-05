@@ -3585,19 +3585,31 @@ window.fascEventEnded = function () {
           if (!window.CricriFriends || !window.CricriFriends.requestFriend) {
             throw new Error('Módulo de amizade indisponível — recarregue a página');
           }
-          await window.CricriFriends.requestFriend(profile.id);
-          msg('conn-msg', 'Pedido enviado pra @' + (profile.handle || profile.id.slice(0, 8)) + ' — espere aceitar no sininho', true);
+          var result = await window.CricriFriends.requestFriend(profile.id);
+          if (result && result.mutual) {
+            msg('conn-msg', 'Amizade confirmada com @' + (profile.handle || profile.id.slice(0, 8)) + ' — os dois veem online', true);
+            if (window.CricriNotifBell && window.CricriNotifBell.push) {
+              window.CricriNotifBell.push({
+                ico: '🤝',
+                title: 'Amizade confirmada',
+                body: '@' + (profile.handle || 'usuário') + ' — os dois veem online',
+                kind: 'friend'
+              });
+            }
+          } else {
+            msg('conn-msg', 'Pedido enviado pra @' + (profile.handle || profile.id.slice(0, 8)) + ' — espere aceitar no sininho', true);
+            if (window.CricriNotifBell && window.CricriNotifBell.push) {
+              window.CricriNotifBell.push({
+                ico: '📨',
+                title: 'Pedido enviado',
+                body: 'Para @' + (profile.handle || 'usuário'),
+                kind: 'friend'
+              });
+            }
+          }
           if (input) input.value = '';
           await loadConnections();
           if (window.CricriFriends.invalidate) window.CricriFriends.invalidate();
-          if (window.CricriNotifBell && window.CricriNotifBell.push) {
-            window.CricriNotifBell.push({
-              ico: '📨',
-              title: 'Pedido enviado',
-              body: 'Para @' + (profile.handle || 'usuário'),
-              kind: 'friend'
-            });
-          }
           if (typeof window.__cricriLoadFriendsOnline === 'function') {
             window.__cricriLoadFriendsOnline();
           }
@@ -5099,18 +5111,33 @@ window.fascEventEnded = function () {
     if (card) card.hidden = false;
 
     try {
-      var res = await window.fascDb
-        .from('connections')
-        .select('to_id')
-        .eq('from_id', id);
-      if (res.error) throw res.error;
-
-      var ids = (res.data || []).map(function (r) { return r.to_id; }).filter(Boolean);
+      // Amigos mútuos (A↔B) — os dois lados veem a mesma lista
+      var ids = [];
+      if (window.CricriFriends && window.CricriFriends.listMutualFriendIds) {
+        ids = await window.CricriFriends.listMutualFriendIds(true);
+      } else {
+        var res = await window.fascDb
+          .from('connections')
+          .select('to_id')
+          .eq('from_id', id);
+        if (res.error) throw res.error;
+        var iFollow = (res.data || []).map(function (r) { return r.to_id; }).filter(Boolean);
+        if (iFollow.length) {
+          var back = await window.fascDb
+            .from('connections')
+            .select('from_id')
+            .eq('to_id', id)
+            .in('from_id', iFollow);
+          if (!back.error) {
+            ids = (back.data || []).map(function (r) { return r.from_id; }).filter(Boolean);
+          }
+        }
+      }
       if (!ids.length) {
         list.innerHTML = '';
         if (empty) {
           empty.hidden = false;
-          empty.textContent = 'Adiciona conexões para ver quem está na roda.';
+          empty.textContent = 'Amizade mútua: peça e a outra pessoa aceita no sininho — aí os dois veem online.';
         }
         if (meta) meta.textContent = '0 online';
         return;

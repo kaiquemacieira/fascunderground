@@ -211,6 +211,42 @@
     // já somos amigos?
     if (await isMutualFriend(toId)) throw new Error('Vocês já são amigos');
 
+    // Se a outra pessoa já me adicionou (legado/one-way), completa a amizade mútua na hora
+    var theyFollow = await client
+      .from('connections')
+      .select('id,status')
+      .eq('from_id', toId)
+      .eq('to_id', me)
+      .maybeSingle();
+    if (theyFollow.data && theyFollow.data.id) {
+      if (withStatus) {
+        await client.from('connections').update({ status: 'accepted' }).eq('id', theyFollow.data.id);
+        var payloadAcc = { from_id: me, to_id: toId, status: 'accepted' };
+        var insAcc = await client.from('connections').upsert(payloadAcc, { onConflict: 'from_id,to_id' });
+        if (insAcc.error) {
+          await client.from('connections').insert(payloadAcc);
+        }
+      } else {
+        var insLeg = await client.from('connections').insert({ from_id: me, to_id: toId });
+        if (insLeg.error && !/duplicate|unique/i.test(insLeg.error.message || '')) throw insLeg.error;
+      }
+      invalidate();
+      try {
+        window.dispatchEvent(new CustomEvent('cricri:friend-accepted', { detail: { friendId: toId } }));
+      } catch (_) {}
+      if (window.CricriPush && window.CricriPush.notifyUser) {
+        try {
+          window.CricriPush.notifyUser(toId, {
+            title: 'Amizade confirmada',
+            body: 'Vocês estão conectados na roda CRICRI',
+            url: '/profile.html',
+            tag: 'friend-accepted'
+          });
+        } catch (_) {}
+      }
+      return { id: theyFollow.data.id, mutual: true };
+    }
+
     var payload = withStatus
       ? { from_id: me, to_id: toId, status: 'pending' }
       : { from_id: me, to_id: toId };
