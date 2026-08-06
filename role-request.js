@@ -1,24 +1,32 @@
 /**
  * CRICRI · Marcar Rolê/After
- * Fluxo: botão → modo seleção → clique/toque no mapa → formulário
+ * 1) Entra em modo de clique no mapa (sem abrir form)
+ * 2) Só abre o formulário depois do clique no ponto
  *
- * v4: overlay FIXED cobrindo o retângulo do mapa (ignora markers/z-index),
- * desliga pointer-events dos markers, botão "usar centro" de fallback.
+ * v3: overlay de captura garante clique/toque mesmo sobre markers/controles
  */
 (function () {
   'use strict';
-  if (window.CricriRoleRequest && window.CricriRoleRequest.__v4) return;
+  if (window.CricriRoleRequest && window.CricriRoleRequest.__v3) return;
 
   var ADMIN_EMAIL =
     (window.FASC_CONFIG && window.FASC_CONFIG.adminEmail) || 'kaaiqq@gmail.com';
 
   var pickMode = false;
   var pickMarker = null;
+  var pickLatLng = null;
+  var mapClickHandler = null;
+  var mapDomClickHandler = null;
   var pickOverlay = null;
-  var pickBanner = null;
   var attachWaitTimer = null;
-  var overlayRaf = null;
-  var savedMarkerPE = [];
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
 
   function injectCss() {
     if (document.getElementById('cricri-role-css')) return;
@@ -44,7 +52,7 @@
       '#cricri-role-sheet h2{margin:0 0 .35rem;font:700 1.05rem/1.2 Oswald,system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase}',
       '#cricri-role-sheet .rs-sub{margin:0 0 .85rem;font-size:.8rem;line-height:1.4;color:#a89f90}',
       '#cricri-role-sheet label{display:block;font:600 .68rem/1 Oswald,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#e33d6b;margin:.55rem 0 .3rem}',
-      '#cricri-role-sheet input,#cricri-role-sheet textarea{',
+      '#cricri-role-sheet input,#cricri-role-sheet textarea,#cricri-role-sheet select{',
       'width:100%;box-sizing:border-box;border-radius:10px;border:1.5px solid rgba(230,220,196,.16);',
       'background:rgba(0,0,0,.28);color:#ebe3cf;padding:.6rem .7rem;font:500 .88rem/1.35 Inter,system-ui,sans-serif}',
       '#cricri-role-sheet .rs-type{display:flex;gap:.4rem;margin:.35rem 0 .5rem}',
@@ -60,24 +68,28 @@
       '#cricri-role-sheet .rs-msg{margin:.55rem 0 0;font-size:.78rem;min-height:1.2em;color:#8c8376}',
       '#cricri-role-sheet .rs-msg.ok{color:#7ecf9a}',
       '#cricri-role-sheet .rs-msg.err{color:#f5a3b8}',
+      /* pick mode: form NÃO aparece; mapa livre pra clicar */
       'body.role-pick-mode #cricri-role-sheet{display:none!important;pointer-events:none!important}',
-      'body.role-pick-mode nav.bottom-nav,body.role-pick-mode nav.bottom-nav[data-cricri-nav="1"],',
-      'body.role-pick-mode #cricri-bottom-nav-fixed{pointer-events:none!important;opacity:.3!important}',
-      'body.role-pick-mode #cricri-install-btn,body.role-pick-mode .a11y-panel{pointer-events:none!important;opacity:.25!important}',
-      '#role-pick-hit{position:fixed;z-index:100080;cursor:crosshair;touch-action:none;',
-      'background:rgba(227,61,107,.08);box-shadow:inset 0 0 0 3px rgba(227,61,107,.85);',
-      '-webkit-tap-highlight-color:transparent;border-radius:4px}',
-      '#role-pick-hit .rph-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);',
-      'pointer-events:none;background:rgba(20,16,12,.88);color:#fff;padding:.55rem .9rem;border-radius:999px;',
-      'font:700 .72rem/1.2 Oswald,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;',
-      'white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.45)}',
+      'body.role-pick-mode #map,body.role-pick-mode .leaflet-container{',
+      'cursor:crosshair!important;z-index:5600!important;position:relative!important}',
+      'body.role-pick-mode .leaflet-container,body.role-pick-mode .leaflet-pane,',
+      'body.role-pick-mode .leaflet-map-pane,body.role-pick-mode .leaflet-overlay-pane,',
+      'body.role-pick-mode .leaflet-marker-pane,body.role-pick-mode .leaflet-shadow-pane,',
+      'body.role-pick-mode .leaflet-tooltip-pane,body.role-pick-mode .leaflet-popup-pane{',
+      'pointer-events:auto!important}',
+      'body.role-pick-mode #cricri-install-btn,body.role-pick-mode #cricri-create-sheet,',
+      'body.role-pick-mode .a11y-panel{pointer-events:none!important}',
+      'body.role-pick-mode nav.bottom-nav,body.role-pick-mode nav.bottom-nav[data-cricri-nav="1"]{',
+      'pointer-events:none!important;opacity:.35!important}',
+      /* overlay transparente por cima de markers — captura clique/toque */
+      '.role-pick-overlay{position:absolute;inset:0;z-index:650;cursor:crosshair;',
+      'background:transparent;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
       '.role-pick-banner{position:fixed;top:max(.75rem,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:100110;',
-      'background:rgba(227,61,107,.97);color:#fff;padding:.55rem .9rem;border-radius:999px;font:700 .72rem/1.25 Oswald,system-ui,sans-serif;',
-      'letter-spacing:.05em;text-transform:uppercase;box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:94vw;text-align:center;',
-      'display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;justify-content:center}',
-      '.role-pick-banner button{appearance:none;border:1.5px solid rgba(255,255,255,.55);background:transparent;color:#fff;',
-      'border-radius:999px;padding:.3rem .55rem;font:700 .68rem/1 Oswald,system-ui,sans-serif;cursor:pointer}',
-      '.role-pick-banner .rpb-center{border-color:rgba(255,255,255,.9);background:rgba(255,255,255,.15)}'
+      'background:rgba(227,61,107,.96);color:#fff;padding:.6rem 1.1rem;border-radius:999px;font:700 .75rem/1.25 Oswald,system-ui,sans-serif;',
+      'letter-spacing:.06em;text-transform:uppercase;box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:92vw;text-align:center;',
+      'pointer-events:auto}',
+      '.role-pick-banner button{appearance:none;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:#fff;',
+      'border-radius:999px;padding:.25rem .55rem;margin-left:.45rem;font:700 .68rem/1 Oswald,system-ui,sans-serif;cursor:pointer}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -85,12 +97,14 @@
   function getMap() {
     if (window.projanoMap && window.projanoMap.map) return window.projanoMap.map;
     if (window._cricriLeafletMap) return window._cricriLeafletMap;
+    var el = document.getElementById('map');
+    if (el && el._leaflet_id && window.L && L.Map) {
+      try {
+        if (el._leaflet) return el._leaflet;
+      } catch (_) {}
+    }
     if (window.projanoMapLayers && window.projanoMapLayers.map) return window.projanoMapLayers.map;
     return null;
-  }
-
-  function getMapEl() {
-    return document.getElementById('map') || document.querySelector('.leaflet-container');
   }
 
   function closeAnyForm() {
@@ -103,237 +117,202 @@
 
   function updateCtaCopy() {
     var btn = document.getElementById('btn-marcar');
+    var hint = document.querySelector('.map-role-hint');
+    var cta = document.getElementById('map-role-cta');
     if (btn) {
       btn.textContent = 'Marcar Rolê/After';
       btn.classList.add('btn-role');
     }
-  }
-
-  function disableMarkersPE(on) {
-    var map = getMap();
-    if (!map) return;
-    if (on) {
-      savedMarkerPE = [];
-      try {
-        map.eachLayer(function (layer) {
-          var el = null;
-          try {
-            if (layer._icon) el = layer._icon;
-            else if (typeof layer.getElement === 'function') el = layer.getElement();
-          } catch (_) {}
-          if (el && el.style) {
-            savedMarkerPE.push({ el: el, pe: el.style.pointerEvents });
-            el.style.pointerEvents = 'none';
-          }
-        });
-      } catch (_) {}
-      try {
-        ['markerPane', 'shadowPane', 'popupPane', 'tooltipPane'].forEach(function (name) {
-          var pane = map.getPane && map.getPane(name);
-          if (pane) {
-            savedMarkerPE.push({ el: pane, pe: pane.style.pointerEvents });
-            pane.style.pointerEvents = 'none';
-          }
-        });
-      } catch (_) {}
-    } else {
-      savedMarkerPE.forEach(function (item) {
-        try { item.el.style.pointerEvents = item.pe || ''; } catch (_) {}
-      });
-      savedMarkerPE = [];
+    if (cta && !document.getElementById('map-role-desc')) {
+      var desc = document.createElement('p');
+      desc.id = 'map-role-desc';
+      desc.className = 'map-role-desc';
+      desc.innerHTML =
+        'Aqui você deixa o público ciente de que seu <strong>rolê está garantido no mapa</strong>. ' +
+        'Toque no botão, <strong>clique no mapa</strong> no ponto do rolê e envie a solicitação. ' +
+        'Peça o quanto antes — o admin precisa <strong>aceitar</strong> antes de aparecer pra geral.';
+      if (hint && hint.parentNode) hint.parentNode.insertBefore(desc, hint);
+      else if (cta) cta.appendChild(desc);
+    }
+    if (hint) {
+      hint.textContent = 'Solicitação vai pro admin por e-mail. Só entra no mapa depois do aceite.';
     }
   }
 
-  function positionOverlay() {
-    if (!pickOverlay) return;
-    var el = getMapEl();
+  function setPickBanner(on) {
+    var el = document.getElementById('role-pick-banner');
+    if (!on) {
+      if (el) el.remove();
+      document.body.classList.remove('role-pick-mode');
+      return;
+    }
+    document.body.classList.add('role-pick-mode');
     if (!el) {
-      pickOverlay.style.display = 'none';
-      return;
+      el = document.createElement('div');
+      el.id = 'role-pick-banner';
+      el.className = 'role-pick-banner';
+      el.innerHTML =
+        'Toque no mapa onde é o rolê' +
+        ' <button type="button" id="role-pick-cancel">Cancelar</button>';
+      document.body.appendChild(el);
+      document.getElementById('role-pick-cancel').addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        stopPickMode(true);
+      });
     }
-    var r = el.getBoundingClientRect();
-    if (r.width < 20 || r.height < 20) {
-      pickOverlay.style.display = 'none';
-      return;
-    }
-    pickOverlay.style.display = 'block';
-    pickOverlay.style.left = r.left + 'px';
-    pickOverlay.style.top = r.top + 'px';
-    pickOverlay.style.width = r.width + 'px';
-    pickOverlay.style.height = r.height + 'px';
   }
 
-  function startOverlayLoop() {
-    stopOverlayLoop();
-    function tick() {
-      positionOverlay();
-      overlayRaf = requestAnimationFrame(tick);
-    }
-    overlayRaf = requestAnimationFrame(tick);
-    window.addEventListener('scroll', positionOverlay, true);
-    window.addEventListener('resize', positionOverlay);
-  }
-
-  function stopOverlayLoop() {
-    if (overlayRaf) {
-      cancelAnimationFrame(overlayRaf);
-      overlayRaf = null;
-    }
-    window.removeEventListener('scroll', positionOverlay, true);
-    window.removeEventListener('resize', positionOverlay);
-  }
-
-  function latLngFromClient(clientX, clientY) {
+  function latLngFromEvent(e) {
+    if (!e) return null;
+    if (e.latlng && e.latlng.lat != null) return e.latlng;
+    if (e.lat != null && e.lng != null) return { lat: e.lat, lng: e.lng };
     var map = getMap();
-    if (!map || typeof map.containerPointToLatLng !== 'function') return null;
-    try {
-      var el = map.getContainer();
-      var r = el.getBoundingClientRect();
-      var x = clientX - r.left;
-      var y = clientY - r.top;
-      if (window.L && L.point) {
-        return map.containerPointToLatLng(L.point(x, y));
-      }
-      return map.containerPointToLatLng({ x: x, y: y });
-    } catch (_) {
-      return null;
+    if (map && e.clientX != null && typeof map.mouseEventToLatLng === 'function') {
+      try {
+        return map.mouseEventToLatLng(e);
+      } catch (_) {}
     }
+    if (map && e.originalEvent && typeof map.mouseEventToLatLng === 'function') {
+      try {
+        return map.mouseEventToLatLng(e.originalEvent);
+      } catch (_) {}
+    }
+    // touch
+    if (map && e.changedTouches && e.changedTouches[0] && typeof map.mouseEventToLatLng === 'function') {
+      try {
+        var t = e.changedTouches[0];
+        var fake = { clientX: t.clientX, clientY: t.clientY };
+        return map.mouseEventToLatLng(fake);
+      } catch (_) {}
+    }
+    return null;
   }
 
   function onPicked(lat, lng) {
-    if (!pickMode) return;
     if (lat == null || lng == null || !isFinite(lat) || !isFinite(lng)) return;
+    if (!pickMode) return;
+    pickLatLng = { lat: lat, lng: lng };
     placePickMarker(lat, lng);
     stopPickMode(false);
-    setTimeout(function () { openForm(lat, lng); }, 50);
-  }
-
-  function useMapCenter() {
-    var map = getMap();
-    if (map && map.getCenter) {
-      var c = map.getCenter();
-      onPicked(c.lat, c.lng);
-      return;
-    }
-    onPicked(-11.0152, -37.2052);
+    // abre form só AGORA, depois do clique
+    setTimeout(function () {
+      openForm(lat, lng);
+    }, 60);
   }
 
   function removePickOverlay() {
-    stopOverlayLoop();
     if (pickOverlay && pickOverlay.parentNode) {
-      try { pickOverlay.parentNode.removeChild(pickOverlay); } catch (_) {}
+      try {
+        pickOverlay.parentNode.removeChild(pickOverlay);
+      } catch (_) {}
     }
     pickOverlay = null;
   }
 
   function ensurePickOverlay() {
     removePickOverlay();
+    var container =
+      document.querySelector('#map.leaflet-container, .leaflet-container') ||
+      document.getElementById('map');
+    if (!container) return;
+
+    // container precisa ser relative pra o overlay absolute cobrir
+    var pos = window.getComputedStyle(container).position;
+    if (pos === 'static') {
+      container.style.position = 'relative';
+    }
+
     pickOverlay = document.createElement('div');
-    pickOverlay.id = 'role-pick-hit';
-    pickOverlay.setAttribute('role', 'button');
-    pickOverlay.setAttribute('aria-label', 'Toque no mapa para marcar o ponto do rolê');
-    pickOverlay.innerHTML = '<span class="rph-hint">Toque aqui no ponto</span>';
+    pickOverlay.className = 'role-pick-overlay';
+    pickOverlay.setAttribute('aria-hidden', 'true');
+    pickOverlay.title = 'Toque para marcar o ponto do rolê';
 
-    var lastTouch = 0;
-
-    function handle(ev) {
+    function handlePointer(ev) {
       if (!pickMode) return;
-      var cx, cy;
-      if (ev.changedTouches && ev.changedTouches[0]) {
-        cx = ev.changedTouches[0].clientX;
-        cy = ev.changedTouches[0].clientY;
-        lastTouch = Date.now();
-      } else if (ev.clientX != null) {
-        if (Date.now() - lastTouch < 450) return;
-        cx = ev.clientX;
-        cy = ev.clientY;
-      } else {
-        return;
+      if (ev.type === 'touchend' || ev.type === 'pointerup' || ev.type === 'click') {
+        // evita double-fire (touch + click)
+        if (ev.type === 'touchend' || ev.type === 'pointerup') {
+          try {
+            ev.preventDefault();
+          } catch (_) {}
+        }
+        var ll = latLngFromEvent(ev);
+        if (ll) {
+          try {
+            ev.stopPropagation();
+          } catch (_) {}
+          onPicked(ll.lat, ll.lng);
+        }
       }
-      try {
-        ev.preventDefault();
-        ev.stopPropagation();
-      } catch (_) {}
-      var ll = latLngFromClient(cx, cy);
-      if (ll) onPicked(ll.lat, ll.lng);
     }
 
-    pickOverlay.addEventListener('click', handle, true);
-    pickOverlay.addEventListener('touchend', handle, { capture: true, passive: false });
-    pickOverlay.addEventListener('pointerup', handle, true);
+    pickOverlay.addEventListener('click', handlePointer, true);
+    pickOverlay.addEventListener('touchend', handlePointer, { capture: true, passive: false });
+    pickOverlay.addEventListener('pointerup', handlePointer, true);
 
-    document.body.appendChild(pickOverlay);
-    positionOverlay();
-    startOverlayLoop();
-  }
-
-  function setPickBanner(on) {
-    if (!on) {
-      if (pickBanner && pickBanner.parentNode) pickBanner.parentNode.removeChild(pickBanner);
-      pickBanner = null;
-      document.body.classList.remove('role-pick-mode');
-      return;
-    }
-    document.body.classList.add('role-pick-mode');
-    if (!pickBanner) {
-      pickBanner = document.createElement('div');
-      pickBanner.className = 'role-pick-banner';
-      pickBanner.id = 'role-pick-banner';
-      pickBanner.innerHTML =
-        '<span>Toque no mapa</span>' +
-        '<button type="button" class="rpb-center" id="role-pick-center">Usar centro</button>' +
-        '<button type="button" id="role-pick-cancel">Cancelar</button>';
-      document.body.appendChild(pickBanner);
-      document.getElementById('role-pick-cancel').addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        stopPickMode(true);
-      });
-      document.getElementById('role-pick-center').addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        useMapCenter();
-      });
-    }
+    container.appendChild(pickOverlay);
   }
 
   function startPickMode() {
     injectCss();
     closeAnyForm();
 
-    if (typeof window.__cricriLoadMap === 'function') {
-      try { window.__cricriLoadMap(); } catch (_) {}
+    // garante mapa carregado (lazy)
+    if (typeof window.__cricriLoadMap === 'function' && !getMap()) {
+      try {
+        window.__cricriLoadMap();
+      } catch (_) {}
     }
 
-    var mapEl = getMapEl() || document.getElementById('mapa');
+    var mapEl = document.getElementById('map') || document.getElementById('mapa');
     if (mapEl) {
-      try { mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-      catch (_) { try { mapEl.scrollIntoView(true); } catch (__) {} }
+      try {
+        mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (_) {
+        try {
+          mapEl.scrollIntoView(true);
+        } catch (__) {}
+      }
     }
 
     pickMode = true;
     setPickBanner(true);
-
     var btn = document.getElementById('btn-marcar');
     if (btn) {
       btn.classList.add('is-pick');
-      btn.textContent = 'Toque no mapa…';
+      btn.textContent = 'Clique no mapa…';
     }
 
-    function wireMap(map) {
+    function handleMapClick(e) {
+      if (!pickMode) return;
+      var ll = latLngFromEvent(e);
+      if (!ll) return;
+      if (e && e.originalEvent) {
+        try {
+          e.originalEvent.preventDefault();
+          e.originalEvent.stopPropagation();
+        } catch (_) {}
+      }
+      onPicked(ll.lat, ll.lng);
+    }
+
+    mapClickHandler = handleMapClick;
+
+    function attach(map) {
       if (!map) return false;
-      try { map.invalidateSize(true); } catch (_) {}
-      disableMarkersPE(true);
-      ensurePickOverlay();
       try {
         if (map.off && map._cricriRoleClick) map.off('click', map._cricriRoleClick);
-        map._cricriRoleClick = function (e) {
-          if (!pickMode || !e || !e.latlng) return;
-          onPicked(e.latlng.lat, e.latlng.lng);
-        };
-        map.on('click', map._cricriRoleClick);
-      } catch (_) {}
-      return true;
+        map._cricriRoleClick = handleMapClick;
+        map.on('click', handleMapClick);
+        try {
+          map.invalidateSize(true);
+        } catch (_) {}
+        ensurePickOverlay();
+        return true;
+      } catch (_) {
+        return false;
+      }
     }
 
     if (attachWaitTimer) {
@@ -341,36 +320,79 @@
       attachWaitTimer = null;
     }
 
-    if (!wireMap(getMap())) {
+    var map = getMap();
+    if (!attach(map)) {
+      // tenta de novo quando o mapa carregar
       var tries = 0;
       attachWaitTimer = setInterval(function () {
         tries++;
-        if (wireMap(getMap()) || tries > 50) {
+        map = getMap();
+        if (attach(map) || tries > 40) {
           clearInterval(attachWaitTimer);
           attachWaitTimer = null;
-          if (pickMode) ensurePickOverlay();
+          // mesmo sem API Leaflet, coloca overlay no #map
+          if (pickMode && !pickOverlay) ensurePickOverlay();
         }
-      }, 120);
+      }, 150);
     }
 
-    document.addEventListener('keydown', function onKey(e) {
+    // fallback DOM no container (além do overlay)
+    var container =
+      document.querySelector('#map.leaflet-container, #map .leaflet-container, .leaflet-container') ||
+      document.getElementById('map');
+    if (container && !mapDomClickHandler) {
+      mapDomClickHandler = function (ev) {
+        if (!pickMode) return;
+        if (ev.target && ev.target.closest && ev.target.closest('.leaflet-control, a, button, .role-pick-banner')) {
+          return;
+        }
+        var m = getMap();
+        if (m && typeof m.mouseEventToLatLng === 'function') {
+          try {
+            var ll = m.mouseEventToLatLng(ev);
+            if (ll) onPicked(ll.lat, ll.lng);
+          } catch (_) {}
+        }
+      };
+      container.addEventListener('click', mapDomClickHandler, true);
+      container.addEventListener('touchend', mapDomClickHandler, { capture: true, passive: true });
+    }
+
+    function onKey(e) {
       if (e.key === 'Escape') stopPickMode(true);
-    }, { once: true });
+    }
+    document.addEventListener('keydown', onKey, { once: true });
   }
 
   function stopPickMode(resetBtn) {
     pickMode = false;
     setPickBanner(false);
     removePickOverlay();
-    disableMarkersPE(false);
     if (attachWaitTimer) {
       clearInterval(attachWaitTimer);
       attachWaitTimer = null;
     }
     var map = getMap();
     if (map && map.off && map._cricriRoleClick) {
-      try { map.off('click', map._cricriRoleClick); } catch (_) {}
+      try {
+        map.off('click', map._cricriRoleClick);
+      } catch (_) {}
       map._cricriRoleClick = null;
+    }
+    mapClickHandler = null;
+    if (mapDomClickHandler) {
+      var container =
+        document.querySelector('#map.leaflet-container, #map .leaflet-container, .leaflet-container') ||
+        document.getElementById('map');
+      if (container) {
+        try {
+          container.removeEventListener('click', mapDomClickHandler, true);
+        } catch (_) {}
+        try {
+          container.removeEventListener('touchend', mapDomClickHandler, true);
+        } catch (_) {}
+      }
+      mapDomClickHandler = null;
     }
     var btn = document.getElementById('btn-marcar');
     if (btn && resetBtn !== false) {
@@ -383,23 +405,27 @@
     var map = getMap();
     if (!map || typeof L === 'undefined') return;
     if (pickMarker) {
-      try { map.removeLayer(pickMarker); } catch (_) {}
+      try {
+        map.removeLayer(pickMarker);
+      } catch (_) {}
     }
     pickMarker = L.circleMarker([lat, lng], {
-      radius: 11,
-      color: '#fff',
+      radius: 10,
+      color: '#e33d6b',
       fillColor: '#e33d6b',
-      fillOpacity: 0.95,
-      weight: 3
+      fillOpacity: 0.85,
+      weight: 2
     }).addTo(map);
-    try { map.setView([lat, lng], Math.max(map.getZoom(), 16)); } catch (_) {}
+    try {
+      pickMarker.bindPopup('Seu rolê (pendente de aceite)').openPopup();
+      map.setView([lat, lng], Math.max(map.getZoom(), 16));
+    } catch (_) {}
   }
 
   function openForm(lat, lng) {
     injectCss();
     document.body.classList.remove('role-pick-mode');
     removePickOverlay();
-    disableMarkersPE(false);
 
     var sheet = document.getElementById('cricri-role-sheet');
     if (!sheet) {
@@ -420,7 +446,7 @@
       '<div class="rs-card" role="dialog" aria-modal="true" aria-label="Solicitar Rolê/After">' +
         '<div class="rs-handle"></div>' +
         '<h2>Solicitar Rolê/After</h2>' +
-        '<p class="rs-sub">Ponto marcado. O admin recebe no e-mail e decide se publica no mapa.</p>' +
+        '<p class="rs-sub">Ponto marcado no mapa. O admin recebe no e-mail e decide se publica.</p>' +
         '<label>Tipo</label>' +
         '<div class="rs-type">' +
           '<button type="button" class="is-on" data-kind="role">Rolê</button>' +
@@ -434,7 +460,11 @@
         '<textarea id="rs-notes" rows="3" maxlength="400" placeholder="Ponto de referência, vibe, se é aberto…"></textarea>' +
         '<label for="rs-contact">Seu contato (e-mail ou @nick)</label>' +
         '<input id="rs-contact" maxlength="120" placeholder="pra o admin te responder" autocomplete="email" />' +
-        '<p class="rs-coords">Ponto: ' + Number(lat).toFixed(5) + ', ' + Number(lng).toFixed(5) + '</p>' +
+        '<p class="rs-coords">Ponto: ' +
+        Number(lat).toFixed(5) +
+        ', ' +
+        Number(lng).toFixed(5) +
+        '</p>' +
         '<div class="rs-actions">' +
           '<button type="button" class="rs-cancel" data-rs="cancel">Cancelar</button>' +
           '<button type="button" class="rs-send" data-rs="send">Solicitar</button>' +
@@ -444,7 +474,9 @@
 
     sheet.querySelectorAll('[data-kind]').forEach(function (b) {
       b.addEventListener('click', function () {
-        sheet.querySelectorAll('[data-kind]').forEach(function (x) { x.classList.remove('is-on'); });
+        sheet.querySelectorAll('[data-kind]').forEach(function (x) {
+          x.classList.remove('is-on');
+        });
         b.classList.add('is-on');
         kind = b.getAttribute('data-kind') || 'role';
       });
@@ -465,15 +497,27 @@
       var contact = (document.getElementById('rs-contact').value || '').trim();
       var msg = document.getElementById('rs-msg');
       if (!title) {
-        if (msg) { msg.className = 'rs-msg err'; msg.textContent = 'Dê um nome pro rolê.'; }
+        if (msg) {
+          msg.className = 'rs-msg err';
+          msg.textContent = 'Dê um nome pro rolê.';
+        }
         return;
       }
       var payload = {
-        title: title, kind: kind, when_text: when || null, notes: notes || null,
-        contact: contact || null, lat: Number(lat), lng: Number(lng),
-        status: 'pending', created_at: new Date().toISOString()
+        title: title,
+        kind: kind,
+        when_text: when || null,
+        notes: notes || null,
+        contact: contact || null,
+        lat: Number(lat),
+        lng: Number(lng),
+        status: 'pending',
+        created_at: new Date().toISOString()
       };
-      if (msg) { msg.className = 'rs-msg'; msg.textContent = 'Enviando…'; }
+      if (msg) {
+        msg.className = 'rs-msg';
+        msg.textContent = 'Enviando…';
+      }
       try {
         await submitRequest(payload);
         if (msg) {
@@ -497,10 +541,15 @@
       }
     });
 
+    // foca o título pra facilitar no mobile
     setTimeout(function () {
       var input = document.getElementById('rs-title');
-      if (input) { try { input.focus(); } catch (_) {} }
-    }, 150);
+      if (input) {
+        try {
+          input.focus();
+        } catch (_) {}
+      }
+    }, 120);
   }
 
   async function submitRequest(payload) {
@@ -525,11 +574,22 @@
     var saved = false;
     if (window.fascDb) {
       try {
-        var res = await window.fascDb.from('role_requests').insert({
-          user_id: userId, handle: handle, title: payload.title, kind: payload.kind,
-          when_text: payload.when_text, notes: payload.notes, contact: payload.contact,
-          lat: payload.lat, lng: payload.lng, status: 'pending'
-        }).select('id').maybeSingle();
+        var res = await window.fascDb
+          .from('role_requests')
+          .insert({
+            user_id: userId,
+            handle: handle,
+            title: payload.title,
+            kind: payload.kind,
+            when_text: payload.when_text,
+            notes: payload.notes,
+            contact: payload.contact,
+            lat: payload.lat,
+            lng: payload.lng,
+            status: 'pending'
+          })
+          .select('id')
+          .maybeSingle();
         if (!res.error) {
           saved = true;
           payload.id = res.data && res.data.id;
@@ -543,7 +603,7 @@
       var key = 'cricri-role-requests-v1';
       var list = JSON.parse(localStorage.getItem(key) || '[]');
       if (!Array.isArray(list)) list = [];
-      list.unshift(Object.assign({ id: payload.id || ('local-' + Date.now()) }, payload));
+      list.unshift(Object.assign({ id: payload.id || 'local-' + Date.now() }, payload));
       localStorage.setItem(key, JSON.stringify(list.slice(0, 30)));
     } catch (_) {}
 
@@ -553,13 +613,25 @@
     var body = encodeURIComponent(
       [
         'Nova solicitação de ' + (payload.kind === 'after' ? 'After' : 'Rolê') + ' no mapa CRICRI',
-        '', 'Título: ' + payload.title, 'Tipo: ' + payload.kind,
-        'Quando: ' + (payload.when_text || '—'), 'Contato: ' + (payload.contact || '—'),
+        '',
+        'Título: ' + payload.title,
+        'Tipo: ' + payload.kind,
+        'Quando: ' + (payload.when_text || '—'),
+        'Contato: ' + (payload.contact || '—'),
         'Nick: ' + (handle ? '@' + handle : '—'),
         'Coords: ' + payload.lat + ', ' + payload.lng,
-        'Mapa: https://www.openstreetmap.org/?mlat=' + payload.lat + '&mlon=' + payload.lng +
-          '#map=17/' + payload.lat + '/' + payload.lng,
-        '', 'Detalhes:', payload.notes || '—', '',
+        'Mapa: https://www.openstreetmap.org/?mlat=' +
+          payload.lat +
+          '&mlon=' +
+          payload.lng +
+          '#map=17/' +
+          payload.lat +
+          '/' +
+          payload.lng,
+        '',
+        'Detalhes:',
+        payload.notes || '—',
+        '',
         'Admin: ' + (location.origin || '') + '/admin-roles.html',
         saved ? '(salvo no Supabase)' : '(rode STEP_V_role_requests.sql)'
       ].join('\n')
@@ -569,7 +641,11 @@
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(function () { try { a.remove(); } catch (_) {} }, 500);
+    setTimeout(function () {
+      try {
+        a.remove();
+      } catch (_) {}
+    }, 500);
     return payload;
   }
 
@@ -578,8 +654,8 @@
     updateCtaCopy();
     var btn = document.getElementById('btn-marcar');
     if (!btn) return;
-    if (btn.dataset.roleBound === 'v4') return;
-    btn.dataset.roleBound = 'v4';
+    if (btn.dataset.roleBound === '1') return;
+    btn.dataset.roleBound = '1';
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -592,20 +668,11 @@
   } else {
     bind();
   }
-  setTimeout(bind, 600);
-  setTimeout(bind, 1800);
-  window.addEventListener('cricri:map-ready', function () {
-    if (pickMode) {
-      var map = getMap();
-      if (map) {
-        disableMarkersPE(true);
-        ensurePickOverlay();
-      }
-    }
-  });
+  setTimeout(bind, 800);
+  setTimeout(bind, 2000);
 
   window.CricriRoleRequest = {
-    __v4: true,
+    __v3: true,
     start: startPickMode,
     openForm: openForm
   };

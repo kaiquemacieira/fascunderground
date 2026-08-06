@@ -1,7 +1,7 @@
 /**
  * CRICRI · mapa sob demanda
  * Leaflet (+ CSS) e mock.js só quando #mapa entra no viewport.
- * heat-map / GTFS só se a UI existir (feature flags).
+ * Não recarrega Leaflet se já existir (explorar.html já inclui no head).
  */
 (function () {
   'use strict';
@@ -10,7 +10,7 @@
 
   function loadCss(href) {
     return new Promise(function (resolve, reject) {
-      if (document.querySelector('link[data-cricri-css="' + href + '"]')) {
+      if (document.querySelector('link[href*="leaflet"]') || document.querySelector('link[data-cricri-css="' + href + '"]')) {
         resolve();
         return;
       }
@@ -27,6 +27,11 @@
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
       if (document.querySelector('script[data-cricri-src="' + src + '"]')) {
+        resolve();
+        return;
+      }
+      // Leaflet já no head → não carrega de novo
+      if (/leaflet/i.test(src) && typeof window.L !== 'undefined' && window.L.map) {
         resolve();
         return;
       }
@@ -47,8 +52,15 @@
     if (mapEl) mapEl.setAttribute('aria-busy', 'true');
     try {
       await loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-      await loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-      // heat só se controle existir (foi cortado da v1 pública; seguro no-op)
+      // espera L se o script do head ainda estiver carregando
+      if (typeof window.L === 'undefined') {
+        await loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+        var wait = 0;
+        while (typeof window.L === 'undefined' && wait < 40) {
+          await new Promise(function (r) { setTimeout(r, 50); });
+          wait++;
+        }
+      }
       if (document.getElementById('btn-heat-toggle')) {
         await loadScript('https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js').catch(function () {});
         await loadScript('js/heat-map.js').catch(function () {});
@@ -56,9 +68,15 @@
       if (document.getElementById('map-transit-lines') || document.getElementById('map-transit-note')) {
         await loadScript('js/gtfs-rt.js').catch(function () {});
       }
-      await loadScript('mock.js');
+      // mock só uma vez
+      if (!window.projanoMap && !window._cricriLeafletMap) {
+        await loadScript('mock.js');
+      }
       loaded = true;
       console.info('[CRICRI] mapa carregado sob demanda');
+      try {
+        window.dispatchEvent(new CustomEvent('cricri:map-ready'));
+      } catch (_) {}
     } catch (e) {
       console.warn('[CRICRI] falha ao carregar mapa', e && e.message || e);
     } finally {
@@ -71,7 +89,6 @@
     var sec = document.getElementById('mapa') || document.getElementById('map');
     if (!sec) return;
     if (!('IntersectionObserver' in window)) {
-      // fallback: idle ou timeout curto
       if ('requestIdleCallback' in window) {
         requestIdleCallback(function () { bootMap(); }, { timeout: 2500 });
       } else {

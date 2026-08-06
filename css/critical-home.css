@@ -1,19 +1,19 @@
-/* CRICRI critical — header, shell, feed start */
-:root{--ink:#0c0a08;--paper:#f6efdc;--rosa:#e33d6b;--ochre:#d49a2c;--space-page-x:1.1rem;--z-header:200;--z-bottom-nav:50}
+/* FASC critical — header, shell, feed start (paleta branco/preto/dourado) */
+:root{--ink:#0A0A0A;--paper:#FAFAF7;--rosa:#E6BE49;--ochre:#E6BE49;--space-page-x:1.1rem;--z-header:200;--z-bottom-nav:50}
 *{box-sizing:border-box}
-html{color-scheme:dark;background:#0c0a08}
-body{margin:0;background:#0c0a08;color:#ebe3cf;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+html{color-scheme:dark;background:#0A0A0A}
+body{margin:0;background:#0A0A0A;color:#FAFAF7;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .skip-link{position:absolute;left:-999px;top:0}
-.skip-link:focus{left:1rem;top:1rem;z-index:9999;background:#e33d6b;color:#fff;padding:.5rem .75rem}
-.header{background:#0c0a08;padding:.85rem var(--space-page-x);display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(230,220,196,.12);position:sticky;top:0;z-index:var(--z-header);gap:.75rem}
-.logo{font-family:"Saira Stencil One",Oswald,Impact,sans-serif;font-size:clamp(1.35rem,4vw,1.75rem);letter-spacing:.04em;text-decoration:none;color:#ebe3cf;position:relative}
-.logo span{color:#e33d6b}
+.skip-link:focus{left:1rem;top:1rem;z-index:9999;background:#E6BE49;color:#1a1400;padding:.5rem .75rem}
+.header{background:#0A0A0A;padding:.85rem var(--space-page-x);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(250,250,247,.12);position:sticky;top:0;z-index:var(--z-header);gap:.75rem}
+.logo{font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:clamp(1.15rem,4vw,1.4rem);letter-spacing:-0.01em;text-decoration:none;color:#FAFAF7;position:relative}
+.logo span{color:#E6BE49}
 .header-actions{display:flex;align-items:center;gap:.5rem;margin-left:auto}
-.auth-chip{appearance:none;border:2px solid #e33d6b;background:#e33d6b;color:#fff;font-family:Oswald,system-ui,sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem .95rem;border-radius:999px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
-.a11y-toggle{width:44px;height:44px;border-radius:999px;border:1.5px solid rgba(230,220,196,.22);background:rgba(0,0,0,.28);color:#ebe3cf;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.auth-chip{appearance:none;border:1px solid #E6BE49;background:#E6BE49;color:#1a1400;font-family:'Inter',system-ui,sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.02em;text-transform:none;padding:.55rem .95rem;border-radius:999px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.a11y-toggle{width:44px;height:44px;border-radius:999px;border:1px solid rgba(250,250,247,.22);background:rgba(250,250,247,.06);color:#FAFAF7;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .hero,.feed-section{padding:1.25rem var(--space-page-x) 0}
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:var(--z-bottom-nav);display:flex;background:#0c0a08;border-top:1px solid rgba(230,220,196,.12);padding:.35rem .5rem calc(.35rem + env(safe-area-inset-bottom));}
-.bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;color:#9a9184;text-decoration:none;font-size:.65rem;font-family:Oswald,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:.35rem}
-.bottom-nav a.active,.bottom-nav a[aria-current="page"]{color:#e33d6b}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:var(--z-bottom-nav);display:flex;background:#0A0A0A;border-top:1px solid rgba(250,250,247,.12);padding:.35rem .5rem calc(.35rem + env(safe-area-inset-bottom));}
+.bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;color:rgba(250,250,247,.62);text-decoration:none;font-size:.65rem;font-family:'Inter',system-ui,sans-serif;font-weight:600;letter-spacing:0;text-transform:none;padding:.35rem}
+.bottom-nav a.active,.bottom-nav a[aria-current="page"]{color:#E6BE49}
 .map-section{min-height:12rem;padding:1rem var(--space-page-x) 2rem}
-#map{min-height:280px;background:#1a1612;border-radius:12px}
+#map{min-height:280px;background:#141414;border-radius:12px}

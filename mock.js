@@ -2254,6 +2254,7 @@ console.log('Mock carregado');
     if (typeof applyProximityFilter === 'function') applyProximityFilter();
   });
 
+  window._cricriLeafletMap = map;
   window.projanoMap = {
     map: map,
     flyTo: function (lat, lng, z) { map.setView([lat, lng], z || 16); },

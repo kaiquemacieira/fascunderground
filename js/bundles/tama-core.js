@@ -785,7 +785,7 @@ window.FASC_CONFIG = {
     'color:#c4b9a6;font-family:Inter,system-ui,sans-serif;overflow:hidden}',
     '.cricri-footer-inner{max-width:36rem;margin:0 auto;text-align:center;position:relative;z-index:1}',
     '.cricri-footer-brand{display:flex;flex-direction:column;align-items:center;gap:.35rem;margin-bottom:1rem}',
-    '.cricri-footer-mark{font-family:"Saira Stencil One",Oswald,Impact,sans-serif;font-size:clamp(1.6rem,5vw,2rem);',
+    '.cricri-footer-mark{font-family:"Inter",Oswald,Impact,sans-serif;font-size:clamp(1.6rem,5vw,2rem);',
     'letter-spacing:.06em;color:#e33d6b;line-height:1;position:relative;display:inline-block}',
     '.cricri-footer-mark::after{content:"";position:absolute;left:-4%;right:-4%;bottom:.05em;height:.22em;',
     'background:#d49a2c;opacity:.5;z-index:-1;transform:skewX(-8deg)}',

@@ -70,7 +70,7 @@
     } catch (_) {}
 
     // Nativo: barra de status / PWA / form controls
-    ensureMeta(META, theme === 'light' ? '#f6efdc' : '#0c0a08');
+    ensureMeta(META, theme === 'light' ? '#FFFFFF' : '#0A0A0A');
     ensureMeta(META_SCHEME, theme === 'light' ? 'light' : 'dark');
 
     document.querySelectorAll('[data-theme-set]').forEach(function (btn) {

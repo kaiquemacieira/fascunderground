@@ -1,0 +1,33 @@
+/** CRICRI Maps — sem Google Maps (Leaflet + OSM gratuito) */
+export default {
+  expo: {
+    name: 'CRICRI Mapa',
+    slug: 'cricri-maps',
+    version: '1.1.0',
+    orientation: 'portrait',
+    scheme: 'cricri',
+    userInterfaceStyle: 'dark',
+    splash: { backgroundColor: '#0c0a08' },
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: 'app.cricri.maps',
+      infoPlist: {
+        NSLocationWhenInUseUsageDescription:
+          'O CRICRI usa sua localização para mostrar spots e marcar rolês no mapa de São Cristóvão.',
+      },
+    },
+    android: {
+      package: 'app.cricri.maps',
+      permissions: ['ACCESS_COARSE_LOCATION', 'ACCESS_FINE_LOCATION'],
+      adaptiveIcon: { backgroundColor: '#0c0a08' },
+    },
+    plugins: [
+      [
+        'expo-location',
+        {
+          locationWhenInUsePermission: 'Permitir localização para o mapa CRICRI.',
+        },
+      ],
+    ],
+  },
+};

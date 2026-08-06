@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark light">
-  <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
   <script>
   /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
@@ -34,7 +34,8 @@
   </script>
 
   <title>Área do Usuário · CRICRI</title>
-  <meta name="theme-color" content="#0c0a08">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0A0A0A">
   <meta name="view-transition" content="same-origin">
   <script>
   (function () {
@@ -88,7 +89,7 @@
     :root {
       --ink: #17120e;
       --cream: #f2e8d2;
-      --rosa: #e33d6b;
+      --rosa: #E6BE49;
       --stone: #8c8376;
       --bg: #0c0a09;
       --card: #171412;
@@ -160,7 +161,7 @@
       box-shadow: 0 2px 0 rgba(28,21,17,0.08), 0 6px 14px rgba(212,47,98,0.1);
     }
     html[data-theme="light"] .handle-line:hover {
-      color: #e33d6b;
+      color: #E6BE49;
     }
     html[data-theme="light"] .card {
       background: #fffef8;
@@ -386,8 +387,8 @@
       gap: 0.35rem;
       padding: 0.4rem 0.75rem;
       border-radius: 999px;
-      border: 1.5px solid rgba(227, 61, 107, 0.45);
-      background: rgba(227, 61, 107, 0.12);
+      border: 1.5px solid rgba(230, 190, 73, 0.45);
+      background: rgba(230, 190, 73, 0.12);
       color: var(--rosa);
       font-family: Oswald, system-ui, sans-serif;
       font-weight: 600;
@@ -396,7 +397,7 @@
       text-transform: uppercase;
       text-decoration: none;
     }
-    .profile-topbar .auth-chip:hover { background: rgba(227, 61, 107, 0.22); }
+    .profile-topbar .auth-chip:hover { background: rgba(230, 190, 73, 0.22); }
     .profile-topbar .auth-chip.is-user {
       border-color: rgba(212, 154, 44, 0.45);
       background: rgba(212, 154, 44, 0.12);
@@ -415,9 +416,9 @@
       transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
     .back:hover, .profile-back:hover {
-      color: #e33d6b;
-      background: rgba(227, 61, 107, 0.12);
-      border-color: rgba(227, 61, 107, 0.45);
+      color: #E6BE49;
+      background: rgba(230, 190, 73, 0.12);
+      border-color: rgba(230, 190, 73, 0.45);
       transform: translateY(-1px);
     }
     .back:active, .profile-back:active { transform: translateY(0); }
@@ -435,7 +436,7 @@
     .title span { color: var(--rosa); }
 
     /* caixinha */
-    .caixinha-lead {
+    .caixinha-lead { color: #c8b3e6 !important;
       margin: 0 0 0.85rem;
       font-size: 0.78rem;
       line-height: 1.4;
@@ -720,8 +721,8 @@
       margin-top: 0.65rem;
       padding: 0.35rem 0.7rem 0.35rem 0.5rem;
       border-radius: 999px;
-      border: 1.5px solid rgba(227, 61, 107, 0.45);
-      background: linear-gradient(135deg, rgba(227, 61, 107, 0.18), rgba(240, 160, 32, 0.12));
+      border: 1.5px solid rgba(230, 190, 73, 0.45);
+      background: linear-gradient(135deg, rgba(230, 190, 73, 0.18), rgba(240, 160, 32, 0.12));
       font-size: 0.78rem;
       font-weight: 600;
       color: #f2e8d2;
@@ -736,7 +737,7 @@
     }
     html[data-theme="light"] .presence-seal {
       color: #17120e;
-      background: linear-gradient(135deg, rgba(227, 61, 107, 0.12), rgba(240, 160, 32, 0.1));
+      background: linear-gradient(135deg, rgba(230, 190, 73, 0.12), rgba(240, 160, 32, 0.1));
     }
 
     .card {
@@ -824,7 +825,7 @@
       height: 100%;
       width: 0%;
       border-radius: inherit;
-      background: linear-gradient(90deg, #e33d6b, #f0a020);
+      background: linear-gradient(90deg, #E6BE49, #f0a020);
       transition: width 0.12s ease-out;
       min-width: 0;
     }
@@ -1354,14 +1355,14 @@
       min-height: 56px !important;
       border-radius: 50% !important;
       border: 2px solid #f2e8d2 !important;
-      background: #e33d6b !important;
+      background: #E6BE49 !important;
       color: #fff !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
       cursor: pointer !important;
       touch-action: manipulation;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 14px rgba(227, 61, 107, 0.35);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 14px rgba(230, 190, 73, 0.35);
       font-size: 0 !important;
       line-height: 0 !important;
       padding: 0 !important;
@@ -1392,9 +1393,9 @@
       max-height: min(70vh, 560px);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      background: #1c1511;
+      background: #141414;
       color: #ebe3cf;
-      border: 2px solid rgba(227, 61, 107, 0.4);
+      border: 2px solid rgba(230, 190, 73, 0.4);
       border-radius: 12px;
       padding: 0.9rem 0.85rem 1rem;
       z-index: 99991;
@@ -1427,7 +1428,7 @@
     #login-card {
       background: var(--card, #14110e) !important;
       color: var(--text, #f0e6d0) !important;
-      border: 1.5px solid rgba(227, 61, 107, 0.35) !important;
+      border: 1.5px solid rgba(230, 190, 73, 0.35) !important;
       box-shadow: 0 12px 40px rgba(0,0,0,0.35) !important;
       border-radius: 16px !important;
       padding: 1.25rem 1.15rem 1.35rem !important;
@@ -1451,6 +1452,14 @@
     body[data-auth="in"] #profile-wrap {
       display: block !important;
     }
+    /* visita pública: mostra perfil alheio mesmo sem login */
+    body.is-visit #profile-wrap,
+    body.is-visit #profile-wrap[hidden] {
+      display: block !important;
+    }
+    body.is-visit #login-card {
+      display: none !important;
+    }
     #login-card h2,
     #login-card .lead,
     #login-card .label {
@@ -1468,9 +1477,9 @@
       border-color: rgba(230,220,196,0.18) !important;
     }
     #login-card .tab[aria-selected="true"] {
-      background: #e33d6b !important;
+      background: #E6BE49 !important;
       color: #fff !important;
-      border-color: #e33d6b !important;
+      border-color: #E6BE49 !important;
     }
     #login-card .btn-ghost {
       background: transparent !important;
@@ -1478,7 +1487,7 @@
       border: 1.5px solid rgba(230,220,196,0.28) !important;
     }
     #login-card .btn-primary {
-      background: #e33d6b !important;
+      background: #E6BE49 !important;
       color: #fff !important;
       border: none !important;
     }
@@ -1532,9 +1541,9 @@
   flex-direction: column;
   gap: 0.85rem;
   background:
-    linear-gradient(145deg, rgba(227,61,107,0.12), transparent 50%),
+    linear-gradient(145deg, rgba(230,190,73,0.12), transparent 50%),
     rgba(28,21,17,0.65);
-  border-color: rgba(227,61,107,0.28);
+  border-color: rgba(230,190,73,0.28);
 }
 .profile-hero-top {
   display: flex;
@@ -1546,8 +1555,8 @@
   border-radius: 18px;
   display: grid; place-items: center;
   font-size: 2rem;
-  background: rgba(227,61,107,0.15);
-  border: 2px solid rgba(227,61,107,0.4);
+  background: rgba(230,190,73,0.15);
+  border: 2px solid rgba(230,190,73,0.4);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -1558,7 +1567,7 @@
   letter-spacing: 0.04em;
 }
 .profile-hero-meta .handle {
-  color: #e33d6b;
+  color: #E6BE49;
   font-family: Space Mono, ui-monospace, monospace;
   font-size: 0.85rem;
 }
@@ -1622,7 +1631,7 @@
   text-decoration: none;
   max-width: 100%;
 }
-.friend-chip:hover { border-color: rgba(227,61,107,0.45); }
+.friend-chip:hover { border-color: rgba(230,190,73,0.45); }
 .friend-chip .dot {
   width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
   background: #5ec46a;
@@ -1661,21 +1670,21 @@ html[data-theme="light"] .friend-chip {
 .notif-bell {
   width: 48px; height: 48px;
   border-radius: 50%;
-  border: 2px solid rgba(227,61,107,0.5);
+  border: 2px solid rgba(230,190,73,0.5);
   background: linear-gradient(145deg, #2a221c, #1a1512);
   color: #f2e8d2;
   display: grid; place-items: center;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 14px rgba(227,61,107,0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 14px rgba(230,190,73,0.2);
   position: relative;
 }
-.notif-bell:hover { border-color: #e33d6b; }
+.notif-bell:hover { border-color: #E6BE49; }
 .notif-bell svg { width: 22px; height: 22px; }
 .notif-bell .badge {
   position: absolute; top: -2px; right: -2px;
   min-width: 18px; height: 18px; padding: 0 4px;
   border-radius: 999px;
-  background: #e33d6b; color: #fff;
+  background: #E6BE49; color: #fff;
   font-size: 0.65rem; font-weight: 700;
   display: grid; place-items: center;
   font-family: Space Mono, ui-monospace, monospace;
@@ -1683,8 +1692,8 @@ html[data-theme="light"] .friend-chip {
 .notif-panel {
   position: absolute; top: 54px; right: 0;
   width: min(300px, calc(100vw - 1.5rem));
-  background: #1c1511; color: #ebe3cf;
-  border: 1.5px solid rgba(227,61,107,0.35);
+  background: #141414; color: #ebe3cf;
+  border: 1.5px solid rgba(230,190,73,0.35);
   border-radius: 12px;
   padding: 0.75rem;
   box-shadow: 0 16px 40px rgba(0,0,0,0.45);
@@ -1705,16 +1714,16 @@ html[data-theme="light"] .friend-chip {
 
 /* ========== MEOW caixinha ========== */
 .meow-wrap {
-  --meow-rosa: #e33d6b;
-  --meow-terra: #c4472a;
-  --meow-ochre: #d49a2c;
-  --meow-laranja: #e07d1f;
-  --meow-azul: #1b4f5e;
-  --meow-azul-soft: #3d8a9c;
-  --meow-ink: #17120e;
-  --meow-cream: #f6efdc;
-  --meow-paper: #ebe3cf;
-  --meow-shadow: 4px 5px 0 rgba(0,0,0,.45);
+  --meow-rosa: #E6BE49;
+  --meow-terra: #C79A2E;
+  --meow-ochre: #E6BE49;
+  --meow-laranja: #E6BE49;
+  --meow-azul: #E6BE49;
+  --meow-azul-soft: #6ad8ff;
+  --meow-ink: #0A0A0A;
+  --meow-cream: #f6eefc;
+  --meow-paper: #c8b3e6;
+  --meow-shadow: 0 16px 40px -12px rgba(230,190,73,.35);
 }
 #inbox-card.meow-wrap,
 #send-card.meow-wrap {
@@ -1730,22 +1739,23 @@ html[data-theme="light"] .friend-chip {
 }
 .meow-brand .cat-badge {
   width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(150deg, #c4472a, #e07d1f 55%, #d49a2c);
-  border: 2px solid #17120e;
-  box-shadow: 3px 3px 0 rgba(0,0,0,.45);
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  border: 2px solid rgba(255,255,255,.2);
+  box-shadow: 0 0 16px rgba(230,190,73,.35);
   display: grid; place-items: center; flex: 0 0 auto;
 }
 .meow-brand .meow-logo {
-  font-family: "Saira Stencil One", Oswald, Impact, sans-serif;
-  font-size: 1.55rem; letter-spacing: 0.04em; color: #f6efdc;
-  -webkit-text-stroke: 1px #17120e;
-  text-shadow: 2px 2px 0 #b01f4c, 3px 3px 0 #17120e;
+  font-family: "Bebas Neue", Oswald, Impact, sans-serif;
+  font-size: 1.55rem; letter-spacing: 0.06em; color: #f6eefc;
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 12px rgba(230,190,73,.45);
   margin: 0; line-height: 1;
+  text-transform: uppercase;
 }
 .meow-brand .meow-sub {
-  font-family: "Space Mono", ui-monospace, monospace;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: #8c8376; margin: 0.15rem 0 0;
+  color: #7c6a95; margin: 0.15rem 0 0;
 }
 .meow-cartaz {
   border-radius: 22px;
@@ -1757,37 +1767,39 @@ html[data-theme="light"] .friend-chip {
   margin-bottom: 1rem;
 }
 .meow-cartaz.--inbox {
-  background: linear-gradient(160deg, #d49a2c 0%, #e07d1f 45%, #e33d6b 100%);
+  background: linear-gradient(160deg, #141414 0%, #1a0a28 50%, #0A0A0A 100%);
+  border: 1.5px solid rgba(230,190,73,.35) !important;
+  box-shadow: 0 20px 50px -16px rgba(230,190,73,.35), inset 0 0 0 1px rgba(255,255,255,.04) !important;
+  transform: none !important;
 }
 .meow-cartaz.--send {
-  background: linear-gradient(160deg, #e33d6b 0%, #c4472a 48%, #e07d1f 100%);
+  background: linear-gradient(160deg, #12061c 0%, #1a0a28 48%, #0A0A0A 100%);
+  border: 1.5px solid rgba(53,200,255,.3) !important;
+  box-shadow: 0 20px 50px -16px rgba(53,200,255,.25), inset 0 0 0 1px rgba(255,255,255,.04) !important;
+  transform: none !important;
 }
 .meow-cartaz::before,
-.meow-cartaz::after {
-  content: ""; position: absolute; width: 48px; height: 16px;
-  background: repeating-linear-gradient(45deg, rgba(246,239,220,.85) 0 6px, rgba(212,154,44,.55) 6px 12px);
-  border: 1px solid rgba(0,0,0,.25);
-  box-shadow: 1px 2px 3px rgba(0,0,0,.3);
-}
-.meow-cartaz::before { top: -8px; left: 12px; transform: rotate(-8deg); }
-.meow-cartaz::after { top: -8px; right: 10px; transform: rotate(7deg); }
+.meow-cartaz::after { display: none !important; }
 .meow-cartaz h2,
 .meow-cartaz .meow-title {
-  font-family: "Saira Stencil One", Oswald, Impact, sans-serif;
-  font-size: clamp(1.15rem, 3.5vw, 1.4rem);
-  line-height: 1.1; color: #f6efdc; text-align: center;
+  font-family: "Bebas Neue", Oswald, Impact, sans-serif;
+  font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+  line-height: 1.15; color: #f6eefc; text-align: center;
   margin: 0.15rem 0 0.95rem;
-  -webkit-text-stroke: 0.5px #17120e;
-  text-shadow: 2px 2px 0 rgba(0,0,0,.35);
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 18px rgba(230,190,73,.35);
+  letter-spacing: .03em;
+  text-transform: uppercase;
 }
 .meow-bubble {
-  background: #ebe3cf; color: #17120e;
+  background: rgba(255,255,255,.05); color: #f6eefc;
   border-radius: 14px; padding: 0.95rem 1rem;
-  font-weight: 600; font-size: 0.95rem; line-height: 1.4;
-  box-shadow: inset 0 0 0 1px rgba(23,18,14,.06), 3px 4px 0 rgba(0,0,0,.25);
+  font-weight: 500; font-size: 0.95rem; line-height: 1.45;
+  box-shadow: none;
+  border: 1.5px solid rgba(255,255,255,.14);
   min-height: 64px;
 }
-.meow-bubble.--placeholder { color: rgba(23,18,14,.42); font-weight: 500; }
+.meow-bubble.--placeholder { color: rgba(246,238,252,.42); font-weight: 400; }
 .meow-bubble textarea {
   width: 100%; border: 0; background: transparent; resize: vertical;
   font: inherit; color: inherit; min-height: 72px; outline: none;
@@ -1882,8 +1894,8 @@ html[data-theme="light"] .friend-chip {
   touch-action: manipulation;
 }
 .meow-payforward-chip:hover {
-  border-color: #e33d6b;
-  color: #e33d6b;
+  border-color: #E6BE49;
+  color: #E6BE49;
 }
 .meow-payforward-row {
   display: flex;
@@ -1935,7 +1947,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 }
 .meow-share code {
   background: rgba(255,255,255,.08); padding: 0.15rem 0.4rem; border-radius: 4px;
-  font-size: 0.75rem; color: #f28aa8;
+  font-size: 0.75rem; color: #C79A2E;
 }
 #send-card.meow-wrap { margin: 1.25rem 0 2rem; }
 
@@ -2046,7 +2058,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   font-size: clamp(1.4rem, 5vw, 1.9rem);
   color: #f6efdc;
   -webkit-text-stroke: 1px #17120e;
-  text-shadow: 3px 3px 0 #17120e, 0 0 24px rgba(227,61,107,.5);
+  text-shadow: 3px 3px 0 #17120e, 0 0 24px rgba(230,190,73,.5);
   transform: rotate(-8deg);
   background: rgba(23,18,14,.55);
   padding: 0.55rem 1rem;
@@ -2106,14 +2118,325 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 }
 
 
-/* ===== footer no perfil (espelha style.css) ===== */
+
+
+/* ===== modo visita (perfil de outro usuário) ===== */
+body.is-visit #edit-profile-card,
+body.is-visit #btn-edit-profile,
+/* logout boost */
+
+/* logout sempre visível no perfil próprio */
+#btn-logout-mini.btn-logout-hero {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 1.15rem !important;
+  font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: #ff6b9d !important;
+  background: rgba(230, 190, 73, 0.1) !important;
+  border: 1.5px solid rgba(230, 190, 73, 0.45) !important;
+  border-radius: 999px !important;
+  cursor: pointer;
+  width: auto !important;
+  max-width: 100%;
+}
+#btn-logout-mini.btn-logout-hero:hover {
+  background: rgba(230, 190, 73, 0.2) !important;
+  border-color: #E6BE49 !important;
+  color: #fff !important;
+}
+body.is-visit #btn-logout-mini { display: none !important; }
+.hero-actions-row {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+body.is-visit #btn-logout-mini,
+body.is-visit #inbox-card,
+body.is-visit #connections-card,
+body.is-visit #friends-online-card {
+  display: none !important;
+}
+body.is-visit #login-card { display: none !important; }
+body.is-visit #profile-wrap { display: block !important; }
+body.is-visit #send-card:not([hidden]) { display: block !important; margin-top: 1rem; }
+.visit-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+.visit-badge {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c6a95;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1.5px dashed rgba(255,255,255,0.18);
+}
+.visit-meow-btn {
+  width: min(100%, 280px);
+  text-align: center;
+  text-decoration: none;
+}
+
+/* ===== Threads-like profile clear ===== */
+body.page-profile .page,
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+}
+#profile-hero.hero,
+#profile-hero {
+  text-align: center;
+  padding: 1.25rem 1rem 1.5rem !important;
+  border-radius: 18px !important;
+  border: 1.5px solid rgba(255,255,255,.14) !important;
+  background: linear-gradient(180deg, rgba(230,190,73,.08), rgba(16,4,24,.9) 40%) !important;
+  box-shadow: 0 20px 50px -20px rgba(230,190,73,.3) !important;
+}
+#profile-hero .hero-banner { display: none !important; }
+#profile-hero .hero-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+#profile-hero .avatar-wrap {
+  width: 92px !important;
+  height: 92px !important;
+  border-radius: 50% !important;
+  font-size: 2.4rem !important;
+  border: 3px solid rgba(230,190,73,.55) !important;
+  box-shadow: 0 0 0 4px rgba(230,190,73,.12), 0 0 24px rgba(230,190,73,.25) !important;
+  background: rgba(230,190,73,.12) !important;
+  overflow: hidden;
+}
+#profile-hero .avatar-wrap img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+#profile-hero .display-name-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+#profile-hero .display-name {
+  margin: 0 !important;
+  font-family: "Bebas Neue", Oswald, sans-serif !important;
+  font-size: 1.65rem !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase;
+  color: #f6eefc !important;
+}
+#profile-hero .btn-edit-profile {
+  border-radius: 999px !important;
+  border: 1.5px solid rgba(255,255,255,.22) !important;
+  background: transparent !important;
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: .68rem !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase;
+  padding: .4rem .75rem !important;
+  color: #c8b3e6 !important;
+}
+#profile-hero .handle-line {
+  color: #E6BE49 !important;
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: .9rem !important;
+  margin: 0 !important;
+}
+#profile-hero .id-pill {
+  border-radius: 999px !important;
+  border: 1px dashed rgba(255,255,255,.18) !important;
+  background: rgba(255,255,255,.04) !important;
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: .68rem !important;
+}
+#profile-hero .bio-preview {
+  max-width: 36ch;
+  color: #c8b3e6 !important;
+  font-size: .92rem !important;
+  line-height: 1.45 !important;
+  margin: .15rem 0 .35rem !important;
+}
+#profile-hero .hero-actions-row {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+#profile-hero .btn-logout-hero {
+  border-radius: 999px !important;
+  font-size: .68rem !important;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-family: "IBM Plex Mono", monospace !important;
+}
+
+/* friends panel */
+.friends-panel,
+.friends-online {
+  width: 100%;
+  margin-top: 1rem !important;
+  padding: 1rem .9rem !important;
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.035) !important;
+  text-align: left !important;
+}
+.friends-panel-title,
+.friends-online .hero-conn-title {
+  font-family: "Bebas Neue", Oswald, sans-serif !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase;
+  color: #f6eefc !important;
+  font-size: 1rem !important;
+}
+.friends-online-meta {
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: .68rem !important;
+  color: #E6BE49 !important;
+  background: rgba(212,255,61,.1);
+  padding: .25rem .55rem;
+  border-radius: 999px;
+}
+.friends-online-hint,
+.friends-panel-note {
+  margin: .2rem 0 .65rem !important;
+  font-size: .72rem !important;
+  color: #7c6a95 !important;
+  line-height: 1.4 !important;
+  font-family: "IBM Plex Mono", monospace !important;
+}
+.friends-panel-note { margin-top: .65rem !important; margin-bottom: 0 !important; opacity: .9; }
+.friends-online-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: .45rem !important;
+}
+.friend-chip {
+  display: flex !important;
+  align-items: center !important;
+  gap: .55rem !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: .55rem .7rem !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(255,255,255,.12) !important;
+  background: rgba(5,1,6,.45) !important;
+  text-decoration: none !important;
+}
+.friend-chip .dot {
+  width: 10px !important; height: 10px !important;
+}
+.friend-chip.is-on .dot,
+.friend-chip:not(.is-away):not(.is-off) .dot {
+  background: #E6BE49 !important;
+  box-shadow: 0 0 10px rgba(212,255,61,.55) !important;
+}
+.friend-chip.is-away .dot {
+  background: #E6BE49 !important;
+  box-shadow: 0 0 8px rgba(53,200,255,.45) !important;
+}
+.friend-chip.is-off .dot {
+  background: #7c6a95 !important;
+  box-shadow: none !important;
+}
+.friend-chip .friend-label {
+  margin-left: auto;
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: .62rem !important;
+}
+.friend-chip.is-on .friend-label { color: #E6BE49 !important; }
+.friend-chip.is-away .friend-label { color: #E6BE49 !important; }
+
+/* connections card clear */
+.hero-conn {
+  width: 100%;
+  margin-top: .85rem;
+  padding: 1rem .9rem;
+  border-radius: 16px;
+  border: 1.5px dashed rgba(255,255,255,.16);
+  background: rgba(255,255,255,.03);
+  text-align: left;
+}
+.hero-conn-title {
+  font-family: "Bebas Neue", Oswald, sans-serif !important;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #f6eefc;
+}
+
+/* hide kindness forever */
+.kindness-wall,
+#kindness-wall { display: none !important; visibility: hidden !important; height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+
+/* title cleaner */
+main .title {
+  font-family: "Bebas Neue", Oswald, sans-serif !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 1.15rem !important;
+  color: #7c6a95 !important;
+  margin: .5rem 0 1rem !important;
+}
+main .title span { color: #E6BE49 !important; }
+
+html[data-theme="light"] #profile-hero,
+html[data-a11y-theme="light"] #profile-hero {
+  background: linear-gradient(180deg, rgba(166,116,24,.08), #fbf3dc 45%) !important;
+  border-color: rgba(32,21,38,.18) !important;
+}
+html[data-theme="light"] #profile-hero .display-name { color: #201526 !important; }
+html[data-theme="light"] #profile-hero .handle-line { color: var(--text-2) !important; }
+html[data-theme="light"] #profile-hero .bio-preview { color: #5c4a68 !important; }
+html[data-theme="light"] .friends-panel,
+html[data-theme="light"] .hero-conn {
+  background: rgba(32,21,38,.04) !important;
+  border-color: rgba(32,21,38,.16) !important;
+}
+html[data-theme="light"] .friend-chip {
+  background: rgba(255,255,255,.7) !important;
+  color: #201526 !important;
+}
+html[data-theme="light"] .meow-cartaz.--inbox,
+html[data-theme="light"] .meow-cartaz.--send {
+  background: #fbf3dc !important;
+  border-color: rgba(166,116,24,.25) !important;
+  box-shadow: 0 12px 32px -12px rgba(32,21,38,.15) !important;
+}
+html[data-theme="light"] .meow-cartaz .meow-title,
+html[data-theme="light"] .meow-brand .meow-logo { color: #201526 !important; text-shadow: none !important; }
+html[data-theme="light"] .meow-bubble {
+  background: rgba(32,21,38,.04) !important;
+  color: #201526 !important;
+  border-color: rgba(32,21,38,.16) !important;
+}
+
+/* ===== footer no perfil (espelha style.css?v=20260806mock) ===== */
 .cricri-footer {
   position: relative;
   margin: 2.5rem 0 0;
   padding: 2.5rem 1.15rem 5.5rem;
   overflow: hidden;
   isolation: isolate;
-  background: linear-gradient(180deg, transparent 0%, rgba(227,61,107,0.04) 28%, rgba(12,10,9,0.92) 72%, #0a0807 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(230,190,73,0.04) 28%, rgba(12,10,9,0.92) 72%, #0a0807 100%);
   border-top: 1px solid rgba(230,220,196,0.08);
 }
 .cricri-footer-glow { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
@@ -2124,7 +2447,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 }
 .cricri-footer-glow::before {
   top: -20%; width: min(520px, 90vw); height: 180px;
-  background: radial-gradient(ellipse at center, rgba(227,61,107,0.32) 0%, rgba(227,61,107,0.12) 35%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(230,190,73,0.32) 0%, rgba(230,190,73,0.12) 35%, transparent 70%);
 }
 .cricri-footer-glow::after {
   top: 8%; width: min(280px, 50vw); height: 100px;
@@ -2135,7 +2458,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 .cricri-footer-mark {
   font-family: "Saira Stencil One", Oswald, system-ui, sans-serif;
   font-size: clamp(1.7rem, 6vw, 2.3rem); letter-spacing: 0.14em; color: #f2e8d2;
-  text-shadow: 0 0 8px rgba(227,61,107,0.45), 0 0 28px rgba(227,61,107,0.35);
+  text-shadow: 0 0 8px rgba(230,190,73,0.45), 0 0 28px rgba(230,190,73,0.35);
 }
 .cricri-footer-tag { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8176; }
 .cricri-footer-text { font-size: 0.85rem; line-height: 1.5; color: #b8ae9e; margin: 0 0 1rem; }
@@ -2143,12 +2466,12 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 .cricri-footer-official {
   display: inline-flex; flex-direction: column; align-items: center; gap: 0.15rem;
   padding: 0.75rem 1.1rem; border-radius: 12px; text-decoration: none;
-  border: 1px solid rgba(227,61,107,0.35); background: rgba(227,61,107,0.08); color: #e8dfd0;
+  border: 1px solid rgba(230,190,73,0.35); background: rgba(230,190,73,0.08); color: #e8dfd0;
   margin-bottom: 1rem;
 }
-.cricri-footer-official-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: #e33d6b; }
+.cricri-footer-official-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: #E6BE49; }
 .cricri-footer-official-url { font-size: 0.8rem; }
-.cricri-footer-official-arrow { color: #e33d6b; }
+.cricri-footer-official-arrow { color: #E6BE49; }
 .cricri-footer-dev {
   display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
   margin: 1rem 0; padding: 0.85rem 1rem; border-radius: 12px;
@@ -2158,8 +2481,8 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 .cricri-footer-dev-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8176; font-family: Oswald, system-ui, sans-serif; }
 .cricri-footer-dev-name {
   font-family: "Saira Stencil One", Oswald, system-ui, sans-serif;
-  font-size: 1.05rem; letter-spacing: 0.08em; color: #e33d6b;
-  text-shadow: 0 0 12px rgba(227,61,107,0.35);
+  font-size: 1.05rem; letter-spacing: 0.08em; color: #E6BE49;
+  text-shadow: 0 0 12px rgba(230,190,73,0.35);
 }
 .cricri-footer-a11y {
   display: flex; gap: 0.75rem; align-items: flex-start; text-align: left;
@@ -2185,22 +2508,22 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 /* ===== caixinha design UP ===== */
 #inbox-card.inbox-up {
   position: relative;
-  border: 1.5px solid rgba(227,61,107,0.4);
+  border: 1.5px solid rgba(230,190,73,0.4);
   background:
-    linear-gradient(165deg, rgba(227,61,107,0.12) 0%, #171412 38%, #14110e 100%);
-  box-shadow: 0 0 0 1px rgba(227,61,107,0.08), 0 12px 32px rgba(0,0,0,0.35), 0 0 40px rgba(227,61,107,0.08);
+    linear-gradient(165deg, rgba(230,190,73,0.12) 0%, #171412 38%, #14110e 100%);
+  box-shadow: 0 0 0 1px rgba(230,190,73,0.08), 0 12px 32px rgba(0,0,0,0.35), 0 0 40px rgba(230,190,73,0.08);
   overflow: hidden;
 }
 #inbox-card.inbox-up::before {
   content: "";
   position: absolute; top: -40%; right: -20%;
   width: 180px; height: 180px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(227,61,107,0.22), transparent 70%);
+  background: radial-gradient(circle, rgba(230,190,73,0.22), transparent 70%);
   pointer-events: none;
 }
 #inbox-card.inbox-up h2 {
   display: flex; align-items: center; gap: 0.5rem;
-  color: #e33d6b !important;
+  color: #E6BE49 !important;
   font-size: 0.95rem;
   letter-spacing: 0.08em;
 }
@@ -2208,7 +2531,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   display: inline-flex; align-items: center; gap: 0.25rem;
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
   text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 999px;
-  background: rgba(227,61,107,0.2); color: #f2a0b8; border: 1px solid rgba(227,61,107,0.35);
+  background: rgba(230,190,73,0.2); color: #f2a0b8; border: 1px solid rgba(230,190,73,0.35);
 }
 #inbox-card.inbox-up .lead { color: #cfc5b4; }
 .inbox-share-row {
@@ -2248,11 +2571,11 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   border-radius: 999px; border: 1px solid rgba(242,232,210,0.2);
   background: transparent; color: #8c8376; cursor: pointer;
 }
-.hero-actions-row .btn-logout-hero:hover { color: #e33d6b; border-color: rgba(227,61,107,0.4); }
+.hero-actions-row .btn-logout-hero:hover { color: #E6BE49; border-color: rgba(230,190,73,0.4); }
 .hero-actions-row .btn-logout-hero {
-  border: 1.5px solid rgba(227,61,107,0.45) !important;
+  border: 1.5px solid rgba(230,190,73,0.45) !important;
   color: #f5a3b8 !important;
-  background: rgba(227,61,107,0.1) !important;
+  background: rgba(230,190,73,0.1) !important;
   padding: 0.45rem 0.9rem !important;
   border-radius: 999px !important;
   font-weight: 700 !important;
@@ -2281,18 +2604,18 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 }
 .cricri-tool-btn {
   width: 44px; height: 44px; border-radius: 50%;
-  border: 2px solid rgba(227,61,107,0.45);
+  border: 2px solid rgba(230,190,73,0.45);
   background: linear-gradient(145deg, #2a221c, #1a1512);
   color: #f2e8d2; display: grid; place-items: center; cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 12px rgba(227,61,107,0.18);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 12px rgba(230,190,73,0.18);
   position: relative;
 }
-.cricri-tool-btn:hover { border-color: #e33d6b; }
+.cricri-tool-btn:hover { border-color: #E6BE49; }
 .cricri-tool-btn svg { width: 20px; height: 20px; pointer-events: none; }
 .cricri-tool-btn .badge {
   position: absolute; top: -3px; right: -3px;
   min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px;
-  background: #e33d6b; color: #fff; font-size: 0.62rem; font-weight: 700;
+  background: #E6BE49; color: #fff; font-size: 0.62rem; font-weight: 700;
   display: grid; place-items: center;
   font-family: Space Mono, ui-monospace, monospace;
   box-shadow: 0 0 0 2px #0c0a09;
@@ -2301,15 +2624,15 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 .cricri-notif-panel, .cricri-gear-panel {
   position: absolute; top: 52px; right: 0;
   width: min(310px, calc(100vw - 1.25rem));
-  background: #1c1511; color: #ebe3cf;
-  border: 1.5px solid rgba(227,61,107,0.35);
+  background: #141414; color: #ebe3cf;
+  border: 1.5px solid rgba(230,190,73,0.35);
   border-radius: 14px; padding: 0.85rem;
   box-shadow: 0 16px 40px rgba(0,0,0,0.5); z-index: 5310;
 }
 .cricri-notif-panel[hidden], .cricri-gear-panel[hidden] { display: none !important; }
 .cricri-notif-panel h2, .cricri-gear-panel h2 {
   margin: 0 0 0.45rem; font-family: Oswald, system-ui, sans-serif;
-  font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #e33d6b;
+  font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #E6BE49;
 }
 .cricri-notif-panel .hint, .cricri-gear-panel .hint {
   font-size: 0.76rem; color: #9a9184; margin: 0 0 0.65rem; line-height: 1.4;
@@ -2322,7 +2645,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 }
 .cricri-notif-list .ico {
   flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px;
-  display: grid; place-items: center; background: rgba(227,61,107,0.15); font-size: 0.9rem;
+  display: grid; place-items: center; background: rgba(230,190,73,0.15); font-size: 0.9rem;
 }
 .cricri-notif-list strong { display: block; color: #f2e8d2; font-size: 0.78rem; }
 .cricri-notif-list span { color: #9a9184; font-size: 0.72rem; }
@@ -2336,7 +2659,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   cursor: pointer; text-align: left; width: 100%;
 }
 .cricri-gear-panel a:hover, .cricri-gear-panel button.gear-link:hover {
-  border-color: rgba(227,61,107,0.45); background: rgba(227,61,107,0.1);
+  border-color: rgba(230,190,73,0.45); background: rgba(230,190,73,0.1);
 }
 .cricri-gear-panel .gear-ico { width: 22px; text-align: center; flex: 0 0 auto; }
 
@@ -2365,7 +2688,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
 
 .edit-card.edit-card-slim[data-open="true"] {
   display: block;
-  border-color: rgba(227,61,107,0.35);
+  border-color: rgba(230,190,73,0.35);
 }
 
 
@@ -2395,13 +2718,13 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   cursor: pointer;
   position: relative;
 }
-.profile-tool-btn:hover { border-color: #e33d6b; color: #e33d6b; }
+.profile-tool-btn:hover { border-color: #E6BE49; color: #E6BE49; }
 .profile-notif-badge {
   position: absolute;
   top: 6px; right: 10px;
   min-width: 1.1rem; height: 1.1rem;
   border-radius: 999px;
-  background: #e33d6b;
+  background: #E6BE49;
   color: #fff;
   font-size: 0.65rem;
   display: grid; place-items: center;
@@ -2494,8 +2817,8 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
 }
 .pet-react-btn:hover {
-  border-color: rgba(227, 61, 107, 0.55);
-  background: rgba(227, 61, 107, 0.12);
+  border-color: rgba(230, 190, 73, 0.55);
+  background: rgba(230, 190, 73, 0.12);
 }
 .pet-react-btn:active { transform: scale(0.96); }
 .pet-react-btn:disabled {
@@ -2516,7 +2839,7 @@ html[data-a11y-motion="reduce"] .meow-payforward { animation: none; }
   min-height: 1.1em;
 }
 .pet-react-msg.ok { color: #7dba8a; }
-.pet-react-msg.err { color: #e33d6b; }
+.pet-react-msg.err { color: #E6BE49; }
 html[data-theme="light"] .pet-react-bar {
   background: #f3ecdc;
   border-color: rgba(28, 21, 17, 0.12);
@@ -2529,8 +2852,8 @@ html[data-theme="light"] .pet-react-btn {
 
 
 .pet-react-btn.is-sent {
-  border-color: rgba(227, 61, 107, 0.55);
-  background: rgba(227, 61, 107, 0.18);
+  border-color: rgba(230, 190, 73, 0.55);
+  background: rgba(230, 190, 73, 0.18);
   opacity: 0.85;
   cursor: default;
 }
@@ -2548,7 +2871,7 @@ html[data-theme="light"] .pet-react-btn {
 .tama-gift-host[hidden] { display: none !important; }
 .tama-gift-panel {
   border-radius: 12px;
-  border: 1.5px solid rgba(227, 61, 107, 0.35);
+  border: 1.5px solid rgba(230, 190, 73, 0.35);
   background: linear-gradient(145deg, rgba(42, 22, 28, 0.85), rgba(20, 16, 14, 0.9));
   padding: 0.85rem 0.9rem 0.95rem;
 }
@@ -2558,7 +2881,7 @@ html[data-theme="light"] .pet-react-btn {
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e33d6b;
+  color: #E6BE49;
 }
 .tama-gift-hint {
   margin: 0 0 0.65rem;
@@ -2608,8 +2931,8 @@ html[data-theme="light"] .pet-react-btn {
   min-height: 40px;
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
-  border: 1.5px solid rgba(227, 61, 107, 0.55);
-  background: rgba(227, 61, 107, 0.16);
+  border: 1.5px solid rgba(230, 190, 73, 0.55);
+  background: rgba(230, 190, 73, 0.16);
   color: #f2e8d2;
   font-family: Oswald, system-ui, sans-serif;
   font-weight: 700;
@@ -2624,8 +2947,8 @@ html[data-theme="light"] .pet-react-btn {
   text-overflow: ellipsis;
 }
 .tama-gift-btn:hover {
-  background: rgba(227, 61, 107, 0.3);
-  border-color: #e33d6b;
+  background: rgba(230, 190, 73, 0.3);
+  border-color: #E6BE49;
 }
 .tama-gift-btn:disabled {
   opacity: 0.6;
@@ -2658,7 +2981,7 @@ html[data-theme="light"] .tama-gift-btn {
   margin-right: auto;
   padding: 0.9rem 1rem 1rem;
   border-radius: 14px;
-  border: 1.5px solid rgba(227, 61, 107, 0.28);
+  border: 1.5px solid rgba(230, 190, 73, 0.28);
   background: linear-gradient(160deg, rgba(42, 22, 28, 0.55), rgba(20, 16, 14, 0.75));
 }
 .kindness-wall[hidden] { display: none !important; }
@@ -2668,7 +2991,7 @@ html[data-theme="light"] .tama-gift-btn {
   font-size: 0.95rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e33d6b;
+  color: #E6BE49;
 }
 .kindness-wall-sub {
   margin: 0 0 0.75rem;
@@ -2701,7 +3024,7 @@ html[data-theme="light"] .tama-gift-btn {
   color: #9a9184;
 }
 .kindness-item-meta .anon-label {
-  color: #e33d6b;
+  color: #E6BE49;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2730,8 +3053,8 @@ html[data-theme="light"] .tama-gift-btn {
   min-height: 36px;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  border: 1.5px solid rgba(227, 61, 107, 0.45);
-  background: rgba(227, 61, 107, 0.12);
+  border: 1.5px solid rgba(230, 190, 73, 0.45);
+  background: rgba(230, 190, 73, 0.12);
   color: #f2e8d2;
   font-family: Oswald, system-ui, sans-serif;
   font-weight: 600;
@@ -2742,8 +3065,8 @@ html[data-theme="light"] .tama-gift-btn {
   touch-action: manipulation;
 }
 .meow-public-btn:hover {
-  background: rgba(227, 61, 107, 0.28);
-  border-color: #e33d6b;
+  background: rgba(230, 190, 73, 0.28);
+  border-color: #E6BE49;
 }
 .meow-public-btn.is-public {
   opacity: 0.85;
@@ -2801,12 +3124,12 @@ html[data-theme="light"] .meow-public-btn {
 }
 .meow-ice-chip:hover,
 .meow-ice-chip.is-active {
-  border-color: #e33d6b;
-  background: rgba(227, 61, 107, 0.12);
+  border-color: #E6BE49;
+  background: rgba(230, 190, 73, 0.12);
   color: #17120e;
 }
 .meow-ice-chip:focus-visible {
-  outline: 2px solid #e33d6b;
+  outline: 2px solid #E6BE49;
   outline-offset: 2px;
 }
 
@@ -2835,13 +3158,13 @@ html[data-theme="light"] .meow-public-btn {
 }
 .meow-react-btn.is-on,
 .anon-react-btn.is-on {
-  border-color: #e33d6b;
-  background: rgba(227, 61, 107, 0.15);
-  box-shadow: 0 0 0 1px rgba(227, 61, 107, 0.25);
+  border-color: #E6BE49;
+  background: rgba(230, 190, 73, 0.15);
+  box-shadow: 0 0 0 1px rgba(230, 190, 73, 0.25);
 }
 .meow-react-btn:hover,
 .anon-react-btn:hover {
-  border-color: rgba(227, 61, 107, 0.45);
+  border-color: rgba(230, 190, 73, 0.45);
 }
 .anon-react-btn {
   background: rgba(42, 37, 32, 0.55);
@@ -2883,8 +3206,8 @@ html[data-theme="light"] .meow-public-btn {
   gap: 0.2rem;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: rgba(227, 61, 107, 0.1);
-  border: 1px solid rgba(227, 61, 107, 0.25);
+  background: rgba(230, 190, 73, 0.1);
+  border: 1px solid rgba(230, 190, 73, 0.25);
   font-size: 0.8rem;
 }
 .meow-react-count-pill strong,
@@ -2960,8 +3283,8 @@ html[data-theme="light"] .meow-public-btn {
 }
 .bottom-nav a.active {
   opacity: 1;
-  color: #e33d6b;
-  background: rgba(227, 61, 107, 0.12);
+  color: #E6BE49;
+  background: rgba(230, 190, 73, 0.12);
 }
 .bottom-nav a.active svg { stroke-width: 2.1; }
 html[data-theme="light"] .bottom-nav,
@@ -2984,6 +3307,42 @@ html[data-a11y-theme="light"] .bottom-nav a {
 </style>
 
 <style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
+  <link rel="stylesheet" href="css/estetica-v2.css?v=20260806nav2">
+
+<style id="cricri-bn-critical">
+nav.bottom-nav[data-cricri-nav="1"]{
+  position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;
+  z-index:2147483000!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;
+  align-items:end!important;width:100%!important;max-width:100vw!important;margin:0!important;
+  height:calc(62px + env(safe-area-inset-bottom,0px))!important;
+  padding:0 0.1rem env(safe-area-inset-bottom,0px)!important;
+  background:rgba(10,10,10,0.97)!important;
+  border-top:1px solid rgba(250,250,247,0.14)!important;
+  box-shadow:0 -8px 28px rgba(0,0,0,0.45)!important;
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+  transform:none!important;clip:auto!important;clip-path:none!important;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item{
+  display:flex!important;flex-direction:column;align-items:center;justify-content:center;
+  gap:0.15rem;text-decoration:none;min-height:54px;color:rgba(250,250,247,0.55)!important;
+  font:600 0.58rem/1 Inter,system-ui,sans-serif;letter-spacing:0.03em;text-transform:uppercase;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#E6BE49!important}
+nav.bottom-nav[data-cricri-nav="1"] .bn-ico{display:flex;width:24px;height:24px;align-items:center;justify-content:center}
+nav.bottom-nav[data-cricri-nav="1"] .bn-ico svg{width:22px;height:22px}
+nav.bottom-nav[data-cricri-nav="1"] .bn-create-wrap{display:flex;align-items:center;justify-content:center}
+nav.bottom-nav[data-cricri-nav="1"] button.bn-create{
+  width:48px;height:48px;margin-top:-12px;border-radius:14px;border:1.5px solid rgba(250,250,247,0.22);
+  background:#141414;color:#E6BE49;display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+nav.bottom-nav[data-cricri-nav="1"] button.bn-create .bn-plus{width:18px;height:18px}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"]{background:rgba(255,255,255,0.97)!important;border-top-color:rgba(17,17,17,0.12)!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item{color:rgba(17,17,17,0.45)!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#D4A72C!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{background:#fff;border-color:rgba(17,17,17,0.15)}
+body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
+</style>
+
 </head>
 <body class="page-profile">
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -3004,6 +3363,9 @@ html[data-a11y-theme="light"] .bottom-nav a {
 
   <div class="page">
     <header class="topbar profile-topbar" role="banner">
+      <button type="button" class="casas-open-btn" id="casas-open" aria-label="Abrir comunidades FASC" title="Comunidades">
+        <span class="dots-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
       <a class="logo" href="index.html" aria-label="CRICRI — início">CRI<span>CRI</span></a>
       <a class="back profile-back" href="index.html">← Home</a>
     </header>
@@ -3014,12 +3376,8 @@ html[data-a11y-theme="light"] .bottom-nav a {
       <div class="tama-gift-host" id="tama-gift-host" hidden></div>
 <div class="pet-react-host" id="pet-react-host" hidden></div>
 
-      <!-- P1.3 — Mural de gentilezas (próprio + público via ?u=) -->
-      <section class="kindness-wall" id="kindness-wall" aria-label="Mural de gentilezas" hidden>
-        <h2 class="kindness-wall-title">Mural de gentilezas</h2>
-        <p class="kindness-wall-sub">Elogios que a pessoa escolheu mostrar — sempre anônimos.</p>
-        <div class="kindness-wall-list" id="kindness-wall-list"></div>
-      </section>
+      <!-- mural de gentilezas removido -->
+      <section class="kindness-wall" id="kindness-wall" hidden aria-hidden="true" style="display:none!important"></section>
 
 
 
@@ -3028,7 +3386,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
       
 
     <!-- LOGIN -->
-    <p id="js-fallback" style="margin:0 1rem 1rem;padding:0.75rem;background:#e33d6b;color:#fff;border-radius:8px;font-size:0.9rem;display:none" role="alert">
+    <p id="js-fallback" style="margin:0 1rem 1rem;padding:0.75rem;background:#E6BE49;color:#fff;border-radius:8px;font-size:0.9rem;display:none" role="alert">
       Se esta mensagem aparece, o JavaScript não carregou. Confira se a pasta <b>js/</b> está junto do profile.html.
     </p>
     <section class="card" id="login-card" aria-labelledby="login-heading">
@@ -3087,7 +3445,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
             <span class="presence-seal-text" id="presence-seal-text"></span>
           </div>
           <div class="hero-actions-row">
-            <button type="button" class="btn-logout-hero" id="btn-logout-mini" title="Sair da conta e trocar de usuário">Sair da conta</button>
+            <button type="button" class="btn-logout-hero" id="btn-logout-mini" title="Sair da conta e trocar de usuário">⏻ Sair</button>
           </div>
 
           <!-- Conexões junto da foto -->
@@ -3103,14 +3461,17 @@ html[data-a11y-theme="light"] .bottom-nav a {
           </div>
 
           <!-- P1.4 — Amigos por perto (conexão + presença; sem geoloc) -->
-          <div class="friends-online" id="friends-online-card" hidden>
+          <div class="friends-online friends-panel" id="friends-online-card" hidden>
             <div class="friends-online-head">
-              <p class="hero-conn-title" style="margin:0">Amigos por perto</p>
+              <div>
+                <p class="hero-conn-title friends-panel-title" style="margin:0">Amizades</p>
+                <p class="friends-online-hint">Painel online · away · offline</p>
+              </div>
               <span class="friends-online-meta" id="friends-online-meta">—</span>
             </div>
-            <p class="friends-online-hint">Conexões ativas na roda · online &lt; 3 min · away &lt; 15 min</p>
             <ul class="friends-online-list" id="friends-online-list" aria-live="polite"></ul>
-            <p class="friends-empty" id="friends-online-empty" hidden>Ninguém da sua lista por perto agora.</p>
+            <p class="friends-empty" id="friends-online-empty" hidden>Nenhuma conexão ativa agora. Peça amizade e a outra pessoa aceita no sininho.</p>
+            <p class="friends-panel-note">Amizade mútua: os dois veem presença (online &lt; 3 min · away &lt; 15 min).</p>
           </div>
         </div>
       </section>
@@ -3192,7 +3553,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
           <p class="caixinha-lead">Recados e perguntas anônimas. Só você vê quem mandou — a rua não.</p>
           <div class="meow-react-counts" id="meow-react-counts" hidden></div>
           <div class="meow-item-list" id="inbox-list"></div>
-          <p class="msg" id="inbox-msg" role="status" style="color:#17120e;margin-top:0.5rem"></p>
+          <p class="msg" id="inbox-msg" role="status" style="color:#c8b3e6;margin-top:0.5rem"></p>
           <!-- P1.5 — Devolve a gentileza (após reply/reação) -->
           <div class="meow-payforward" id="meow-payforward" hidden role="status">
             <p class="meow-payforward-text">Que tal mandar um elogio anônimo pra alguém também?</p>
@@ -3257,7 +3618,7 @@ html[data-a11y-theme="light"] .bottom-nav a {
           </div>
           <p class="meow-hint">seu nome nunca chega se estiver anônimo</p>
         </form>
-        <p class="msg" id="send-msg" role="status" style="color:#17120e;margin-top:0.5rem"></p>
+        <p class="msg" id="send-msg" role="status" style="color:#c8b3e6;margin-top:0.5rem"></p>
       </div>
     </section>
     </main>
@@ -4080,20 +4441,182 @@ window.fascEventEnded = function () {
     }
   }
 
+  function visitHandleFromUrl() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      return (params.get('u') || params.get('to') || '').replace(/^@/, '').trim().toLowerCase();
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /** Modo visita: perfil de OUTRA pessoa (não o logado) */
+  function applyVisitHero(d) {
+    if (!d) return;
+    var name = d.name || d.handle || 'Alguém';
+    var handle = (d.handle || '').replace(/^@/, '');
+    var bio = d.bio || '';
+    if ($('display-name')) $('display-name').textContent = name;
+    if ($('handle-line')) $('handle-line').textContent = handle ? '@' + handle : '';
+    if ($('bio-preview')) $('bio-preview').textContent = bio;
+    if ($('uid')) $('uid').textContent = d.id ? String(d.id) : '—';
+    var box = $('avatar');
+    if (box) {
+      box.innerHTML = '';
+      if (d.photo_url && String(d.photo_url).indexOf('emoji:') === 0) {
+        box.textContent = d.photo_url.slice(6) || '🎨';
+      } else if (d.photo_url) {
+        var img = document.createElement('img');
+        img.src = d.photo_url;
+        img.alt = name;
+        img.onerror = function () {
+          box.textContent = (name || '?').charAt(0).toUpperCase();
+        };
+        box.appendChild(img);
+      } else {
+        box.textContent = (name || '?').charAt(0).toUpperCase();
+      }
+    }
+  }
+
+  function setVisitMode(on, target) {
+    document.body.classList.toggle('is-visit', !!on);
+    document.body.setAttribute('data-visit', on ? '1' : '0');
+    var editBtn = $('btn-edit-profile');
+    var editCard = $('edit-profile-card');
+    var logoutMini = $('btn-logout-mini');
+    var inbox = $('inbox-card');
+    var conn = $('connections-card');
+    var friends = $('friends-online-card');
+    if (on) {
+      if (editBtn) { editBtn.hidden = true; editBtn.style.display = 'none'; }
+      if (editCard) { editCard.hidden = true; editCard.setAttribute('hidden', ''); }
+      if (logoutMini) { logoutMini.hidden = true; logoutMini.style.display = 'none'; }
+      if (inbox) { inbox.hidden = true; inbox.setAttribute('hidden', ''); }
+      if (conn) { conn.hidden = true; conn.setAttribute('hidden', ''); }
+      if (friends) { friends.hidden = true; friends.setAttribute('hidden', ''); }
+      // badge de visita
+      var hero = $('profile-hero');
+      if (hero && !document.getElementById('visit-actions')) {
+        var row = document.createElement('div');
+        row.id = 'visit-actions';
+        row.className = 'visit-actions';
+        row.innerHTML =
+          '<p class="visit-badge">Perfil público</p>' +
+          (target && target.handle
+            ? '<a class="btn btn-primary visit-meow-btn" href="profile.html?u=' + encodeURIComponent(target.handle) + '#send-card">Mandar na caixinha</a>'
+            : '');
+        var body = hero.querySelector('.hero-body') || hero;
+        body.appendChild(row);
+      }
+    } else {
+      if (editBtn) { editBtn.hidden = false; editBtn.style.display = ''; }
+      if (logoutMini) { logoutMini.hidden = false; logoutMini.style.display = ''; }
+      var va = document.getElementById('visit-actions');
+      if (va) va.remove();
+    }
+  }
+
+  async function loadVisitProfile() {
+    var handle = visitHandleFromUrl();
+    if (!handle || !window.fascDb) return null;
+    try {
+      var res = await Promise.race([
+        window.fascDb.from('profiles').select('id,name,handle,photo_url,bio,city').eq('handle', handle).maybeSingle(),
+        new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 4000); })
+      ]);
+      if (res.error || !res.data) {
+        // tenta case-insensitive via ilike
+        var res2 = await window.fascDb.from('profiles').select('id,name,handle,photo_url,bio,city').ilike('handle', handle).maybeSingle();
+        if (res2.error || !res2.data) return null;
+        return res2.data;
+      }
+      return res.data;
+    } catch (e) {
+      console.warn('[visit profile]', e && e.message || e);
+      return null;
+    }
+  }
+
+  async function showVisitedProfile(target, me) {
+    // Mostra hero da OUTRA pessoa, esconde ferramentas do perfil próprio
+    document.body.setAttribute('data-auth', me ? 'in' : 'out');
+    var login = $('login-card');
+    if (login) {
+      login.hidden = true;
+      login.setAttribute('hidden', '');
+      login.style.setProperty('display', 'none', 'important');
+    }
+    var wrap = $('profile-wrap');
+    if (wrap) {
+      wrap.hidden = false;
+      wrap.removeAttribute('hidden');
+      wrap.style.removeProperty('display');
+      wrap.classList.remove('is-entering');
+      void wrap.offsetWidth;
+      wrap.classList.add('is-entering');
+      window.clearTimeout(wrap._enterTimer);
+      wrap._enterTimer = window.setTimeout(function () {
+        wrap.classList.remove('is-entering');
+      }, 900);
+    }
+    applyVisitHero(target);
+    setVisitMode(true, target);
+    // send-card (wireSend também cuida; reforça aqui)
+    var card = $('send-card');
+    if (card && (!me || me.id !== target.id)) {
+      card.hidden = false;
+      card.removeAttribute('hidden');
+    }
+    if ($('title') || document.querySelector('main .title')) {
+      var tit = document.querySelector('main .title');
+      if (tit) {
+        tit.innerHTML = 'Perfil <span>@' + escapeHtml((target.handle || '').replace(/^@/, '')) + '</span>';
+      }
+    }
+    try {
+      document.title = (target.name || target.handle || 'Perfil') + ' · CRICRI';
+    } catch (_) {}
+  }
+
   async function refreshSession() {
     // Login form stays visible until we KNOW there is a user
     showLoggedOut();
+    setVisitMode(false);
+    var visitHandle = visitHandleFromUrl();
+
     if (!window.fascAuth) {
+      // ainda tenta carregar perfil público por ?u=
+      if (visitHandle) {
+        var t0 = await loadVisitProfile();
+        if (t0) await showVisitedProfile(t0, null);
+      }
       msg('auth-msg', 'Não foi possível conectar ao servidor de login. Tente de novo em instantes.', false);
       return;
     }
     try {
       var user = await window.fascAuth.user();
+
+      // ===== VISITA A OUTRO PERFIL (?u=nick) =====
+      if (visitHandle) {
+        var target = await loadVisitProfile();
+        if (target) {
+          var isSelf = user && user.id === target.id;
+          if (!isSelf) {
+            await showVisitedProfile(target, user || null);
+            // se logado, ainda pode carregar dados próprios em background sem sobrescrever o hero
+            return;
+          }
+          // é o próprio usuário — cai no fluxo normal abaixo
+        }
+      }
+
       if (!user) {
-        loadKindnessWall(); // mural público via ?u= mesmo sem login
+        loadKindnessWall();
         return;
       }
       showLoggedIn(user);
+      setVisitMode(false);
       await loadProfile(user.id);
       window.__cricriReloadInbox = loadInbox;
       loadInbox();
@@ -4102,6 +4625,10 @@ window.fascEventEnded = function () {
     } catch (e) {
       console.warn('[session]', e);
       showLoggedOut();
+      if (visitHandle) {
+        var t1 = await loadVisitProfile();
+        if (t1) await showVisitedProfile(t1, null);
+      }
       loadKindnessWall();
     }
   }
@@ -4397,7 +4924,7 @@ window.fascEventEnded = function () {
             '</div>';
         var publicBtn = m.is_public
           ? '<button type="button" class="meow-public-btn is-public" disabled>No mural público ✓</button>'
-          : '<button type="button" class="meow-public-btn" data-meow-public="' + m.id + '">Tornar este elogio público no meu perfil</button>';
+          : '<button type="button" class="meow-public-btn" data-meow-public="' + m.id + '">Tornar este elogio público</button>';
         return (
           '<article class="meow-scrap" data-id="' + m.id + '">' +
             '<div class="meow-bubble">"' + escapeHtml(m.body) + '"</div>' +
@@ -4608,73 +5135,14 @@ window.fascEventEnded = function () {
     }
   }
 
-  /** Mural de gentilezas — próprio perfil ou ?u=handle (RPC, sem from_profile_id) */
+    /** Mural de gentilezas — removido da UI */
   async function loadKindnessWall() {
     var section = $('kindness-wall');
-    var list = $('kindness-wall-list');
-    if (!section || !list || !window.fascDb) return;
-
-    var params = new URLSearchParams(window.location.search);
-    var handle = (params.get('u') || params.get('to') || '').replace(/^@/, '').trim();
-    var rows = [];
-    try {
-      if (handle) {
-        var byH = await window.fascDb.rpc('get_kindness_wall_by_handle', { p_handle: handle });
-        if (byH.error) {
-          console.warn('[kindness wall handle]', byH.error.message);
-        } else {
-          rows = byH.data || [];
-        }
-      } else {
-        var me = window.fascAuth ? await window.fascAuth.user() : null;
-        if (!me) {
-          section.hidden = true;
-          return;
-        }
-        var byId = await window.fascDb.rpc('get_kindness_wall', { p_to_user: me.id });
-        if (byId.error) {
-          console.warn('[kindness wall]', byId.error.message);
-        } else {
-          rows = byId.data || [];
-        }
-      }
-    } catch (e) {
-      console.warn('[kindness wall]', e.message || e);
+    if (section) {
       section.hidden = true;
-      return;
+      section.setAttribute('aria-hidden', 'true');
+      section.style.display = 'none';
     }
-
-    if (!rows.length) {
-      // perfil próprio: mostra vazio orientativo; visitante: esconde se não há nada
-      if (handle) {
-        section.hidden = true;
-        list.innerHTML = '';
-        return;
-      }
-      section.hidden = false;
-      list.innerHTML = '<p class="kindness-empty">Nenhum elogio público ainda. Na caixinha, use “Tornar este elogio público”.</p>';
-      return;
-    }
-
-    section.hidden = false;
-    list.innerHTML = rows.map(function (m) {
-      var when = m.created_at
-        ? new Date(m.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
-        : '';
-      var ans = m.answer
-        ? '<p class="kindness-item-answer"><strong>Reply:</strong> ' + escapeHtml(m.answer) + '</p>'
-        : '';
-      return (
-        '<article class="kindness-item">' +
-          '<p class="kindness-item-body">"' + escapeHtml(m.body) + '"</p>' +
-          '<div class="kindness-item-meta">' +
-            '<span class="anon-label">anônimo</span>' +
-            (when ? '<time>' + escapeHtml(when) + '</time>' : '') +
-          '</div>' +
-          ans +
-        '</article>'
-      );
-    }).join('');
   }
 
   async function updateShareHint() {
@@ -5310,19 +5778,24 @@ window.fascEventEnded = function () {
   <script src="js/hostile-filter.js"></script>
   <script src="js/tama-state-read.js"></script>
   <script src="js/pet-reactions.js"></script>
-<script src="js/footer.js"></script>
+<script src="js/footer.js?v=20260806d"></script>
   <div id="site-footer-slot"></div>
 
-  <div id="bottom-nav-slot"></div>
+  <div id="bottom-nav-slot">
+
+
+
+</div>
   <script src="js/cri-svg.js"></script>
   <script src="js/guest-mode.js"></script>
-  <script src="js/visit-sheet.js?v=20260805i"></script>
+  <script src="js/visit-sheet.js?v=20260806d"></script>
   <script src="js/friends.js?v=20260805g"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
   <script src="js/install-app.js?v=20260805g"></script>
   <script src="js/sw-register.js?v=20260805g"></script>
   <script src="js/realtime-sync.js"></script>
-  <script src="js/bottom-nav.js?v=20260805k"></script>
+  <script src="js/casas.js?v=20260806d"></script>
+  <script src="js/bottom-nav.js?v=20260806nav3"></script>
   <!-- chip de nick removido do topbar — sininho global em js/notif-bell.js -->
 
 <script>
@@ -5363,7 +5836,7 @@ window.fascEventEnded = function () {
       span.className = 'avatar-fallback';
       span.setAttribute('aria-hidden', 'true');
       span.textContent = '🐾';
-      span.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.6rem';
+      span.style.css?v=20260806mockText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.6rem';
       wrap.appendChild(span);
     }
   }
@@ -5394,6 +5867,29 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<nav class="bottom-nav" data-cricri-nav="1" aria-label="Navegação principal">
+  <a class="bn-item" data-bn="home" href="index.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg></span>
+    <span class="bn-label">Home</span>
+  </a>
+  <a class="bn-item" data-bn="feed" href="feed.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+    <span class="bn-label">Feed</span>
+  </a>
+  <div class="bn-create-wrap">
+    <button type="button" class="bn-create" id="bn-create-btn" aria-label="Criar">
+      <svg class="bn-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+  <a class="bn-item" data-bn="notifs" href="notifications.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 17h5l-1.4-1.4A2 2 0 0 1 18.2 14V11a6.2 6.2 0 1 0-12.4 0v3c0 .5-.2 1-.6 1.4L3.8 17h5.4"/><path d="M9.5 17a2.5 2.5 0 0 0 5 0"/></svg></span>
+    <span class="bn-label">Avisos</span>
+  </a>
+  <a class="bn-item active" data-bn="perfil" href="profile.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.6 19.5c1.2-3.4 4-5.3 7.4-5.3s6.2 1.9 7.4 5.3"/></svg></span>
+    <span class="bn-label">Perfil</span>
+  </a>
+</nav>
 </body>
 
 </html>

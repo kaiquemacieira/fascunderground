@@ -42,10 +42,10 @@
   <style>
     :root {
       --void: #0c0a08; --ink: #17120e; --paper: #ebe3cf; --cream: #f6efdc;
-      --rosa: #e33d6b; --rosa-deep: #b01f4c; --rosa-soft: #f28aa8;
+      --rosa: #E6BE49; --rosa-deep: #C79A2E; --rosa-soft: rgba(230,190,73,0.16);
       --ochre: #d49a2c; --ochre-deep: #a67418; --terra: #c4472a;
       --azul: #1b4f5e; --stone: #8c8376;
-      --bezel: #e33d6b; --accent: #f28aa8; --shell-bg: #1a1210;
+      --bezel: #E6BE49; --accent: #C79A2E; --shell-bg: #1a1210;
       color-scheme: dark;
     }
     * { box-sizing: border-box; }
@@ -111,7 +111,7 @@
     .screen::before {
       content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
       background:
-        radial-gradient(circle at 22% 20%, rgba(227,61,107,0.16), transparent 42%),
+        radial-gradient(circle at 22% 20%, rgba(230,190,73,0.16), transparent 42%),
         radial-gradient(circle at 82% 78%, rgba(212,154,44,0.12), transparent 46%);
       animation: glow-drift 9s ease-in-out infinite;
     }
@@ -197,7 +197,7 @@
       background: rgba(212,47,98,0.12); color: var(--paper);
     }
     .life-chip.is-late { border-color: rgba(196,138,42,0.6); background: rgba(196,138,42,0.15); color: var(--ochre); }
-    .life-chip.is-dying { border-color: rgba(212,47,98,0.8); color: #f06a95; }
+    .life-chip.is-dying { border-color: rgba(212,47,98,0.8); color: #C79A2E; }
     .life-chip.is-ended { opacity: 0.6; }
 
     /* —— Despedida / Hall (fim do festival) —— */
@@ -331,7 +331,7 @@
     }
     .row-tools button:hover { color: var(--paper); border-color: var(--rosa); }
     .shell-dot { width: 1.35rem; height: 1.35rem; padding: 0; border-radius: 50%; }
-    .shell-dot[data-shell="rosa"] { background: #e33d6b; }
+    .shell-dot[data-shell="rosa"] { background: #E6BE49; }
     .shell-dot[data-shell="ocre"] { background: #d49a2c; }
     .shell-dot[data-shell="azul"] { background: #2a5f8f; }
     .shell-dot[data-shell="stencil"] { background: #e6dcc4; }
@@ -399,14 +399,14 @@
 
     
     html[data-theme="light"], html[data-a11y-theme="light"] {
-      --void: #f3ecdc; --paper: #17120e; --stone: #5c564e; --rosa: #e33d6b; --ochre: #b8821a;
-      --bezel: #e33d6b; --accent: #c42a58; --shell-bg: #fffef8;
+      --void: #f3ecdc; --paper: #17120e; --stone: #5c564e; --rosa: #E6BE49; --ochre: #b8821a;
+      --bezel: #E6BE49; --accent: #c42a58; --shell-bg: #fffef8;
     }
     html[data-theme="light"] body {
       background: var(--void);
       color: var(--paper);
       background-image:
-        radial-gradient(ellipse 90% 55% at 50% -15%, rgba(227, 61, 107, 0.12), transparent),
+        radial-gradient(ellipse 90% 55% at 50% -15%, rgba(230, 190, 73, 0.12), transparent),
         radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212, 154, 44, 0.08), transparent);
     }
     html[data-theme="light"] .device { box-shadow: 5px 7px 0 rgba(23,18,14,0.15); }
@@ -420,7 +420,7 @@
 
     /* —— Device moderno CRICRI (combina com o site) —— */
     .device {
-      --fur: #e33d6b; --fur-light: #f7c9d6; --fur-ear: #ffe1ea;
+      --fur: #E6BE49; --fur-light: #f7c9d6; --fur-ear: #ffe1ea;
       position: relative;
       max-width: 20.5rem;
       margin: 0 auto 1rem;
@@ -464,13 +464,13 @@
     }
     .shell-picker button:hover { transform: translateY(-2px) scale(1.06); }
     .shell-picker button[aria-pressed="true"] { outline: 2px solid #fff; outline-offset: 2px; }
-    .shell-picker [data-shell="rosa"] { background: linear-gradient(135deg, #f28aa8, #e33d6b); }
+    .shell-picker [data-shell="rosa"] { background: linear-gradient(135deg, #C79A2E, #E6BE49); }
     .shell-picker [data-shell="ocre"] { background: linear-gradient(135deg, #ffe066, #d49a2c); }
     .shell-picker [data-shell="azul"] { background: linear-gradient(135deg, #5ec4d6, #1b4f5e); }
     .shell-picker [data-shell="tuxedo"] { background: linear-gradient(135deg, #6a6258, #1a1512); }
     .tama-page-bg {
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(227,61,107,0.22), transparent 55%),
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(230,190,73,0.22), transparent 55%),
         radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212,154,44,0.1), transparent) !important;
     }
 
@@ -522,8 +522,8 @@
   min-height: 44px;
   padding: 0.55rem 1rem;
   border-radius: 999px;
-  border: 1.5px solid rgba(227, 61, 107, 0.55);
-  background: rgba(227, 61, 107, 0.14);
+  border: 1.5px solid rgba(230, 190, 73, 0.55);
+  background: rgba(230, 190, 73, 0.14);
   color: #f2e8d2;
   font-family: Oswald, system-ui, sans-serif;
   font-weight: 700;
@@ -534,15 +534,15 @@
   touch-action: manipulation;
 }
 .btn-share-cricri:hover {
-  background: rgba(227, 61, 107, 0.28);
-  border-color: #e33d6b;
+  background: rgba(230, 190, 73, 0.28);
+  border-color: #E6BE49;
 }
 .btn-share-cricri:disabled {
   opacity: 0.65;
   cursor: wait;
 }
 .btn-share-cricri:focus-visible {
-  outline: 2px solid #e33d6b;
+  outline: 2px solid #E6BE49;
   outline-offset: 2px;
 }
 
@@ -571,9 +571,9 @@
 .tama-card[hidden] { display: none !important; }
 .tama-card-inner {
   border-radius: 14px;
-  border: 1.5px solid rgba(227, 61, 107, 0.35);
+  border: 1.5px solid rgba(230, 190, 73, 0.35);
   background:
-    linear-gradient(145deg, rgba(227, 61, 107, 0.14), transparent 55%),
+    linear-gradient(145deg, rgba(230, 190, 73, 0.14), transparent 55%),
     rgba(28, 21, 17, 0.72);
   padding: 0.9rem 1rem;
   box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.3);
@@ -590,8 +590,8 @@
   display: grid;
   place-items: center;
   font-size: 1.75rem;
-  background: rgba(227, 61, 107, 0.15);
-  border: 1.5px solid rgba(227, 61, 107, 0.35);
+  background: rgba(230, 190, 73, 0.15);
+  border: 1.5px solid rgba(230, 190, 73, 0.35);
   flex-shrink: 0;
 }
 .tama-card-meta { min-width: 0; flex: 1; }
@@ -601,7 +601,7 @@
   font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #e33d6b;
+  color: #E6BE49;
 }
 .tama-card-name {
   margin: 0.15rem 0 0;
@@ -627,11 +627,11 @@
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #e33d6b;
+  color: #E6BE49;
   text-decoration: none;
-  border-bottom: 1px solid rgba(227, 61, 107, 0.4);
+  border-bottom: 1px solid rgba(230, 190, 73, 0.4);
 }
-.tama-card-link:hover { color: #f28aa8; }
+.tama-card-link:hover { color: #C79A2E; }
 .tama-card-cta {
   text-align: center;
   padding: 0.35rem 0.25rem;
@@ -649,7 +649,7 @@
   min-height: 44px;
   padding: 0.55rem 1.1rem;
   border-radius: 999px;
-  background: #e33d6b;
+  background: #E6BE49;
   color: #fff;
   font-family: Oswald, system-ui, sans-serif;
   font-weight: 700;
@@ -661,7 +661,7 @@
 }
 .tama-card-cta .btn:hover { filter: brightness(1.06); }
 html[data-theme="light"] .tama-card-inner {
-  background: linear-gradient(145deg, rgba(227, 61, 107, 0.1), transparent 55%), #f7f0e2;
+  background: linear-gradient(145deg, rgba(230, 190, 73, 0.1), transparent 55%), #f7f0e2;
   border-color: rgba(28, 21, 17, 0.2);
   box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.12);
 }
@@ -724,8 +724,8 @@ html[data-theme="light"] .tama-card-stats strong { color: #17120e; }
   min-height: 5.4rem;
 }
 .tama-album-item.is-owned {
-  border-color: rgba(227, 61, 107, 0.45);
-  background: rgba(227, 61, 107, 0.12);
+  border-color: rgba(230, 190, 73, 0.45);
+  background: rgba(230, 190, 73, 0.12);
   opacity: 1;
   filter: none;
 }
@@ -767,8 +767,8 @@ html[data-theme="light"] .tama-album-item {
 }
 html[data-theme="light"] .tama-album-name { color: #17120e; }
 html[data-theme="light"] .tama-album-item.is-owned {
-  background: rgba(227, 61, 107, 0.1);
-  border-color: rgba(227, 61, 107, 0.35);
+  background: rgba(230, 190, 73, 0.1);
+  border-color: rgba(230, 190, 73, 0.35);
 }
 .sr-only {
   position: absolute;
@@ -792,8 +792,8 @@ html[data-theme="light"] .tama-album-item.is-owned {
   100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
 }
 @keyframes tama-glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(227, 61, 107, 0); }
-  50% { box-shadow: 0 0 14px 1px rgba(227, 61, 107, 0.35); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 190, 73, 0); }
+  50% { box-shadow: 0 0 14px 1px rgba(230, 190, 73, 0.35); }
 }
 @keyframes tama-card-sheen {
   0% { background-position: 120% 0; }
@@ -1025,8 +1025,8 @@ html[data-theme="light"] .tama-album-rarity--super { color: #a67c00 !important; 
 
 /* cores por TIPO de item (tema) — base da figurinha */
 .tama-type--nascimento {
-  --type-accent: #e33d6b;
-  --type-bg: rgba(227, 61, 107, 0.14);
+  --type-accent: #E6BE49;
+  --type-bg: rgba(230, 190, 73, 0.14);
 }
 .tama-type--comida {
   --type-accent: #d49a2c;
@@ -1143,13 +1143,13 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
 .tama-confirm-card {
   width: min(360px, 100%);
   background: linear-gradient(165deg, #2a221c 0%, #1a1512 100%);
-  border: 2px solid rgba(227, 61, 107, 0.55);
+  border: 2px solid rgba(230, 190, 73, 0.55);
   border-radius: 16px;
   padding: 1.35rem 1.25rem 1.15rem;
   box-shadow:
-    0 0 0 1px rgba(227,61,107,0.15),
+    0 0 0 1px rgba(230,190,73,0.15),
     0 18px 40px rgba(0,0,0,0.55),
-    0 0 32px rgba(227,61,107,0.12);
+    0 0 32px rgba(230,190,73,0.12);
   text-align: center;
 }
 .tama-confirm-icon {
@@ -1157,10 +1157,10 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
   border-radius: 50%;
   display: grid; place-items: center;
   font-size: 1.35rem;
-  background: rgba(227,61,107,0.18);
-  border: 2px solid rgba(227,61,107,0.5);
+  background: rgba(230,190,73,0.18);
+  border: 2px solid rgba(230,190,73,0.5);
   color: #f5a3b8;
-  box-shadow: 0 0 20px rgba(227,61,107,0.25);
+  box-shadow: 0 0 20px rgba(230,190,73,0.25);
 }
 .tama-confirm-card h2 {
   margin: 0 0 0.45rem;
@@ -1200,30 +1200,67 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
 }
 .tama-btn-cancel:hover { background: rgba(255,255,255,0.06); }
 .tama-btn-danger {
-  background: linear-gradient(135deg, #e33d6b, #c4472a);
+  background: linear-gradient(135deg, #E6BE49, #c4472a);
   border: none;
   color: #fff;
-  box-shadow: 0 4px 14px rgba(227,61,107,0.35);
+  box-shadow: 0 4px 14px rgba(230,190,73,0.35);
 }
 .tama-btn-danger:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .tama-btn-danger:focus-visible,
 .tama-btn-cancel:focus-visible {
-  outline: 2px solid #e33d6b;
+  outline: 2px solid #E6BE49;
   outline-offset: 2px;
 }
 /* botão renascer com cara de atenção */
 button[data-action="reset"] {
-  border-color: rgba(227,61,107,0.45) !important;
+  border-color: rgba(230,190,73,0.45) !important;
   color: #f5a3b8 !important;
-  background: rgba(227,61,107,0.12) !important;
+  background: rgba(230,190,73,0.12) !important;
 }
 button[data-action="reset"]:hover {
-  background: rgba(227,61,107,0.22) !important;
-  box-shadow: 0 0 12px rgba(227,61,107,0.2);
+  background: rgba(230,190,73,0.22) !important;
+  box-shadow: 0 0 12px rgba(230,190,73,0.2);
 }
 </style>
 
 <style id="cricri-kill-top-tools">#cricri-top-tools,#cricri-notif-bell,.notif-bell-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
+  <link rel="stylesheet" href="css/estetica-v2.css?v=20260806nav2">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style id="cricri-bn-critical">
+nav.bottom-nav[data-cricri-nav="1"]{
+  position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;
+  z-index:2147483000!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;
+  align-items:end!important;width:100%!important;max-width:100vw!important;margin:0!important;
+  height:calc(62px + env(safe-area-inset-bottom,0px))!important;
+  padding:0 0.1rem env(safe-area-inset-bottom,0px)!important;
+  background:rgba(10,10,10,0.97)!important;
+  border-top:1px solid rgba(250,250,247,0.14)!important;
+  box-shadow:0 -8px 28px rgba(0,0,0,0.45)!important;
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+  transform:none!important;clip:auto!important;clip-path:none!important;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item{
+  display:flex!important;flex-direction:column;align-items:center;justify-content:center;
+  gap:0.15rem;text-decoration:none;min-height:54px;color:rgba(250,250,247,0.55)!important;
+  font:600 0.58rem/1 Inter,system-ui,sans-serif;letter-spacing:0.03em;text-transform:uppercase;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#E6BE49!important}
+nav.bottom-nav[data-cricri-nav="1"] .bn-ico{display:flex;width:24px;height:24px;align-items:center;justify-content:center}
+nav.bottom-nav[data-cricri-nav="1"] .bn-ico svg{width:22px;height:22px}
+nav.bottom-nav[data-cricri-nav="1"] .bn-create-wrap{display:flex;align-items:center;justify-content:center}
+nav.bottom-nav[data-cricri-nav="1"] button.bn-create{
+  width:48px;height:48px;margin-top:-12px;border-radius:14px;border:1.5px solid rgba(250,250,247,0.22);
+  background:#141414;color:#E6BE49;display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+nav.bottom-nav[data-cricri-nav="1"] button.bn-create .bn-plus{width:18px;height:18px}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"]{background:rgba(255,255,255,0.97)!important;border-top-color:rgba(17,17,17,0.12)!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item{color:rgba(17,17,17,0.45)!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#D4A72C!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{background:#fff;border-color:rgba(17,17,17,0.15)}
+body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
+</style>
+
 </head>
 
 <script>
@@ -1417,7 +1454,7 @@ button[data-action="reset"]:hover {
                     <!-- coroa-frontão anciã -->
                     <path d="M76,28 L84,44 L100,28 L116,44 L124,28 L124,46 L76,46 Z" fill="var(--ochre)" stroke="var(--ochre-deep, #a67418)" stroke-width="1.5"/>
                     <circle cx="100" cy="26" r="3.4" fill="var(--rosa)"/>
-                    <path d="M88,40 Q100,34 112,40" fill="none" stroke="var(--rosa-deep, #b01f4c)" stroke-width="1.2" opacity="0.7"/>
+                    <path d="M88,40 Q100,34 112,40" fill="none" stroke="var(--rosa-deep, #C79A2E)" stroke-width="1.2" opacity="0.7"/>
                   </g>
                   <g class="acc-sparkle" fill="var(--ochre)">
                     <path d="M28,90 l2,7 7,2 -7,2 -2,7 -2,-7 -7,-2 7,-2 Z"/>
@@ -1505,14 +1542,41 @@ button[data-action="reset"]:hover {
 
   <div class="tama-footer-spacer" style="height:1.5rem" aria-hidden="true"></div>
   <div id="site-footer-slot"></div>
-  <div id="bottom-nav-slot"></div>
+  <div id="bottom-nav-slot">
+
+<nav class="bottom-nav" data-cricri-nav="1" aria-label="Navegação principal">
+  <a class="bn-item" data-bn="home" href="index.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg></span>
+    <span class="bn-label">Home</span>
+  </a>
+  <a class="bn-item" data-bn="feed" href="feed.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+    <span class="bn-label">Feed</span>
+  </a>
+  <div class="bn-create-wrap">
+    <button type="button" class="bn-create" id="bn-create-btn" aria-label="Criar">
+      <svg class="bn-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+  <a class="bn-item" data-bn="notifs" href="notifications.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 17h5l-1.4-1.4A2 2 0 0 1 18.2 14V11a6.2 6.2 0 1 0-12.4 0v3c0 .5-.2 1-.6 1.4L3.8 17h5.4"/><path d="M9.5 17a2.5 2.5 0 0 0 5 0"/></svg></span>
+    <span class="bn-label">Avisos</span>
+  </a>
+  <a class="bn-item active" data-bn="perfil" href="profile.html">
+    <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.6 19.5c1.2-3.4 4-5.3 7.4-5.3s6.2 1.9 7.4 5.3"/></svg></span>
+    <span class="bn-label">Perfil</span>
+  </a>
+</nav>
+
+</div>
   <script src="js/guest-mode.js"></script>
   <script src="js/visit-sheet.js?v=20260805i"></script>
   <script src="js/friends.js?v=20260805g"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
   <script src="js/install-app.js?v=20260805g"></script>
   <script src="js/sw-register.js?v=20260805g"></script>
-  <script src="js/bottom-nav.js?v=20260805k"></script>
+  <script src="js/casas.js?v=20260806d"></script>
+  <script src="js/bottom-nav.js?v=20260806nav3"></script>
 
   <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-motion.js"></script>

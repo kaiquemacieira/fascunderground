@@ -1,22 +1,30 @@
 /**
  * CRICRI · Baixar app (PWA) + QR Code
- * - beforeinstallprompt → instala automaticamente ao clicar
- * - Gera QR com o link do app
- * - Se já baixou/instalou uma vez → esconde o botão
+ * - beforeinstallprompt → botão Instalar agora
+ * - QR Code sempre visível no sheet
+ * - Copiar link / abrir na tela de início (iOS)
+ * - Manifest + SW necessários (manifest.webmanifest + sw.js)
  */
 (function () {
   'use strict';
-  if (window.__cricriInstallMounted) return;
-  window.__cricriInstallMounted = true;
+  if (window.__cricriInstallMountedV2) return;
+  window.__cricriInstallMountedV2 = true;
 
   var STORAGE_KEY = 'cricri-app-downloaded-v1';
   var deferredPrompt = null;
 
   function appUrl() {
     try {
-      return (window.location.origin || '') + (window.location.pathname.replace(/[^/]+$/, '') || '/') + 'index.html';
+      var origin = window.location.origin || '';
+      var path = window.location.pathname || '/';
+      // raiz do app
+      if (path.indexOf('/explorar') !== -1 || /\.html$/i.test(path)) {
+        path = path.replace(/[^/]+$/, '');
+      }
+      if (!path.endsWith('/')) path += '/';
+      return origin + path + 'index.html';
     } catch (_) {
-      return 'https://cricri-2026.vercel.app/';
+      return window.location.href;
     }
   }
 
@@ -29,22 +37,20 @@
   }
 
   function hasDownloadedOnce() {
-    try {
-      return localStorage.getItem(STORAGE_KEY) === '1';
-    } catch (_) {
-      return false;
-    }
+    try { return localStorage.getItem(STORAGE_KEY) === '1'; } catch (_) { return false; }
   }
 
   function markDownloaded() {
-    try {
-      localStorage.setItem(STORAGE_KEY, '1');
-    } catch (_) {}
+    try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
   }
 
   function isIos() {
     var ua = navigator.userAgent || '';
     return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  function isAndroid() {
+    return /Android/i.test(navigator.userAgent || '');
   }
 
   function injectHead() {
@@ -60,6 +66,18 @@
       apple.href = 'icons/apple-touch-icon.png';
       document.head.appendChild(apple);
     }
+    if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+      var m = document.createElement('meta');
+      m.name = 'apple-mobile-web-app-capable';
+      m.content = 'yes';
+      document.head.appendChild(m);
+    }
+    if (!document.querySelector('meta[name="mobile-web-app-capable"]')) {
+      var m2 = document.createElement('meta');
+      m2.name = 'mobile-web-app-capable';
+      m2.content = 'yes';
+      document.head.appendChild(m2);
+    }
   }
 
   function injectCss() {
@@ -71,39 +89,44 @@
       'position:fixed;left:max(0.75rem,env(safe-area-inset-left));',
       'bottom:calc(5.25rem + env(safe-area-inset-bottom,0px));',
       'z-index:5600;display:inline-flex;align-items:center;gap:0.4rem;',
-      'padding:0.55rem 0.9rem;border-radius:999px;border:1.5px solid #e33d6b;',
-      'background:#e33d6b;color:#fff;font:600 0.72rem/1 Oswald,system-ui,sans-serif;',
+      'padding:0.55rem 0.9rem;border-radius:999px;border:1.5px solid #E6BE49;',
+      'background:#E6BE49;color:#1a1400;font:600 0.72rem/1 Oswald,system-ui,sans-serif;',
       'letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;',
       'box-shadow:0 6px 18px rgba(227,61,107,0.4)}',
       '#cricri-install-btn[hidden]{display:none!important}',
       '#cricri-install-btn svg{width:16px;height:16px}',
       '#cricri-install-sheet{position:fixed;inset:0;z-index:100130;display:flex;align-items:flex-end;justify-content:center;',
       'background:rgba(0,0,0,0.55);padding-bottom:env(safe-area-inset-bottom,0)}',
-      '#cricri-install-sheet .sheet{width:min(100%,400px);background:#14110f;border-radius:18px 18px 0 0;',
+      '#cricri-install-sheet .sheet{width:min(100%,400px);max-height:min(92vh,720px);overflow:auto;background:#14110f;border-radius:18px 18px 0 0;',
       'border:1.5px solid rgba(230,220,196,0.14);padding:1.15rem 1.1rem 1.35rem;color:#ebe3cf}',
       '#cricri-install-sheet h2{margin:0 0 0.5rem;font:700 1rem/1.2 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase}',
       '#cricri-install-sheet p,#cricri-install-sheet ol{margin:0 0 0.65rem;font-size:0.85rem;line-height:1.45;color:#cfc5b4}',
+      '#cricri-install-sheet ol{padding-left:1.2rem}',
       '#cricri-install-sheet .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:0.5rem;margin:0.75rem 0;padding:0.85rem;',
       'border-radius:14px;background:rgba(230,220,196,0.06);border:1px solid rgba(230,220,196,0.12)}',
       '#cricri-install-sheet .qr-wrap img{width:180px;height:180px;border-radius:12px;background:#fff;padding:8px}',
       '#cricri-install-sheet .qr-caption{font-size:0.72rem;color:#8c8376;text-align:center}',
+      '#cricri-install-sheet .link-row{display:flex;gap:.4rem;margin:.4rem 0 .7rem}',
+      '#cricri-install-sheet .link-row input{flex:1;min-width:0;border-radius:10px;border:1.5px solid rgba(230,220,196,.16);',
+      'background:rgba(0,0,0,.28);color:#ebe3cf;padding:.55rem .65rem;font-size:.78rem}',
       '#cricri-install-sheet .sheet-actions{display:flex;flex-direction:column;gap:0.45rem;margin-top:0.5rem}',
       '#cricri-install-sheet button{appearance:none;border-radius:11px;padding:0.7rem 1rem;cursor:pointer;',
       'font:700 0.78rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.05em;text-transform:uppercase}',
-      '#cricri-install-sheet .primary{background:#e33d6b;border:none;color:#fff}',
+      '#cricri-install-sheet .primary{background:#E6BE49;border:none;color:#fff}',
       '#cricri-install-sheet .ghost{background:transparent;border:1.5px solid rgba(230,220,196,0.22);color:#ebe3cf}',
+      '#cricri-install-sheet .status{font-size:.75rem;color:#8c8376;min-height:1.1em;margin:.35rem 0 0}',
+      '#cricri-install-sheet .status.ok{color:#7ecf9a}',
       'html[data-theme="light"] #cricri-install-sheet .sheet{background:#fffef8;color:#17120e}'
     ].join('');
     document.head.appendChild(s);
   }
 
   function qrImageUrl(data) {
-    var u = encodeURIComponent(data);
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=' + u;
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=' + encodeURIComponent(data);
   }
 
   function shouldHideButton() {
-    return isStandalone() || hasDownloadedOnce();
+    return isStandalone();
   }
 
   function updateVisibility() {
@@ -142,58 +165,110 @@
     if (el) el.remove();
   }
 
-  function showSheet(opts) {
-    opts = opts || {};
+  function setStatus(text, ok) {
+    var el = document.getElementById('cricri-install-status');
+    if (!el) return;
+    el.textContent = text || '';
+    el.className = 'status' + (ok ? ' ok' : '');
+  }
+
+  function showSheet() {
     closeSheet();
     var url = appUrl();
+    var canNative = !!deferredPrompt;
     var wrap = document.createElement('div');
     wrap.id = 'cricri-install-sheet';
     wrap.setAttribute('role', 'dialog');
     wrap.setAttribute('aria-modal', 'true');
+
+    var iosSteps = isIos()
+      ? '<ol>' +
+          '<li>Toque em <strong>Compartilhar</strong> (quadrado com seta) no Safari</li>' +
+          '<li>Role e toque em <strong>Adicionar à Tela de Início</strong></li>' +
+          '<li>Confirme em <strong>Adicionar</strong></li>' +
+        '</ol>'
+      : '';
+
+    var androidHint = (!canNative && isAndroid())
+      ? '<p>No Chrome: menu <strong>⋮</strong> → <strong>Instalar app</strong> ou <strong>Adicionar à tela inicial</strong>.</p>'
+      : '';
+
     wrap.innerHTML =
       '<div class="sheet">' +
-        '<h2>' + (opts.title || 'Baixar CRICRI') + '</h2>' +
-        '<p>' + (opts.body || 'Instale o app na tela inicial ou escaneie o QR no celular.') + '</p>' +
+        '<h2>Baixar CRICRI</h2>' +
+        '<p>Instale na tela inicial do celular — funciona offline e abre como app.</p>' +
+        iosSteps +
+        androidHint +
         '<div class="qr-wrap">' +
-          '<img src="' + qrImageUrl(url) + '" alt="QR Code do app CRICRI" width="180" height="180" />' +
-          '<span class="qr-caption">QR Code · abra no celular</span>' +
+          '<img src="' + qrImageUrl(url) + '" alt="QR Code do app CRICRI" width="180" height="180" loading="lazy" />' +
+          '<span class="qr-caption">Escaneie com a câmera do celular</span>' +
         '</div>' +
-        (opts.ios
-          ? '<ol>' +
-              '<li>Toque em <strong>Compartilhar</strong> no Safari</li>' +
-              '<li><strong>Adicionar à Tela de Início</strong></li>' +
-              '<li>Confirme em <strong>Adicionar</strong></li>' +
-            '</ol>'
-          : '') +
+        '<div class="link-row">' +
+          '<input id="cricri-install-url" type="text" readonly value="' + url.replace(/"/g, '&quot;') + '" />' +
+          '<button type="button" class="ghost" id="cricri-install-copy">Copiar</button>' +
+        '</div>' +
         '<div class="sheet-actions">' +
-          (opts.showInstall
+          (canNative
             ? '<button type="button" class="primary" id="cricri-install-now">Instalar agora</button>'
-            : '') +
+            : '<button type="button" class="primary" id="cricri-install-open">Abrir no celular</button>') +
           '<button type="button" class="ghost" id="cricri-install-gotit">Fechar</button>' +
         '</div>' +
+        '<p class="status" id="cricri-install-status" role="status"></p>' +
       '</div>';
+
     document.body.appendChild(wrap);
     wrap.addEventListener('click', function (e) {
       if (e.target === wrap) closeSheet();
     });
-    var got = document.getElementById('cricri-install-gotit');
-    if (got) got.addEventListener('click', closeSheet);
+
+    document.getElementById('cricri-install-gotit').addEventListener('click', closeSheet);
+
+    var copyBtn = document.getElementById('cricri-install-copy');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var input = document.getElementById('cricri-install-url');
+        var text = (input && input.value) || url;
+        function ok() { setStatus('Link copiado!', true); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(ok).catch(function () {
+            if (input) { input.select(); try { document.execCommand('copy'); ok(); } catch (_) {} }
+          });
+        } else if (input) {
+          input.select();
+          try { document.execCommand('copy'); ok(); } catch (_) {}
+        }
+      });
+    }
+
     var now = document.getElementById('cricri-install-now');
     if (now) {
       now.addEventListener('click', function () {
         triggerNativeInstall();
       });
     }
+
+    var openBtn = document.getElementById('cricri-install-open');
+    if (openBtn) {
+      openBtn.addEventListener('click', function () {
+        // tenta de novo o prompt se chegou atrasado
+        if (deferredPrompt) {
+          triggerNativeInstall();
+          return;
+        }
+        // abre o próprio app (útil se estiver no desktop e quiser testar)
+        try {
+          window.open(url, '_blank');
+        } catch (_) {
+          window.location.href = url;
+        }
+        setStatus('Abra no celular e use Instalar / Adicionar à tela inicial.', false);
+      });
+    }
   }
 
   async function triggerNativeInstall() {
     if (!deferredPrompt) {
-      showSheet({
-        title: 'Quase lá',
-        body: 'Use o QR no celular ou o menu do navegador → Instalar app.',
-        showInstall: false,
-        ios: isIos()
-      });
+      setStatus('Prompt nativo indisponível neste navegador. Use o QR ou o menu do browser.', false);
       return;
     }
     try {
@@ -203,55 +278,23 @@
       if (choice && choice.outcome === 'accepted') {
         markDownloaded();
         updateVisibility();
-        closeSheet();
+        setStatus('Instalado! Procure o ícone CRICRI na tela inicial.', true);
+        setTimeout(closeSheet, 1200);
+      } else {
+        setStatus('Instalação cancelada. Você pode tentar de novo.', false);
       }
     } catch (e) {
       console.warn('[install]', e);
-      showSheet({ title: 'Instalar CRICRI', body: 'Escaneie o QR ou use o menu do navegador.', ios: isIos() });
+      setStatus('Não deu pra instalar agora. Use o QR ou o menu do navegador.', false);
     }
   }
 
-  async function onInstallClick() {
-    // marca intenção de download e tenta instalar na hora
+  function onInstallClick() {
+    showSheet();
+    // se o prompt nativo já estiver pronto, destaca
     if (deferredPrompt) {
-      showSheet({
-        title: 'Baixar CRICRI',
-        body: 'Confirme a instalação no popup do navegador. O QR também está pronto pra outro aparelho.',
-        showInstall: true
-      });
-      // inicia download automaticamente
-      setTimeout(function () {
-        triggerNativeInstall();
-      }, 280);
-      return;
+      setStatus('Toque em Instalar agora para baixar o app.', false);
     }
-    if (isIos()) {
-      markDownloaded(); // usuário viu o fluxo; esconde na próxima se quiser — só marca se completar?
-      // não marca ainda no iOS até "Entendi" — marca ao fechar sheet
-      showSheet({
-        title: 'Instalar no iPhone',
-        body: 'Siga os passos ou escaneie o QR em outro device.',
-        ios: true,
-        showInstall: false
-      });
-      var got = document.getElementById('cricri-install-gotit');
-      if (got) {
-        got.addEventListener('click', function () {
-          markDownloaded();
-          updateVisibility();
-        });
-      }
-      return;
-    }
-    showSheet({
-      title: 'Baixar CRICRI',
-      body: 'Escaneie o QR no celular. Se o navegador oferecer, a instalação inicia em seguida.',
-      showInstall: !!deferredPrompt
-    });
-    // tenta de novo caso o prompt chegue atrasado
-    setTimeout(function () {
-      if (deferredPrompt) triggerNativeInstall();
-    }, 500);
   }
 
   function wirePrompt() {
@@ -259,6 +302,10 @@
       e.preventDefault();
       deferredPrompt = e;
       updateVisibility();
+      // se o sheet já estiver aberto, atualiza botão
+      if (document.getElementById('cricri-install-sheet') && !document.getElementById('cricri-install-now')) {
+        showSheet();
+      }
     });
     window.addEventListener('appinstalled', function () {
       deferredPrompt = null;
@@ -301,9 +348,7 @@
     prompt: onInstallClick,
     isStandalone: isStandalone,
     hasDownloaded: hasDownloadedOnce,
-    showQr: function () {
-      showSheet({ title: 'QR Code CRICRI', body: 'Escaneie para abrir/instalar o app.', showInstall: !!deferredPrompt });
-    },
+    showQr: function () { showSheet(); },
     resetDownloadFlag: function () {
       try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
       updateVisibility();

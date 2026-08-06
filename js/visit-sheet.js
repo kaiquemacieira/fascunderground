@@ -1,17 +1,17 @@
 /**
- * CRICRI · Folha de visita de perfil
- * Card fluido: foto, CRI, stats, pedir amizade, ver perfil, meow
- *
+ * CRICRI · Folha de visita de perfil (estilo Threads)
  * CricriVisit.open({ handle?, userId?, name?, photo_url? })
  */
 (function () {
   'use strict';
-  if (window.CricriVisit) return;
+  if (window.CricriVisit && window.CricriVisit.__v2) return;
 
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   function injectCss() {
@@ -20,73 +20,66 @@
     s.id = 'cricri-visit-css';
     s.textContent = [
       '#cricri-visit-sheet{position:fixed;inset:0;z-index:100080;display:flex;align-items:flex-end;justify-content:center;',
-      'background:rgba(0,0,0,0.55);padding:0;padding-bottom:env(safe-area-inset-bottom,0px)}',
+      'background:rgba(5,1,6,.72);padding-bottom:env(safe-area-inset-bottom,0)}',
       '#cricri-visit-sheet[hidden]{display:none!important}',
-      '#cricri-visit-sheet .vs-card{width:min(100%,420px);max-height:min(88vh,640px);overflow:auto;',
-      'background:linear-gradient(165deg,#1c1612 0%,#120e0c 100%);border:1.5px solid rgba(230,220,196,0.14);',
-      'border-radius:18px 18px 0 0;padding:1.15rem 1.1rem 1.35rem;color:#ebe3cf;',
-      'box-shadow:0 -16px 48px rgba(0,0,0,0.5);animation:vs-up .28s ease}',
-      '@keyframes vs-up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}',
-      '#cricri-visit-sheet .vs-handle{width:40px;height:4px;border-radius:99px;background:rgba(230,220,196,0.25);margin:0 auto 0.85rem}',
-      '#cricri-visit-sheet .vs-head{display:flex;gap:0.85rem;align-items:center;margin-bottom:1rem}',
-      '#cricri-visit-sheet .vs-av{width:64px;height:64px;border-radius:16px;overflow:hidden;flex:none;',
-      'background:rgba(227,61,107,0.22);display:flex;align-items:center;justify-content:center;',
-      'font-size:1.6rem;font-weight:700;font-family:Oswald,system-ui,sans-serif;border:2px solid rgba(227,61,107,0.35)}',
+      '#cricri-visit-sheet .vs-card{width:min(100%,420px);max-height:min(90vh,680px);overflow:auto;',
+      'background:#141414;border-radius:22px 22px 0 0;border:1.5px solid rgba(255,255,255,.14);',
+      'padding:1rem 1.1rem 1.4rem;color:#FAFAF7;box-shadow:0 -20px 50px rgba(0,0,0,.5)}',
+      '#cricri-visit-sheet .vs-handle{width:40px;height:4px;border-radius:99px;background:rgba(255,255,255,.22);margin:0 auto .9rem}',
+      /* threads layout */
+      '#cricri-visit-sheet .vs-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.55rem;margin-bottom:1rem}',
+      '#cricri-visit-sheet .vs-av{width:88px;height:88px;border-radius:50%;overflow:hidden;flex:none;',
+      'display:grid;place-items:center;font-size:2.2rem;background:rgba(0,0,0,.12);',
+      'border:3px solid rgba(0,0,0,.5);box-shadow:0 0 0 4px rgba(0,0,0,.12),0 0 24px rgba(0,0,0,.25)}',
       '#cricri-visit-sheet .vs-av img{width:100%;height:100%;object-fit:cover}',
-      '#cricri-visit-sheet .vs-meta{min-width:0;flex:1}',
-      '#cricri-visit-sheet .vs-name{margin:0;font:700 1.15rem/1.2 Oswald,system-ui,sans-serif;letter-spacing:.03em}',
-      '#cricri-visit-sheet .vs-handle-txt{margin:0.15rem 0 0;font-size:0.85rem;color:#e33d6b}',
-      '#cricri-visit-sheet .vs-tama{margin:0 0 1rem;padding:0.85rem;border-radius:14px;',
-      'border:1.5px solid rgba(227,61,107,0.28);background:rgba(227,61,107,0.08);',
-      'display:flex;gap:0.75rem;align-items:center}',
-      '#cricri-visit-sheet .vs-tama-emoji{font-size:2.4rem;line-height:1;flex:none;filter:drop-shadow(0 0 10px rgba(227,61,107,0.35))}',
-      '#cricri-visit-sheet .vs-tama-meta{min-width:0;flex:1;font-size:0.8rem;line-height:1.35;color:#cfc5b4}',
-      '#cricri-visit-sheet .vs-tama-meta strong{color:#ebe3cf;font-size:0.95rem;display:block;margin-bottom:0.2rem}',
-      '#cricri-visit-sheet .vs-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.45rem;margin:0 0 1rem}',
-      '#cricri-visit-sheet .vs-stat{padding:0.55rem 0.6rem;border-radius:10px;background:rgba(230,220,196,0.05);',
-      'border:1px solid rgba(230,220,196,0.08);font-size:0.72rem;color:#a89f90}',
-      '#cricri-visit-sheet .vs-stat b{display:block;color:#ebe3cf;font-size:0.92rem;font-family:Oswald,system-ui,sans-serif;margin-top:0.1rem}',
-      '#cricri-visit-sheet .vs-actions{display:flex;flex-direction:column;gap:0.45rem}',
-      '#cricri-visit-sheet .vs-btn{appearance:none;border-radius:12px;padding:0.7rem 1rem;cursor:pointer;',
-      'font:600 0.8rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase;border:1.5px solid transparent;text-align:center;text-decoration:none}',
-      '#cricri-visit-sheet .vs-primary{background:#e33d6b;color:#fff;border-color:#e33d6b}',
-      '#cricri-visit-sheet .vs-ghost{background:transparent;color:#ebe3cf;border-color:rgba(230,220,196,0.22)}',
-      '#cricri-visit-sheet .vs-msg{margin:0.5rem 0 0;font-size:0.78rem;color:#8c8376;min-height:1.2em}',
-      '#cricri-visit-sheet .vs-msg.ok{color:#7ecf9a}',
-      '#cricri-visit-sheet .vs-msg.err{color:#f5a3b8}',
-      '#cricri-visit-sheet .vs-empty-tama{opacity:0.75;font-size:0.85rem;color:#8c8376;margin:0 0 1rem;padding:0.75rem;border-radius:12px;border:1px dashed rgba(230,220,196,0.15)}',
-      'html[data-theme="light"] #cricri-visit-sheet .vs-card,html[data-a11y-theme="light"] #cricri-visit-sheet .vs-card{background:#fffef8;color:#17120e}',
-      'html[data-theme="light"] #cricri-visit-sheet .vs-stat b{color:#17120e}'
+      '#cricri-visit-sheet .vs-meta{min-width:0;width:100%}',
+      '#cricri-visit-sheet .vs-name{margin:0;font:700 1.2rem/1.2 "Inter",system-ui,sans-serif;letter-spacing:-0.01em;text-transform:none}',
+      '#cricri-visit-sheet .vs-handle-txt{margin:.15rem 0 0;font-size:.88rem;color:#E6BE49;font-family:"Inter",system-ui,sans-serif}',
+      '#cricri-visit-sheet .vs-bio{margin:.35rem 0 0;font-size:.88rem;line-height:1.45;color:#A6A6A2;max-width:36ch;margin-left:auto;margin-right:auto}',
+      '#cricri-visit-sheet .vs-tama{margin:0 0 1rem;padding:.85rem;border-radius:14px;display:flex;gap:.75rem;align-items:center;',
+      'background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.12)}',
+      '#cricri-visit-sheet .vs-tama-emoji{font-size:2.2rem;line-height:1;flex:none;filter:drop-shadow(0 0 10px rgba(0,0,0,.35))}',
+      '#cricri-visit-sheet .vs-tama-meta{min-width:0;flex:1;font-size:.8rem;line-height:1.35;color:#A6A6A2}',
+      '#cricri-visit-sheet .vs-tama-meta strong{color:#FAFAF7;font-size:.95rem;display:block;margin-bottom:.2rem;font-family:"Inter",system-ui,sans-serif;font-weight:700;letter-spacing:0;text-transform:none}',
+      '#cricri-visit-sheet .vs-stats{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin:0 0 1rem}',
+      '#cricri-visit-sheet .vs-stat{padding:.55rem .6rem;border-radius:12px;background:rgba(255,255,255,.04);',
+      'border:1px solid rgba(255,255,255,.1);font-size:.68rem;color:#7A7A76;font-family:"IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.06em}',
+      '#cricri-visit-sheet .vs-stat b{display:block;color:#FAFAF7;font-size:.95rem;font-family:"Inter",system-ui,sans-serif;margin-top:.15rem;letter-spacing:0;text-transform:none}',
+      '#cricri-visit-sheet .vs-actions{display:flex;flex-direction:column;gap:.45rem}',
+      '#cricri-visit-sheet .vs-btn{appearance:none;border-radius:999px;padding:.75rem 1rem;cursor:pointer;text-align:center;',
+      'font:700 .78rem/1 "Inter",system-ui,sans-serif;letter-spacing:.02em;text-transform:none;text-decoration:none;border:1.5px solid transparent;display:block}',
+      '#cricri-visit-sheet .vs-primary{background:#E6BE49;',
+      'animation:vs-holo 5s linear infinite;color:#0A0A0A;border:none}',
+      '@keyframes vs-holo{to{background-position:300% 0}}',
+      '#cricri-visit-sheet .vs-ghost{background:transparent;color:#FAFAF7;border-color:rgba(255,255,255,.22)}',
+      '#cricri-visit-sheet .vs-msg{margin:.5rem 0 0;font-size:.78rem;color:#7A7A76;min-height:1.2em;text-align:center}',
+      '#cricri-visit-sheet .vs-msg.ok{color:#E6BE49}',
+      '#cricri-visit-sheet .vs-msg.err{color:#F0D488}',
+      '#cricri-visit-sheet .vs-empty-tama{opacity:.85;font-size:.85rem;color:#7A7A76;margin:0 0 1rem;padding:.75rem;border-radius:12px;border:1.5px dashed rgba(255,255,255,.14);text-align:center}',
+      'html[data-theme="light"] #cricri-visit-sheet{background:rgba(32,21,38,.45)}',
+      'html[data-theme="light"] #cricri-visit-sheet .vs-card,html[data-a11y-theme="light"] #cricri-visit-sheet .vs-card{background:#FFFFFF;color:#111111}',
+      'html[data-theme="light"] #cricri-visit-sheet .vs-name{color:#111111}',
+      'html[data-theme="light"] #cricri-visit-sheet .vs-handle-txt{color:#A67418}',
+      'html[data-theme="light"] #cricri-visit-sheet .vs-stat b{color:#111111}',
+      'html[data-theme="light"] #cricri-visit-sheet .vs-ghost{color:#111111;border-color:rgba(32,21,38,.25)}'
     ].join('');
     document.head.appendChild(s);
   }
 
-  function avatarHtml(pr) {
-    pr = pr || {};
-    var photo = (pr.photo_url || '').toString();
-    if (photo.indexOf('emoji:') === 0) {
-      return '<div class="vs-av" aria-hidden="true">' + esc(photo.slice(6) || '🎨') + '</div>';
-    }
-    if (/^https?:\/\//i.test(photo)) {
-      return '<div class="vs-av"><img src="' + esc(photo) + '" alt=""></div>';
-    }
-    var letter = ((pr.handle || pr.name || '?') + '').replace(/^@/, '').charAt(0).toUpperCase();
-    return '<div class="vs-av">' + esc(letter) + '</div>';
+  function formLabel(id) {
+    var map = { egg: 'Ovo', kitten: 'Filhote', teen: 'Jovem', adult: 'Adulto', legend: 'Lenda' };
+    return map[id] || id || '';
   }
 
-  function formLabel(id) {
-    var map = {
-      barroco: 'Forma Barroca',
-      azulejo: 'Forma Azulejo',
-      cortejo: 'Forma Cortejo',
-      lenda: 'Forma Lenda',
-      total: 'Cabrunco Total'
-    };
-    return map[id] || '';
+  function avatarHtml(pr) {
+    if (pr.photo_url) {
+      return '<div class="vs-av"><img src="' + esc(pr.photo_url) + '" alt="" /></div>';
+    }
+    var letter = (pr.name || pr.handle || '?').charAt(0).toUpperCase();
+    return '<div class="vs-av" aria-hidden="true">' + esc(letter) + '</div>';
   }
 
   async function resolveProfile(opts) {
-    opts = opts || {};
     var client = window.fascDb;
     if (!client) throw new Error('Sem conexão');
     if (opts.userId) {
@@ -95,7 +88,7 @@
       if (byId.data) return byId.data;
     }
     var handle = (opts.handle || '').replace(/^@/, '').trim();
-    if (!handle) throw new Error('Perfil sem nick');
+    if (!handle) throw new Error('Perfil não encontrado');
     var byH = await client.from('profiles').select('id,name,handle,photo_url,bio').eq('handle', handle).maybeSingle();
     if (byH.error) throw byH.error;
     if (!byH.data) throw new Error('Perfil não encontrado');
@@ -105,41 +98,11 @@
   async function loadTamaSummary(userId) {
     if (!userId || !window.fascDb) return null;
     try {
-      // tenta RPC pública se existir
-      if (window.fascDb.rpc) {
-        var rpc = await window.fascDb.rpc('get_tama_public', { p_user_id: userId });
-        if (!rpc.error && rpc.data) {
-          var d = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
-          if (d) return d;
-        }
+      if (window.CricriTamaState && window.CricriTamaState.summaryFor) {
+        return await window.CricriTamaState.summaryFor(userId);
       }
     } catch (_) {}
-    try {
-      var res = await window.fascDb.from('tama_state').select('state').eq('user_id', userId).maybeSingle();
-      if (res.error || !res.data || !res.data.state) return null;
-      var st = res.data.state;
-      if (typeof st === 'string') {
-        try { st = JSON.parse(st); } catch (_) { return null; }
-      }
-      if (window.CricriTamaRead && window.CricriTamaRead.summarize) {
-        return window.CricriTamaRead.summarize(st);
-      }
-      // fallback mínimo
-      if (!st || !st.started) return null;
-      return {
-        name: st.name || 'Cri',
-        stageLabel: st.stageId || '—',
-        emoji: '🐾',
-        shellLabel: st.shell || '—',
-        careScore: st.careScore || 0,
-        alive: st.alive !== false,
-        formId: st.formId || null,
-        formLabel: formLabel(st.formId),
-        evolutions: st.evolutions || 0
-      };
-    } catch (_) {
-      return null;
-    }
+    return null;
   }
 
   function close() {
@@ -165,7 +128,7 @@
     sheet.innerHTML =
       '<div class="vs-card" role="dialog" aria-modal="true" aria-label="Visitar perfil">' +
         '<div class="vs-handle" aria-hidden="true"></div>' +
-        '<p style="margin:0;text-align:center;color:#8c8376;font-size:0.85rem">Carregando perfil…</p>' +
+        '<p style="margin:0;text-align:center;color:#7A7A76;font-size:0.85rem">Carregando perfil…</p>' +
       '</div>';
 
     try {
@@ -182,6 +145,7 @@
       }
 
       var nick = pr.handle ? '@' + pr.handle : '';
+      var bio = (pr.bio || '').trim();
       var tamaBlock = '';
       if (tama) {
         var form = tama.formLabel || formLabel(tama.formId) || '';
@@ -208,14 +172,16 @@
 
       var actions = '';
       if (!isSelf) {
+        if (pr.handle) {
+          actions += '<a class="vs-btn vs-primary" href="profile.html?u=' + encodeURIComponent(pr.handle) + '">Ver perfil completo</a>';
+        }
         if (isFriend) {
           actions += '<button type="button" class="vs-btn vs-ghost" disabled>Vocês já são amigos</button>';
         } else {
-          actions += '<button type="button" class="vs-btn vs-primary" data-vs="friend">Pedir amizade</button>';
+          actions += '<button type="button" class="vs-btn vs-ghost" data-vs="friend">Pedir amizade</button>';
         }
         if (pr.handle) {
-          actions += '<a class="vs-btn vs-ghost" href="profile.html?u=' + encodeURIComponent(pr.handle) + '">Ver perfil completo</a>';
-          actions += '<a class="vs-btn vs-ghost" href="profile.html?u=' + encodeURIComponent(pr.handle) + '#caixinha-title">Mandar Meow</a>';
+          actions += '<a class="vs-btn vs-ghost" href="profile.html?u=' + encodeURIComponent(pr.handle) + '#caixinha-title">Mandar na caixinha</a>';
         }
       } else {
         actions += '<a class="vs-btn vs-primary" href="profile.html">Meu perfil</a>';
@@ -231,6 +197,7 @@
             '<div class="vs-meta">' +
               '<p class="vs-name">' + esc(pr.name || pr.handle || 'Alguém') + '</p>' +
               (nick ? '<p class="vs-handle-txt">' + esc(nick) + '</p>' : '') +
+              (bio ? '<p class="vs-bio">' + esc(bio) + '</p>' : '') +
             '</div>' +
           '</div>' +
           tamaBlock +
@@ -272,18 +239,16 @@
       sheet.innerHTML =
         '<div class="vs-card">' +
           '<div class="vs-handle"></div>' +
-          '<p style="margin:0 0 0.75rem;color:#f5a3b8">' + esc((e && e.message) || 'Erro ao abrir perfil') + '</p>' +
+          '<p style="margin:0 0 0.75rem;color:#F0D488;text-align:center">' + esc((e && e.message) || 'Erro ao abrir perfil') + '</p>' +
           '<button type="button" class="vs-btn vs-ghost" data-vs="close">Fechar</button>' +
         '</div>';
       sheet.querySelector('[data-vs="close"]').addEventListener('click', close);
     }
   }
 
-  // delegação global: data-visit-user / data-visit-handle
   document.addEventListener('click', function (e) {
     var el = e.target.closest('[data-visit-handle], [data-visit-user], a.post-nick, a.post-avatar-link');
     if (!el) return;
-    // deixa link normal com modifier
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     var handle = el.getAttribute('data-visit-handle') || '';
     var userId = el.getAttribute('data-visit-user') || '';
@@ -292,10 +257,15 @@
       var m = href.match(/[?&]u=([^&]+)/);
       if (m) handle = decodeURIComponent(m[1]);
     }
+    if (!handle && el.classList.contains('post-avatar-link')) {
+      var href2 = el.getAttribute('href') || '';
+      var m2 = href2.match(/[?&]u=([^&]+)/);
+      if (m2) handle = decodeURIComponent(m2[1]);
+    }
     if (!handle && !userId) return;
     e.preventDefault();
     open({ handle: handle, userId: userId });
   });
 
-  window.CricriVisit = { open: open, close: close };
+  window.CricriVisit = { open: open, close: close, __v2: true };
 })();
