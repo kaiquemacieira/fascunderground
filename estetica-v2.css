@@ -1007,88 +1007,115 @@ html[data-theme="light"] #profile-hero .handle-line {
 }
 
 
-/* ═══ mobile harden ═══ */
-html, body {
-  max-width: 100% !important;
-  overflow-x: hidden !important;
+
+
+/* ═══ tipografia base estável ═══ */
+html {
+  font-size: 16px !important;
 }
-img, video, svg, canvas {
-  max-width: 100% !important;
-  height: auto;
+body {
+  font-size: 1rem !important;
+  line-height: 1.45 !important;
 }
+
+/* coluna app — não estoura no desktop */
 .home-wrap,
 .feed-container,
 .page,
-main {
-  max-width: 100% !important;
+main#conteudo-principal,
+main.page,
+#profile-wrap,
+.mural-composer.card {
+  max-width: 520px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
   box-sizing: border-box !important;
 }
-/* espaço para bottom nav + safe area */
-body {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+
+/* títulos sob controle */
+.home-title,
+h1.home-title {
+  font-size: clamp(1.45rem, 4vw, 1.85rem) !important;
+  line-height: 1.15 !important;
 }
-/* casas drawer full height mobile */
-.casas-drawer {
-  width: min(88vw, 360px) !important;
-  max-width: 100vw !important;
+.cd-num {
+  font-size: clamp(1.2rem, 4vw, 1.65rem) !important;
 }
-/* a11y panel não cobre tela toda no mobile */
-.a11y-panel {
-  width: min(340px, calc(100vw - 1.25rem)) !important;
-  max-height: min(60vh, calc(100dvh - 9rem - env(safe-area-inset-bottom, 0px))) !important;
+.feed-head h2,
+.section-title,
+.title {
+  font-size: 1.15rem !important;
 }
-/* composer / cards */
-.mural-composer.card,
-.card {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.display-name,
+#profile-hero .display-name {
+  font-size: 1.25rem !important;
+  line-height: 1.2 !important;
 }
-.scrap-composer-footer {
-  gap: 0.5rem !important;
+.logo, .home-logo, .brand {
+  font-size: 1.15rem !important;
 }
-.mural-audience {
-  flex-wrap: wrap !important;
+.post-card, .card {
+  font-size: 0.92rem !important;
 }
-/* topbar home */
-.home-top {
+.bn-label {
+  font-size: 0.58rem !important;
+}
+
+/* CTAs home: em desktop lado a lado se couber */
+.home-ctas {
+  display: flex !important;
   flex-wrap: wrap !important;
   gap: 0.5rem !important;
 }
 .home-ctas .home-cta {
-  width: 100% !important;
+  width: auto !important;
+  flex: 1 1 auto !important;
+  min-width: 8rem !important;
 }
-/* countdown grid mobile */
-.cd-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 0.35rem !important;
-}
-.cd-num {
-  font-size: clamp(1.25rem, 6vw, 1.85rem) !important;
-}
-/* profile hero */
-#profile-hero {
-  max-width: 100% !important;
-  overflow: hidden !important;
-}
-#profile-hero .display-name-row {
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  gap: 0.5rem !important;
-}
-/* bottom nav labels smaller on very narrow */
-@media (max-width: 360px) {
-  nav.bottom-nav[data-cricri-nav="1"] .bn-label {
-    font-size: 0.55rem !important;
+
+/* desktop: coluna centrada, tipografia contida */
+@media (min-width: 768px) {
+  html { font-size: 15px !important; }
+  .home-wrap,
+  .feed-container,
+  .page,
+  main#conteudo-principal,
+  #profile-wrap {
+    max-width: 480px !important;
   }
-  nav.bottom-nav[data-cricri-nav="1"] button.bn-create {
-    width: 44px !important;
-    height: 44px !important;
+  .home-title { font-size: 1.65rem !important; }
+  .cd-num { font-size: 1.45rem !important; }
+  .display-name, #profile-hero .display-name { font-size: 1.2rem !important; }
+}
+
+@media (min-width: 1024px) {
+  html { font-size: 15px !important; }
+  .home-wrap,
+  .feed-container,
+  .page,
+  main#conteudo-principal,
+  #profile-wrap {
+    max-width: 440px !important;
   }
 }
+
+/* mobile narrow only */
 @media (max-width: 480px) {
-  .feed-head h2 { font-size: 1.25rem !important; }
-  .home-title { font-size: clamp(1.5rem, 7vw, 2.2rem) !important; }
+  .home-ctas .home-cta { width: 100% !important; }
+  .home-title { font-size: clamp(1.35rem, 6vw, 1.75rem) !important; }
 }
+
+@media (max-width: 360px) {
+  nav.bottom-nav[data-cricri-nav="1"] .bn-label { font-size: 0.55rem !important; }
+  nav.bottom-nav[data-cricri-nav="1"] button.bn-create {
+    width: 44px !important; height: 44px !important;
+  }
+}
+
+/* overflow safe */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video, svg, canvas { max-width: 100%; height: auto; }
 
 
 /* bottom-nav force visible */
