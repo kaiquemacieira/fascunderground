@@ -3962,9 +3962,28 @@ window.fascEventEnded = function () {
           data: { name: name || 'novo usuário' }
         }
       });
-      if (res.error) throw res.error;
-      // Supabase às vezes retorna user sem session (confirmação de e-mail)
-      return res.data;
+      if (res.error) {
+        var code = (res.error.code || '') + ' ' + (res.error.message || '');
+        if (/already|exists|registered|duplicate/i.test(code)) {
+          var e = new Error('Este e-mail já existe. Use outro e-mail ou entre na aba Entrar.');
+          e.code = 'email_exists';
+          throw e;
+        }
+        throw res.error;
+      }
+      var data = res.data || {};
+      var user = data.user;
+      // Anti-enumeration do GoTrue: e-mail já cadastrado → user com identities vazio
+      if (user && Array.isArray(user.identities) && user.identities.length === 0) {
+        var e2 = new Error('Este e-mail já existe. Use outro e-mail ou entre na aba Entrar.');
+        e2.code = 'email_exists';
+        throw e2;
+      }
+      // Confirmação de e-mail ativa: user sem session = precisa confirmar
+      if (user && !data.session) {
+        data.needsEmailConfirmation = true;
+      }
+      return data;
     },
     async signIn(email, password) {
       var res = await client.auth.signInWithPassword({
@@ -5008,8 +5027,8 @@ window.fascEventEnded = function () {
     function friendlyAuthError(err) {
       var m = (err && (err.message || err.error_description || err.msg)) || '';
       var low = String(m).toLowerCase();
-      if (/already|registered|exists|já cadastrado|user already/.test(low)) {
-        return 'Este e-mail já tem conta. Use a aba Entrar ou recupere a senha.';
+      if (/already|registered|exists|já cadastrado|user already|email address has already|user_already_exists|duplicate/i.test(low)) {
+        return 'Este e-mail já existe. Use outro e-mail ou entre na aba Entrar.';
       }
       if (/password|senha|weak|least|characters|6/.test(low) && /password|senha|weak|short|characters/.test(low)) {
         return 'Senha rejeitada. Use no mínimo 6 caracteres (ideal: letras + números).';
@@ -5077,9 +5096,13 @@ window.fascEventEnded = function () {
             if (data && data.session) {
               msg('auth-msg', 'Conta criada e já logada. Bem-vindo ao CRICRI!', true);
               await refreshSession();
-            } else if (data && data.user && !data.session) {
-              msg('auth-msg', 'Conta criada! Abra o e-mail e confirme o link (só uma vez). Depois volte e entre com a senha.', true);
+            } else if (data && (data.needsEmailConfirmation || (data.user && !data.session))) {
+              msg('auth-msg', 'Conta criada! Enviamos um link de confirmação para ' + email + '. Abra o e-mail, confirme e depois use a aba Entrar.', true);
               setMode('login');
+              try {
+                var em = $('email');
+                if (em) em.value = email;
+              } catch (_) {}
             } else {
               msg('auth-msg', 'Conta criada. Se pedir confirmação, veja o e-mail e depois entre na aba Entrar.', true);
               setMode('login');
@@ -5095,8 +5118,15 @@ window.fascEventEnded = function () {
             await refreshSession();
           }
         } catch (err) {
-          msg('auth-msg', friendlyAuthError(err), false);
+          var tip = friendlyAuthError(err);
+          msg('auth-msg', tip, false);
           console.warn('[CRICRI auth]', err);
+          if (err && (err.code === 'email_exists' || /já existe|already exists|already registered/i.test(tip))) {
+            try {
+              var em = $('email');
+              if (em) { em.focus(); em.select && em.select(); }
+            } catch (_) {}
+          }
         } finally {
           if (submit) submit.disabled = false;
         }
