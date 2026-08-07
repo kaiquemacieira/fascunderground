@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
+
+  <script>
+  /* CRICRI · a11y boot (anti-FOUC + multi-página) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('cricri-a11y-v2') || '{}') || {}; } catch (_) {}
+      try {
+        var leg = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+        if (!s.theme && leg.theme) s.theme = leg.theme;
+      } catch (_) {}
+      var h = document.documentElement;
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t);
+      h.style.colorScheme = t;
+      var keys = ['text','contrast','motion','font','spacing','links','color','cursor','reading'];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var v = s[k];
+        if (v && v !== 'default' && v !== 'md') h.setAttribute('data-a11y-' + k, v);
+        else h.removeAttribute('data-a11y-' + k);
+      }
+    } catch (_) {}
+  })();
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
 
@@ -2996,8 +3023,67 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{ba
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
-  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807c">
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807fix1">
   <link rel="stylesheet" href="css/device-adapt.css?v=20260807c">
+
+<style id="tama-layout-fix-v3">
+/* Remove botão antigo do canto superior esquerdo (gear top-tools) */
+#cricri-top-tools, .cricri-top-tools, #cricri-gear-btn, #cricri-gear-panel {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+/* Install (era canto inferior esquerdo) → superior esquerdo */
+#cricri-install-btn {
+  position: fixed !important;
+  top: max(0.55rem, env(safe-area-inset-top, 0px)) !important;
+  left: max(0.55rem, env(safe-area-inset-left, 0px)) !important;
+  bottom: auto !important;
+  right: auto !important;
+  z-index: 2147483001 !important;
+}
+/* Desktop / tablet: largura controlada do pet */
+body.page-tama,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+.device, .screen, #app, .tama-shell, main {
+  max-width: min(28rem, 100vw) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+@media (min-width: 768px) {
+  .device, .screen, #app, .tama-shell {
+    max-width: 24rem !important;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  main, #conteudo-principal {
+    width: 100%;
+    max-width: 28rem;
+  }
+}
+@media (min-width: 1100px) {
+  .device, .screen {
+    max-width: 22rem !important;
+  }
+}
+/* top bar do tama alinhada */
+.top {
+  max-width: min(28rem, 100%);
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+</style>
+
 </head>
 
 <script>
@@ -3373,7 +3459,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </nav>
 
 </div>
-  <script src="js/guest-mode.js"></script>
+  <script src="js/guest-mode.js?v=20260807g"></script>
   <script src="js/visit-sheet.js?v=20260805i"></script>
   <script src="js/friends.js?v=20260807f"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
@@ -3381,7 +3467,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/sw-register.js?v=9"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
-  <script src="js/fixed-chrome.js?v=20260807a"></script>
+  <script src="js/fixed-chrome.js?v=20260807fix1"></script>
 
   <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-motion.js"></script>
@@ -3395,7 +3481,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/tamagotchi.js?v=20260807x"></script>
   <script src="js/profile-tama-card.js"></script>
   <script src="js/tama-postcard.js"></script>
-  <script src="js/a11y-core.js" defer></script>
+  <script src="js/a11y-core.js?v=20260807fix1" defer></script>
   <script src="js/keyboard-nav.js" defer></script>
   <script src="js/touch-gestures.js" defer></script>
   <script src="js/sync-monitor.js" defer></script>

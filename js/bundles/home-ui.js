@@ -372,11 +372,16 @@
 
 /* --- js/a11y-core.js --- */
 /**
- * CRICRI · Acessibilidade global (WCAG-oriented)
- * FAB + painel em qualquer página; estado em localStorage.
+ * CRICRI · Acessibilidade global (LEGADO no bundle)
+ * Se a11y-core.js v2 já carregou, este bloco NÃO roda
+ * (evita filter no body e painel incompleto).
  */
 (function (global) {
   'use strict';
+  if (global.__CRICRI_A11Y_V2) {
+    console.info('[CRICRI a11y] home-ui: legado ignorado (v2 ativo)');
+    return;
+  }
 
   var KEY = 'cricri-a11y-v2';
   var LEGACY = 'fasc-a11y-v1';

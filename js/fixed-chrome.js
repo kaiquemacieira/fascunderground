@@ -32,6 +32,17 @@
   }
 
   function pin() {
+    // Nunca deixar filter/transform no html/body (quebra fixed)
+    try {
+      document.documentElement.style.setProperty('filter', 'none', 'important');
+      document.documentElement.style.removeProperty('filter');
+      document.documentElement.style.setProperty('transform', 'none', 'important');
+      if (document.body) {
+        document.body.style.setProperty('filter', 'none', 'important');
+        document.body.style.removeProperty('filter');
+        document.body.style.setProperty('transform', 'none', 'important');
+      }
+    } catch (_) {}
     // nav
     var navs = document.querySelectorAll('nav.bottom-nav');
     navs.forEach(function (nav) {

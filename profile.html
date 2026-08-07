@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
+
+  <script>
+  /* CRICRI · a11y boot (anti-FOUC + multi-página) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('cricri-a11y-v2') || '{}') || {}; } catch (_) {}
+      try {
+        var leg = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+        if (!s.theme && leg.theme) s.theme = leg.theme;
+      } catch (_) {}
+      var h = document.documentElement;
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t);
+      h.style.colorScheme = t;
+      var keys = ['text','contrast','motion','font','spacing','links','color','cursor','reading'];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var v = s[k];
+        if (v && v !== 'default' && v !== 'md') h.setAttribute('data-a11y-' + k, v);
+        else h.removeAttribute('data-a11y-' + k);
+      }
+    } catch (_) {}
+  })();
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
 
@@ -3530,7 +3557,7 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{ba
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
-  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807a">
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807fix1">
 <style id="profile-hero-clear">
 /* sem título acima da foto */
 main > h1.title { display: none !important; }
@@ -3962,9 +3989,28 @@ window.fascEventEnded = function () {
           data: { name: name || 'novo usuário' }
         }
       });
-      if (res.error) throw res.error;
-      // Supabase às vezes retorna user sem session (confirmação de e-mail)
-      return res.data;
+      if (res.error) {
+        var code = (res.error.code || '') + ' ' + (res.error.message || '');
+        if (/already|exists|registered|duplicate/i.test(code)) {
+          var e = new Error('Este e-mail já existe. Use outro e-mail ou entre na aba Entrar.');
+          e.code = 'email_exists';
+          throw e;
+        }
+        throw res.error;
+      }
+      var data = res.data || {};
+      var user = data.user;
+      // Anti-enumeration do GoTrue: e-mail já cadastrado → user com identities vazio
+      if (user && Array.isArray(user.identities) && user.identities.length === 0) {
+        var e2 = new Error('Este e-mail já existe. Use outro e-mail ou entre na aba Entrar.');
+        e2.code = 'email_exists';
+        throw e2;
+      }
+      // Confirmação de e-mail ativa: user sem session = precisa confirmar
+      if (user && !data.session) {
+        data.needsEmailConfirmation = true;
+      }
+      return data;
     },
     async signIn(email, password) {
       var res = await client.auth.signInWithPassword({
@@ -5008,8 +5054,8 @@ window.fascEventEnded = function () {
     function friendlyAuthError(err) {
       var m = (err && (err.message || err.error_description || err.msg)) || '';
       var low = String(m).toLowerCase();
-      if (/already|registered|exists|já cadastrado|user already/.test(low)) {
-        return 'Este e-mail já tem conta. Use a aba Entrar ou recupere a senha.';
+      if (/already|registered|exists|já cadastrado|user already|email address has already|user_already_exists|duplicate/i.test(low)) {
+        return 'Este e-mail já existe. Use outro e-mail ou entre na aba Entrar.';
       }
       if (/password|senha|weak|least|characters|6/.test(low) && /password|senha|weak|short|characters/.test(low)) {
         return 'Senha rejeitada. Use no mínimo 6 caracteres (ideal: letras + números).';
@@ -5077,9 +5123,13 @@ window.fascEventEnded = function () {
             if (data && data.session) {
               msg('auth-msg', 'Conta criada e já logada. Bem-vindo ao CRICRI!', true);
               await refreshSession();
-            } else if (data && data.user && !data.session) {
-              msg('auth-msg', 'Conta criada! Abra o e-mail e confirme o link (só uma vez). Depois volte e entre com a senha.', true);
+            } else if (data && (data.needsEmailConfirmation || (data.user && !data.session))) {
+              msg('auth-msg', 'Conta criada! Enviamos um link de confirmação para ' + email + '. Abra o e-mail, confirme e depois use a aba Entrar.', true);
               setMode('login');
+              try {
+                var em = $('email');
+                if (em) em.value = email;
+              } catch (_) {}
             } else {
               msg('auth-msg', 'Conta criada. Se pedir confirmação, veja o e-mail e depois entre na aba Entrar.', true);
               setMode('login');
@@ -5095,8 +5145,15 @@ window.fascEventEnded = function () {
             await refreshSession();
           }
         } catch (err) {
-          msg('auth-msg', friendlyAuthError(err), false);
+          var tip = friendlyAuthError(err);
+          msg('auth-msg', tip, false);
           console.warn('[CRICRI auth]', err);
+          if (err && (err.code === 'email_exists' || /já existe|already exists|already registered/i.test(tip))) {
+            try {
+              var em = $('email');
+              if (em) { em.focus(); em.select && em.select(); }
+            } catch (_) {}
+          }
         } finally {
           if (submit) submit.disabled = false;
         }
@@ -5992,7 +6049,7 @@ window.fascEventEnded = function () {
   <script src="js/push.js?v=20260805g"></script>
 
   <script src="js/theme.js?v=20260805n"></script>
-  <script src="js/a11y-core.js" defer></script>
+  <script src="js/a11y-core.js?v=20260807fix1" defer></script>
   <script src="js/keyboard-nav.js" defer></script>
   <script src="js/touch-gestures.js" defer></script>
   <script src="js/sync-monitor.js" defer></script>
@@ -6200,7 +6257,7 @@ window.fascEventEnded = function () {
 
 </div>
   <script src="js/cri-svg.js"></script>
-  <script src="js/guest-mode.js"></script>
+  <script src="js/guest-mode.js?v=20260807g"></script>
   <script src="js/visit-sheet.js?v=20260806d"></script>
   <script src="js/friends.js?v=20260807f"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
@@ -6209,7 +6266,7 @@ window.fascEventEnded = function () {
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
-  <script src="js/fixed-chrome.js?v=20260807a"></script>
+  <script src="js/fixed-chrome.js?v=20260807fix1"></script>
   <!-- chip de nick removido do topbar — sininho global em js/notif-bell.js -->
 
 <script>
@@ -6250,7 +6307,7 @@ window.fascEventEnded = function () {
       span.className = 'avatar-fallback';
       span.setAttribute('aria-hidden', 'true');
       span.textContent = '🐾';
-      span.style.css?v=20260806mockText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.6rem';
+      span.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.6rem';
       wrap.appendChild(span);
     }
   }

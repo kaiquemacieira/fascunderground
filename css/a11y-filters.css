@@ -1,0 +1,102 @@
+/**
+ * CRICRI · Filtros de daltonismo + contraste
+ * NUNCA em html/body — quebra position:fixed (bottom-nav, FAB).
+ * Alvo: .feed-section, main, #conteudo-principal (sem nav dentro).
+ */
+
+/* html/body sempre limpos */
+html, body {
+  filter: none !important;
+}
+
+/* ── Daltonismo ── */
+html[data-a11y-color="protanopia"] .feed-section,
+html[data-a11y-color="protanopia"] #conteudo-principal,
+html[data-a11y-color="protanopia"] main {
+  filter: url(#cricri-protanopia);
+}
+html[data-a11y-color="deuteranopia"] .feed-section,
+html[data-a11y-color="deuteranopia"] #conteudo-principal,
+html[data-a11y-color="deuteranopia"] main {
+  filter: url(#cricri-deuteranopia);
+}
+html[data-a11y-color="tritanopia"] .feed-section,
+html[data-a11y-color="tritanopia"] #conteudo-principal,
+html[data-a11y-color="tritanopia"] main {
+  filter: url(#cricri-tritanopia);
+}
+html[data-a11y-color="gray"] .feed-section,
+html[data-a11y-color="gray"] #conteudo-principal,
+html[data-a11y-color="gray"] main {
+  filter: grayscale(1);
+}
+html[data-a11y-color="lowsat"] .feed-section,
+html[data-a11y-color="lowsat"] #conteudo-principal,
+html[data-a11y-color="lowsat"] main {
+  filter: saturate(0.45);
+}
+
+/* Tokens legíveis por modo */
+html[data-a11y-color="protanopia"],
+html[data-a11y-color="deuteranopia"] {
+  --gold: #F0C830 !important;
+  --gold-deep: #E0B020 !important;
+  --rosa: #F0C830 !important;
+  --danger: #5B9BD5 !important;
+}
+html[data-a11y-color="tritanopia"] {
+  --gold: #FF8C42 !important;
+  --gold-deep: #E07020 !important;
+  --rosa: #FF8C42 !important;
+  --danger: #FF6B8A !important;
+}
+html[data-a11y-color="gray"],
+html[data-a11y-color="lowsat"] {
+  --gold: #E0E0E0 !important;
+  --gold-deep: #B0B0B0 !important;
+  --rosa: #CCCCCC !important;
+}
+
+/* ── Contraste (sem filter no body) ── */
+html[data-a11y-contrast="soft"] .feed-section,
+html[data-a11y-contrast="soft"] #conteudo-principal,
+html[data-a11y-contrast="soft"] main {
+  filter: contrast(0.92) saturate(0.92);
+}
+html[data-a11y-contrast="invert"] .feed-section,
+html[data-a11y-contrast="invert"] #conteudo-principal,
+html[data-a11y-contrast="invert"] main {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html[data-a11y-contrast="high"] {
+  --bg: #000000 !important;
+  --bg-raised: #000000 !important;
+  --bg-sunken: #000000 !important;
+  --text: #FFFFFF !important;
+  --text-2: #FFFFFF !important;
+  --text-3: #EEEEEE !important;
+  --border: #FFFFFF !important;
+  --border-strong: #FFFFFF !important;
+  --gold: #FFFF00 !important;
+  --gold-deep: #FFFF00 !important;
+  --rosa: #FFFF00 !important;
+}
+html[data-a11y-contrast="high"] body {
+  background: #000 !important;
+  color: #fff !important;
+  filter: none !important;
+}
+
+/* Chrome fixo: nunca herda filtro */
+nav.bottom-nav,
+.a11y-wrap,
+#a11y-toggle,
+#a11y-panel,
+#cricri-install-btn,
+.cricri-guest-banner,
+.vlibras-wrapper,
+[vw] {
+  filter: none !important;
+  transform: none !important;
+}

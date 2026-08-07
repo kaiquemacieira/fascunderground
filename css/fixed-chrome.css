@@ -1,13 +1,14 @@
+html, body { filter: none !important; transform: none !important; }
 
 /* CRICRI — chrome fixo na viewport (menu, a11y, install, libras) */
 html, body {
   overflow-x: hidden;
 }
 
-/* Neutraliza apenas html/body — pais com transform quebram position:fixed */
+/* Neutraliza transform/perspective em html/body — pais com transform quebram position:fixed.
+   NÃO zerar filter aqui: a11y (daltonismo / contraste) aplica filter no conteúdo, não no chrome. */
 html, body {
   transform: none !important;
-  filter: none !important;
   perspective: none !important;
 }
 
@@ -29,6 +30,7 @@ nav.bottom-nav[data-cricri-nav="1"],
   visibility: visible !important;
   pointer-events: auto !important;
   transform: none !important;
+  filter: none !important;
   clip: auto !important;
   clip-path: none !important;
   display: grid !important;
@@ -57,7 +59,7 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
   background: rgba(255, 255, 255, 0.97) !important;
 }
 
-/* ACESSIBILIDADE FAB */
+/* ACESSIBILIDADE FAB — fora do filtro de daltonismo */
 .a11y-wrap,
 #a11y-wrap {
   position: fixed !important;
@@ -69,12 +71,14 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
   pointer-events: none !important;
   margin: 0 !important;
   transform: none !important;
+  filter: none !important;
 }
 .a11y-toggle,
 #a11y-toggle {
   pointer-events: auto !important;
   position: relative !important;
   z-index: 2147483003 !important;
+  filter: none !important;
 }
 .a11y-panel,
 #a11y-panel {
@@ -86,17 +90,19 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
   z-index: 2147483004 !important;
   pointer-events: auto !important;
   transform: none !important;
+  filter: none !important;
 }
 
 /* BAIXAR APP */
 #cricri-install-btn {
   position: fixed !important;
-  left: max(0.75rem, env(safe-area-inset-left, 0px)) !important;
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-  top: auto !important;
+  left: max(0.55rem, env(safe-area-inset-left, 0px)) !important;
+  top: max(0.55rem, env(safe-area-inset-top, 0px)) !important;
+  bottom: auto !important;
   right: auto !important;
   z-index: 2147483001 !important;
   transform: none !important;
+  filter: none !important;
   margin: 0 !important;
 }
 
@@ -108,6 +114,12 @@ div[vw] {
   position: fixed !important;
   z-index: 2147483005 !important;
   transform: none !important;
+  filter: none !important;
+}
+
+/* Guest banner e chrome superior também fora do filtro */
+.cricri-guest-banner {
+  filter: none !important;
 }
 
 /* espaço pro conteúdo não ficar atrás do menu */

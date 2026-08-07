@@ -79,6 +79,7 @@
     injectBanner();
 
     // Desabilita ações de escrita comuns
+    // NÃO trava formulário de login/cadastro (#auth-form) — senão "Criar conta" quebra no perfil
     var selectors = [
       '#mural-post-btn',
       '#mural-post-body',
@@ -91,12 +92,13 @@
       '[data-action="scrap"]',
       '[data-action="start"]',
       '#denuncia-submit',
-      '#auth-form button[type="submit"]',
       '.btn-edit-profile',
       '#profile-edit-btn'
     ];
     selectors.forEach(function (sel) {
       document.querySelectorAll(sel).forEach(function (el) {
+        // Nunca travar botões/inputs dentro do formulário de auth
+        if (el.closest && el.closest('#auth-form, .auth-form, #login-form, form[data-auth]')) return;
         if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
           el.setAttribute('readonly', 'readonly');
           el.setAttribute('placeholder', 'Entre na conta pra interagir');

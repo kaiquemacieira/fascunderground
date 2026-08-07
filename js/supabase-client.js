@@ -68,7 +68,25 @@
           data: { name: name || 'novo usuário' }
         }
       });
-      if (res.error) throw res.error;
+      if (res.error) {
+        var msg = (res.error.message || '').toLowerCase();
+        if (/already\s*registered|already\s*exists|user\s*already|email.*exist|duplicate/i.test(msg)) {
+          var e = new Error('Este e-mail já está cadastrado. Tente outro ou entre com a senha.');
+          e.code = res.error.code || 'user_already_exists';
+          e.status = res.error.status;
+          throw e;
+        }
+        throw res.error;
+      }
+      // Supabase às vezes retorna user sem session quando e-mail já existe (identities vazias)
+      try {
+        var u = res.data && res.data.user;
+        if (u && Array.isArray(u.identities) && u.identities.length === 0) {
+          throw new Error('Este e-mail já está cadastrado. Tente outro ou entre com a senha.');
+        }
+      } catch (x) {
+        if (x && /já está cadastrado/i.test(x.message || '')) throw x;
+      }
       return res.data;
     },
     async signIn(email, password) {
@@ -76,7 +94,19 @@
         email: String(email || '').trim(),
         password: String(password || '')
       });
-      if (res.error) throw res.error;
+      if (res.error) {
+        var msg = (res.error.message || '').toLowerCase();
+        if (/invalid\s*login|invalid\s*credentials|email\s*not\s*confirmed/i.test(msg)) {
+          var e = new Error(
+            /not\s*confirmed/i.test(msg)
+              ? 'Confirme o e-mail antes de entrar (veja a caixa de entrada).'
+              : 'E-mail ou senha incorretos. Tente de novo.'
+          );
+          e.code = res.error.code;
+          throw e;
+        }
+        throw res.error;
+      }
       return res.data;
     },
     async signInWithGoogle() {

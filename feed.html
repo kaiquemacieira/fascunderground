@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
+
+  <script>
+  /* CRICRI · a11y boot (anti-FOUC + multi-página) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('cricri-a11y-v2') || '{}') || {}; } catch (_) {}
+      try {
+        var leg = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+        if (!s.theme && leg.theme) s.theme = leg.theme;
+      } catch (_) {}
+      var h = document.documentElement;
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t);
+      h.style.colorScheme = t;
+      var keys = ['text','contrast','motion','font','spacing','links','color','cursor','reading'];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var v = s[k];
+        if (v && v !== 'default' && v !== 'md') h.setAttribute('data-a11y-' + k, v);
+        else h.removeAttribute('data-a11y-' + k);
+      }
+    } catch (_) {}
+  })();
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
 
@@ -1387,7 +1414,7 @@ html[data-a11y-theme="light"] .header-search input {
 }
 
 .feed-wall { display: flex; flex-direction: column; gap: 1rem; }
-.feed-wall[hidden] { display: none; }
+.feed-wall[hidden] { display: none !important; }
 
 .feed-locked-note {
   display: flex;
@@ -2740,14 +2767,8 @@ html[data-a11y-contrast="soft"] {
   --ink: #2a221c;
 }
 
-html[data-a11y-contrast="invert"] {
-  filter: invert(1) hue-rotate(180deg);
-}
-html[data-a11y-contrast="invert"] img,
-html[data-a11y-contrast="invert"] video,
-html[data-a11y-contrast="invert"] .map {
-  filter: invert(1) hue-rotate(180deg);
-}
+/* invert: NÃO no html/body — quebra position:fixed do bottom-nav.
+   aplicado só no conteúdo via js/a11y-core.js */
 
 /* tema claro forçado */
 html[data-a11y-theme="light"] {
@@ -2861,19 +2882,8 @@ html[data-a11y-links="underline"] a {
   text-underline-offset: 0.18em;
 }
 
-/* escala de cinza */
-html[data-a11y-color="gray"] body {
-  filter: grayscale(1);
-}
-html[data-a11y-color="gray"] img,
-html[data-a11y-color="gray"] .map {
-  filter: none; /* already gray via parent — keep map readable? keep gray */
-}
-
-/* saturacao baixa */
-html[data-a11y-color="lowsat"] body {
-  filter: saturate(0.45);
-}
+/* gray/lowsat: NÃO no body — quebra bottom-nav fixed.
+   js/a11y-core.js aplica em #conteudo-principal / .feed-section */
 
 /* cursor grande */
 html[data-a11y-cursor="large"] * {
@@ -3617,25 +3627,40 @@ body { background: var(--bg, #0A0A0A) !important; }
 </style>
 
 <style id="feed-composer-polish">
+/* Composer do mural — layout estável (sem overlap no mobile) */
 .mural-composer.card {
+  position: relative !important;
+  z-index: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.55rem !important;
   background: var(--bg) !important;
   border: 1px solid var(--border) !important;
   border-radius: 16px !important;
   padding: 1rem 1.05rem 1.05rem !important;
   box-shadow: var(--shadow-xs) !important;
-  margin-bottom: 1rem !important;
+  margin: 0 0 1rem !important;
+  overflow: visible !important;
+  isolation: isolate;
 }
 .scrap-composer-label {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-2);
-  margin-bottom: 0.45rem;
-  letter-spacing: -0.01em;
+  display: block !important;
+  position: static !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: var(--text-2) !important;
+  margin: 0 0 0.15rem !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
 }
-.scrap-composer-label b { color: var(--gold-deep); font-weight: 700; }
-#mural-post-body {
-  width: 100%;
+.scrap-composer-label b { color: var(--gold-deep) !important; font-weight: 700 !important; }
+#mural-post-body,
+.mural-composer textarea {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   border: 1px solid var(--border) !important;
   border-radius: 12px !important;
   background: var(--bg-sunken) !important;
@@ -3643,8 +3668,10 @@ body { background: var(--bg, #0A0A0A) !important; }
   padding: 0.75rem 0.85rem !important;
   font-size: 0.95rem !important;
   line-height: 1.45 !important;
-  resize: none;
-  min-height: 4.5rem;
+  resize: vertical !important;
+  min-height: 5rem !important;
+  margin: 0 !important;
+  z-index: auto !important;
 }
 #mural-post-body:focus {
   outline: none !important;
@@ -3652,63 +3679,85 @@ body { background: var(--bg, #0A0A0A) !important; }
   box-shadow: 0 0 0 3px var(--gold-soft) !important;
 }
 .scrap-composer-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.65rem;
-  margin-top: 0.75rem;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.55rem !important;
+  margin-top: 0.15rem !important;
+  position: static !important;
+  width: 100% !important;
 }
 .scrap-composer-footer .hint {
-  font-size: 0.72rem;
-  color: var(--text-3);
-  flex: 1 1 100%;
+  font-size: 0.72rem !important;
+  color: var(--text-3) !important;
+  order: 0;
+  margin: 0 !important;
 }
 #mural-post-count {
-  font-size: 0.72rem;
+  font-size: 0.72rem !important;
   font-variant-numeric: tabular-nums;
-  color: var(--text-3);
-  margin-left: auto;
+  color: var(--text-3) !important;
+  align-self: flex-end;
+  order: 1;
+  margin: 0 !important;
 }
 .mural-audience {
-  display: flex;
-  gap: 0.4rem;
-  flex: 1 1 auto;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.4rem !important;
+  order: 2;
+  width: 100% !important;
 }
 .mural-aud-btn {
   font-size: 0.72rem !important;
   font-weight: 600 !important;
-  padding: 0.4rem 0.75rem !important;
+  padding: 0.45rem 0.8rem !important;
   border-radius: 999px !important;
   border: 1px solid var(--border-strong) !important;
   background: transparent !important;
   color: var(--text-2) !important;
   cursor: pointer;
+  position: static !important;
+  white-space: nowrap;
 }
 .mural-aud-btn.is-on {
   background: var(--text) !important;
   border-color: var(--text) !important;
   color: var(--bg) !important;
 }
+.scrap-composer-buttons {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 0.45rem !important;
+  order: 3;
+  width: 100% !important;
+}
 #mural-post-btn {
   font-size: 0.82rem !important;
   font-weight: 700 !important;
-  padding: 0.5rem 1.15rem !important;
+  padding: 0.55rem 1.25rem !important;
   border-radius: 999px !important;
   border: none !important;
   background: var(--gold) !important;
   color: #1a1400 !important;
   box-shadow: none !important;
   cursor: pointer;
+  position: static !important;
+  margin: 0 !important;
 }
 #mural-post-btn:hover:not(:disabled) {
   filter: brightness(1.05);
   transform: none !important;
   box-shadow: none !important;
 }
-/* guest / login hint */
+#mural-post-btn:disabled,
+#mural-post-btn.is-guest-locked {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
 .mural-composer-msg,
 #mural-post-msg {
-  margin-top: 0.65rem !important;
+  margin-top: 0.35rem !important;
   padding: 0.65rem 0.85rem !important;
   border-radius: 12px !important;
   border: 1px solid var(--border) !important;
@@ -3716,6 +3765,14 @@ body { background: var(--bg, #0A0A0A) !important; }
   color: var(--text-2) !important;
   font-size: 0.8rem !important;
   line-height: 1.45 !important;
+  position: static !important;
+}
+.mural-composer-msg:empty,
+#mural-post-msg:empty {
+  display: none !important;
+  padding: 0 !important;
+  border: none !important;
+  margin: 0 !important;
 }
 .mural-composer-msg a,
 #mural-post-msg a {
@@ -3724,7 +3781,24 @@ body { background: var(--bg, #0A0A0A) !important; }
   text-decoration: none !important;
   border-bottom: 1px solid var(--gold-soft);
 }
+.feed-tabs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.35rem !important;
+  margin: 0.5rem 0 0.75rem !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+.feed-tab { position: static !important; }
+.feed-wall {
+  position: relative !important;
+  z-index: 0 !important;
+  clear: both !important;
+}
 .cricri-guest-banner {
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0.65rem 1rem 0.75rem !important;
   border-color: var(--border-strong) !important;
   background: var(--bg-raised) !important;
   color: var(--text-2) !important;
@@ -3774,8 +3848,907 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{ba
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
-  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807a">
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807fix1">
   <link rel="stylesheet" href="css/device-adapt.css?v=20260807b">
+
+<style id="feed-layout-fix-v2">
+/* ===== FEED LAYOUT FIX v2 — sobrescreve conflitos style.css / scrap legado ===== */
+body.page-feed,
+body.index-mural-only {
+  background: var(--bg, #0A0A0A) !important;
+  color: var(--text, #FAFAF7) !important;
+  overflow-x: hidden !important;
+}
+body.page-feed .header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 200 !important;
+  background: var(--bg, #0A0A0A) !important;
+  border-bottom: 1px solid var(--border, rgba(250,250,247,0.12)) !important;
+}
+#conteudo-principal {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0.5rem 0 5.5rem !important;
+  position: relative !important;
+  z-index: 1 !important;
+  filter: none; /* a11y aplica se necessário */
+}
+.feed-section {
+  display: block !important;
+  width: 100% !important;
+  max-width: 640px !important;
+  margin: 0 auto !important;
+  padding: 0.75rem 1rem 2rem !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+.feed-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative !important;
+}
+.feed-head {
+  margin: 0 0 0.25rem !important;
+}
+.feed-head h2 {
+  margin: 0 !important;
+  font-size: 1.35rem !important;
+  color: var(--text, #FAFAF7) !important;
+}
+.feed-lead { display: none !important; }
+
+/* Composer — coluna limpa, zero absolute */
+#mural-composer.mural-composer,
+.mural-composer.card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.6rem !important;
+  position: relative !important;
+  float: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 0 0.5rem !important;
+  padding: 1rem !important;
+  background: var(--bg-raised, #141414) !important;
+  border: 1px solid var(--border, rgba(250,250,247,0.12)) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  color: var(--text, #FAFAF7) !important;
+}
+#mural-composer * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+#mural-composer .scrap-composer-label,
+.mural-composer .scrap-composer-label {
+  display: block !important;
+  position: static !important;
+  float: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  color: var(--text-2, rgba(250,250,247,0.62)) !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  background: transparent !important;
+  border: none !important;
+}
+#mural-composer .scrap-composer-label b {
+  color: var(--gold, #E6BE49) !important;
+}
+#mural-post-body,
+#mural-composer textarea {
+  display: block !important;
+  position: static !important;
+  float: none !important;
+  width: 100% !important;
+  min-height: 5.5rem !important;
+  margin: 0 !important;
+  padding: 0.75rem 0.9rem !important;
+  border: 1px solid var(--border, rgba(250,250,247,0.12)) !important;
+  border-radius: 12px !important;
+  background: var(--bg-sunken, #000) !important;
+  color: var(--text, #FAFAF7) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.45 !important;
+  resize: vertical !important;
+  font-family: Inter, system-ui, sans-serif !important;
+}
+#mural-composer .scrap-composer-footer {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.5rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  position: static !important;
+  width: 100% !important;
+  background: transparent !important;
+}
+#mural-composer .scrap-composer-footer .hint,
+#mural-post-hint {
+  display: block !important;
+  order: 0 !important;
+  margin: 0 !important;
+  font-size: 0.72rem !important;
+  color: var(--text-3, rgba(250,250,247,0.4)) !important;
+  position: static !important;
+}
+#mural-post-count {
+  display: block !important;
+  order: 1 !important;
+  align-self: flex-end !important;
+  margin: 0 !important;
+  font-size: 0.72rem !important;
+  color: var(--text-3) !important;
+  position: static !important;
+}
+#mural-composer .mural-audience {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.4rem !important;
+  order: 2 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  width: 100% !important;
+}
+#mural-composer .mural-aud-btn {
+  position: static !important;
+  float: none !important;
+  margin: 0 !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  padding: 0.45rem 0.85rem !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--border-strong) !important;
+  background: transparent !important;
+  color: var(--text-2) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  opacity: 1 !important;
+}
+#mural-composer .mural-aud-btn.is-on {
+  background: var(--text, #FAFAF7) !important;
+  color: var(--bg, #0A0A0A) !important;
+  border-color: var(--text) !important;
+}
+#mural-composer .scrap-composer-buttons {
+  display: flex !important;
+  justify-content: flex-end !important;
+  order: 3 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  position: static !important;
+}
+#mural-post-btn {
+  position: static !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0.55rem 1.3rem !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--gold, #E6BE49) !important;
+  color: #1a1400 !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+#mural-post-msg:empty { display: none !important; }
+
+.feed-tabs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.35rem !important;
+  margin: 0.25rem 0 0.5rem !important;
+  padding: 0 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  border: none !important;
+  background: transparent !important;
+}
+.feed-tab {
+  position: static !important;
+  float: none !important;
+  appearance: none !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  background: transparent !important;
+  color: var(--text-2) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  padding: 0.45rem 0.7rem !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+.feed-tab.active,
+.feed-tab[aria-selected="true"] {
+  color: var(--gold, #E6BE49) !important;
+  border-bottom-color: var(--gold, #E6BE49) !important;
+}
+.feed-wall {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  position: relative !important;
+  width: 100% !important;
+  clear: both !important;
+  min-height: 4rem !important;
+}
+.feed-wall[hidden],
+.feed-wall[aria-hidden="true"] {
+  display: none !important;
+}
+.post-card {
+  display: flex !important;
+  gap: 0.75rem !important;
+  position: relative !important;
+  float: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 0 0.75rem !important;
+  padding: 0.9rem !important;
+  background: var(--bg-raised, #141414) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  transform: none !important;
+}
+.post-card:hover { transform: none !important; box-shadow: none !important; }
+
+/* guest banner */
+.cricri-guest-banner {
+  position: relative !important;
+  z-index: 5 !important;
+  margin: 0.75rem 1rem !important;
+  max-width: calc(640px - 2rem) !important;
+}
+
+/* neutraliza scrap legado claro dentro do mural */
+#mural-composer .scrap-textarea,
+#mural-composer .scrap-send-btn,
+#mural-composer .scrap-cancel-btn {
+  /* não usados no mural, mas por segurança */
+  color: inherit !important;
+}
+
+/* a11y alto contraste no feed */
+html[data-a11y-contrast="high"] body.page-feed,
+html[data-a11y-contrast="high"] body.page-feed .header,
+html[data-a11y-contrast="high"] #mural-composer,
+html[data-a11y-contrast="high"] .post-card {
+  background: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+}
+html[data-a11y-contrast="high"] #mural-post-body {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+html[data-a11y-contrast="high"] #mural-post-btn {
+  background: #ff0 !important;
+  color: #000 !important;
+}
+html[data-a11y-contrast="high"] .feed-tab.active {
+  color: #ff0 !important;
+  border-bottom-color: #ff0 !important;
+}
+</style>
+
+
+<style id="feed-desktop-constrain">
+@media (min-width: 768px) {
+  body.page-feed .feed-section,
+  body.index-mural-only .feed-section {
+    max-width: 640px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  body.page-feed .header,
+  body.index-mural-only .header {
+    max-width: 100%;
+  }
+  .cricri-guest-banner {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+</style>
+
+<style id="bn-fixed-nuclear">
+/* Bottom nav SEMPRE fixo no viewport — independente de filter/transform no conteúdo */
+nav.bottom-nav,
+nav.bottom-nav[data-cricri-nav="1"],
+#bottom-nav-slot > nav.bottom-nav {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  z-index: 2147483000 !important;
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  height: calc(62px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  background: rgba(10, 10, 10, 0.97) !important;
+  border-top: 1px solid rgba(250, 250, 247, 0.12) !important;
+  box-sizing: border-box !important;
+}
+html, body {
+  transform: none !important;
+  /* NUNCA filter no html/body */
+  filter: none !important;
+}
+body {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+}
+/* a11y FAB também fora de qualquer filter de ancestral */
+.a11y-wrap, #a11y-toggle, #a11y-panel {
+  filter: none !important;
+  transform: none !important;
+}
+</style>
+
+<style id="feed-rank-scroll">
+.feed-sentinel{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1.25rem 1rem 2rem;min-height:2rem}
+.feed-load-more{display:none!important;appearance:none;border:1.5px solid rgba(230,190,73,.45);background:rgba(230,190,73,.12);color:var(--gold,#E6BE49);font:600 .78rem/1 Oswald,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.25rem;border-radius:999px;cursor:pointer}
+.feed-load-more:hover{background:rgba(230,190,73,.22)}
+.feed-loading{font-size:.75rem;color:var(--stone,#8c8376)}
+.post-views{opacity:.65;font-size:.72rem}
+</style>
+
+<style id="feed-threads-cards">
+/* ── Cards estilo Threads / rede social ── */
+.feed-wall,
+#feed-list-geral,
+#feed-list-agora,
+#feed-list-programacao {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+}
+
+.feed-wall .post-card,
+.post-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0.95rem 1rem 0.85rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(250, 250, 247, 0.1) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  color: var(--text, #fafaf7) !important;
+  box-sizing: border-box !important;
+  float: none !important;
+  position: relative !important;
+  cursor: pointer;
+  transition: background 0.15s ease !important;
+}
+.post-card:hover {
+  background: rgba(250, 250, 247, 0.035) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.post-card--official {
+  border-left: 2px solid var(--ochre, #d49a2c) !important;
+  padding-left: calc(1rem - 2px) !important;
+}
+
+/* Avatar circular */
+.post-card .post-avatar,
+.post-avatar {
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(145deg, #E6BE49, #c45a2a) !important;
+  color: #1a1400 !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  font-family: Inter, system-ui, sans-serif !important;
+}
+.post-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+.post-avatar-link {
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+.post-avatar-link:focus-visible {
+  outline: 2px solid var(--gold, #E6BE49);
+  outline-offset: 2px;
+}
+
+.post-body {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+}
+
+.post-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  margin: 0 0 0.15rem !important;
+  gap: 0.35rem !important;
+}
+.post-identity {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 0.28rem 0.4rem !important;
+  min-width: 0 !important;
+  line-height: 1.25 !important;
+}
+.post-name {
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  color: var(--text, #fafaf7) !important;
+  letter-spacing: -0.01em !important;
+}
+.post-name a,
+.post-nick {
+  color: inherit !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+}
+.post-name a:hover,
+.post-nick:hover {
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+  color: var(--text, #fafaf7) !important;
+}
+.post-handle {
+  font-size: 0.88rem !important;
+  font-weight: 400 !important;
+  color: rgba(250, 250, 247, 0.45) !important;
+}
+.post-dot {
+  color: rgba(250, 250, 247, 0.35) !important;
+  font-weight: 400 !important;
+}
+.post-time {
+  font-size: 0.88rem !important;
+  font-weight: 400 !important;
+  color: rgba(250, 250, 247, 0.45) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.post-aud-pill {
+  font-size: 0.65rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: var(--gold, #E6BE49) !important;
+  background: rgba(230, 190, 73, 0.12) !important;
+  border: 1px solid rgba(230, 190, 73, 0.28) !important;
+  border-radius: 999px !important;
+  padding: 0.12rem 0.45rem !important;
+  margin-left: 0.15rem !important;
+}
+.post-status {
+  font-size: 0.65rem !important;
+  transform: none !important;
+  border-radius: 999px !important;
+  padding: 0.15rem 0.5rem !important;
+}
+
+.post-text {
+  margin: 0.1rem 0 0.35rem !important;
+  font-size: 0.98rem !important;
+  line-height: 1.45 !important;
+  font-weight: 400 !important;
+  color: var(--text, #fafaf7) !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+.post-place {
+  margin: 0 0 0.35rem !important;
+  font-size: 0.8rem !important;
+  color: rgba(250, 250, 247, 0.5) !important;
+  font-weight: 500 !important;
+}
+
+/* Barra de ações estilo Threads */
+.post-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.15rem !important;
+  margin: 0.35rem 0 0 !important;
+  max-width: 100% !important;
+  justify-content: space-between !important;
+  padding-right: 0.5rem !important;
+}
+.post-act {
+  appearance: none !important;
+  border: none !important;
+  background: transparent !important;
+  color: rgba(250, 250, 247, 0.45) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.3rem !important;
+  padding: 0.35rem 0.45rem !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  min-height: 32px !important;
+  transition: color 0.12s ease, background 0.12s ease !important;
+}
+.post-act svg {
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+.post-act:hover {
+  color: var(--gold, #E6BE49) !important;
+  background: rgba(230, 190, 73, 0.1) !important;
+}
+.post-act[data-act="like"]:hover {
+  color: #f91880 !important;
+  background: rgba(249, 24, 128, 0.1) !important;
+}
+.post-act[data-act="repost"]:hover {
+  color: #00ba7c !important;
+  background: rgba(0, 186, 124, 0.1) !important;
+}
+.post-act[data-act="reply"]:hover {
+  color: #1d9bf0 !important;
+  background: rgba(29, 155, 240, 0.1) !important;
+}
+.post-act-count {
+  font-variant-numeric: tabular-nums !important;
+  min-width: 0.8em !important;
+}
+.meow-chip {
+  font-size: 0.95rem !important;
+}
+
+/* tema claro */
+html[data-theme="light"] .post-card,
+html[data-a11y-theme="light"] .post-card {
+  background: transparent !important;
+  color: #0f0f0f !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+html[data-theme="light"] .post-card:hover,
+html[data-a11y-theme="light"] .post-card:hover {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+html[data-theme="light"] .post-name,
+html[data-theme="light"] .post-text,
+html[data-a11y-theme="light"] .post-name,
+html[data-a11y-theme="light"] .post-text {
+  color: #0f0f0f !important;
+}
+html[data-theme="light"] .post-handle,
+html[data-theme="light"] .post-time,
+html[data-theme="light"] .post-act,
+html[data-a11y-theme="light"] .post-handle,
+html[data-a11y-theme="light"] .post-time,
+html[data-a11y-theme="light"] .post-act {
+  color: rgba(15, 15, 15, 0.5) !important;
+}
+
+/* feed wall sem gap entre cards */
+.feed-wall {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 480px) {
+  .post-card {
+    padding: 0.85rem 0.85rem 0.75rem !important;
+    gap: 0.65rem !important;
+  }
+  .post-card .post-avatar,
+  .post-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    flex-basis: 38px !important;
+  }
+  .post-text { font-size: 0.95rem !important; }
+  .post-actions { justify-content: space-between !important; max-width: 100% !important; }
+}
+</style>
+
+<style id="like-animations">
+/* ── Like button + animações ── */
+.post-like-btn .like-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+.post-like-btn .like-heart {
+  display: block;
+  overflow: visible;
+}
+.post-like-btn .like-heart-path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill 0.15s ease, stroke 0.15s ease, transform 0.15s ease;
+  transform-origin: center;
+}
+.post-like-btn.is-liked {
+  color: #f91880 !important;
+}
+.post-like-btn.is-liked .like-heart-path {
+  fill: #f91880;
+  stroke: #f91880;
+}
+.post-like-btn.like-pop .like-heart {
+  animation: like-heart-pop 0.55s cubic-bezier(0.15, 1.4, 0.35, 1) both;
+}
+@keyframes like-heart-pop {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(0.75); }
+  50%  { transform: scale(1.35); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* burst de partículas */
+.like-burst {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.like-icon-wrap.burst-on .like-burst {
+  animation: like-burst-fade 0.55s ease-out both;
+}
+.like-icon-wrap.burst-on .like-burst::before,
+.like-icon-wrap.burst-on .like-burst::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #f91880;
+  box-shadow:
+    14px -8px 0 #ff7ab8,
+    -12px -6px 0 #ff4d94,
+    10px 12px 0 #ff9ec8,
+    -14px 8px 0 #f91880,
+    0 -16px 0 #ffb3d4,
+    16px 4px 0 #ff5a9e,
+    -8px 14px 0 #ff87b9;
+  animation: like-particles 0.55s ease-out both;
+}
+.like-icon-wrap.burst-on .like-burst::after {
+  width: 3px; height: 3px;
+  background: #ffd0e4;
+  box-shadow:
+    8px -14px 0 #fff,
+    -16px 2px 0 #ff7ab8,
+    18px 10px 0 #f91880,
+    -6px -12px 0 #ffc0d9;
+  animation-delay: 0.04s;
+}
+@keyframes like-particles {
+  0%   { transform: scale(0.2); opacity: 1; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+@keyframes like-burst-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* coração flutuante no double-tap */
+.like-float-heart {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  font-size: 3.2rem;
+  color: #f91880;
+  transform: translate(-50%, -50%) scale(0.4);
+  opacity: 0;
+  text-shadow: 0 4px 20px rgba(249, 24, 128, 0.45);
+  line-height: 1;
+}
+.like-float-heart.is-on {
+  animation: like-float 0.85s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+@keyframes like-float {
+  0%   { opacity: 0; transform: translate(-50%, -40%) scale(0.3); }
+  20%  { opacity: 1; transform: translate(-50%, -55%) scale(1.15); }
+  55%  { opacity: 1; transform: translate(-50%, -70%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -95%) scale(0.85); }
+}
+
+.post-like-btn .post-act-count.like-count {
+  transition: transform 0.2s ease, color 0.15s ease;
+}
+.post-like-btn.like-pop .like-count {
+  animation: like-count-bump 0.4s ease both;
+}
+@keyframes like-count-bump {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+}
+
+html[data-a11y-motion="reduce"] .post-like-btn.like-pop .like-heart,
+html[data-a11y-motion="reduce"] .like-float-heart,
+html[data-a11y-motion="reduce"] .like-icon-wrap.burst-on .like-burst::before,
+html[data-a11y-motion="reduce"] .like-icon-wrap.burst-on .like-burst::after {
+  animation: none !important;
+}
+</style>
+
+<style id="share-animations">
+/* ── Share button + toast ── */
+.post-share-btn .share-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+.post-share-btn .share-icon {
+  display: block;
+  overflow: visible;
+}
+.post-share-btn.share-fly {
+  color: #1d9bf0 !important;
+}
+.post-share-btn.share-fly .share-icon {
+  animation: share-lift 0.55s cubic-bezier(0.2, 1.3, 0.3, 1) both;
+}
+.post-share-btn.share-fly .share-arrow,
+.post-share-btn.share-fly .share-arrow-head {
+  animation: share-arrow-up 0.5s cubic-bezier(0.2, 1.2, 0.35, 1) both;
+  transform-origin: center bottom;
+}
+@keyframes share-lift {
+  0%   { transform: scale(1) translateY(0); }
+  30%  { transform: scale(0.88) translateY(2px); }
+  55%  { transform: scale(1.2) translateY(-6px); }
+  100% { transform: scale(1) translateY(0); }
+}
+@keyframes share-arrow-up {
+  0%   { transform: translateY(0); opacity: 1; }
+  40%  { transform: translateY(-3px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* raios / ondas ao compartilhar */
+.share-rays {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.post-share-btn.share-fly .share-rays {
+  animation: share-rays-fade 0.6s ease-out both;
+}
+.post-share-btn.share-fly .share-rays::before,
+.post-share-btn.share-fly .share-rays::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(29, 155, 240, 0.55);
+  animation: share-ring 0.6s ease-out both;
+}
+.post-share-btn.share-fly .share-rays::after {
+  animation-delay: 0.08s;
+  border-color: rgba(29, 155, 240, 0.35);
+}
+@keyframes share-ring {
+  0%   { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes share-rays-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Toast de compartilhamento */
+.share-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) translateY(12px);
+  z-index: 2147483010;
+  padding: 0.7rem 1.15rem;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.94);
+  color: #fafaf7;
+  border: 1px solid rgba(29, 155, 240, 0.35);
+  font: 600 0.82rem/1.2 Inter, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.2, 1.1, 0.3, 1);
+  max-width: min(90vw, 320px);
+  text-align: center;
+}
+.share-toast.is-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.share-toast.is-ok {
+  border-color: rgba(0, 186, 124, 0.45);
+}
+html[data-theme="light"] .share-toast {
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f0f0f;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+html[data-a11y-motion="reduce"] .post-share-btn.share-fly .share-icon,
+html[data-a11y-motion="reduce"] .post-share-btn.share-fly .share-rays::before,
+html[data-a11y-motion="reduce"] .post-share-btn.share-fly .share-rays::after {
+  animation: none !important;
+}
+</style>
 </head>
 <body class="page-feed index-mural-only">
   <!-- Modo convidado: visualização liberada; interações via js/guest-mode.js -->
@@ -3831,7 +4804,9 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
     <div class="header-actions">
       <a class="auth-chip" id="auth-chip" href="profile.html">Entrar</a>
     </div>
-    <!-- a11y FAB: canto inferior direito via js/a11y-core.js?v=20260807a11y"search-overlay" id="search-overlay" hidden>
+    </header>
+    <!-- a11y FAB: canto inferior direito via js/a11y-core.js -->
+    <div class="search-overlay" id="search-overlay" hidden>
       <div class="search-sheet" role="dialog" aria-modal="true" aria-label="Busca no CRICRI">
         <div class="search-sheet-head">
           <div class="search-field">
@@ -3940,7 +4915,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 
 
 </div>
-  <script src="js/guest-mode.js"></script>
+  <script src="js/guest-mode.js?v=20260807g"></script>
   <script src="js/visit-sheet.js?v=20260805i"></script>
   <script src="js/friends.js?v=20260805g"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
@@ -3952,7 +4927,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260807nav"></script>
-  <script src="js/fixed-chrome.js?v=20260807a"></script>
+  <script src="js/fixed-chrome.js?v=20260807fix1"></script>
 
 <script>
 /* Mural: Programação pública; Agora = privado (amigos) */
@@ -4048,11 +5023,14 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
         </div>
 
         <div class="a11y-group">
-          <span class="a11y-group-label" id="a11y-color-label">Cor</span>
+          <span class="a11y-group-label" id="a11y-color-label">Daltonismo / cores</span>
           <div class="a11y-row" role="group" aria-labelledby="a11y-color-label">
-            <button type="button" class="a11y-chip" data-a11y-set="color:default" aria-pressed="true">Padrão</button>
+            <button type="button" class="a11y-chip" data-a11y-set="color:default" aria-pressed="true">Normal</button>
+            <button type="button" class="a11y-chip" data-a11y-set="color:protanopia" aria-pressed="false">Protanopia</button>
+            <button type="button" class="a11y-chip" data-a11y-set="color:deuteranopia" aria-pressed="false">Deuteranopia</button>
+            <button type="button" class="a11y-chip" data-a11y-set="color:tritanopia" aria-pressed="false">Tritanopia</button>
             <button type="button" class="a11y-chip" data-a11y-set="color:lowsat" aria-pressed="false">Baixa sat.</button>
-            <button type="button" class="a11y-chip" data-a11y-set="color:gray" aria-pressed="false">Escala cinza</button>
+            <button type="button" class="a11y-chip" data-a11y-set="color:gray" aria-pressed="false">Escala de cinza</button>
           </div>
         </div>
 
@@ -4466,7 +5444,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <!-- bundles home: core (config/auth/apis) + ui (a11y/gestos) -->
   <script src="js/bundles/home-core.js" defer></script>
   <!-- a11y-core ANTES do home-ui (bundle traz a11y legado que quebra o toque no mobile) -->
-  <script src="js/a11y-core.js?v=20260807a11y" defer></script>
+  <script src="js/a11y-core.js?v=20260807fix1" defer></script>
   <script src="js/bundles/home-ui.js" defer></script>
   <script src="js/theme.js?v=20260805n" defer></script>
   <script src="script.js" defer></script>
@@ -4623,33 +5601,62 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
     var text = p.content || p.body || p.text || '';
     var place = p.place || p.spot_name || '';
     var when = timeAgo(p.created_at);
-    var nickLabel = handle ? '@' + handle : name;
+    var displayName = name.replace(/^@/, '');
     var aud = p.audience || '';
+    var views = Number(p.view_count || 0);
     var badge = official
-      ? '<span class="post-status progresso">Programação FASC</span>'
+      ? '<span class="post-status progresso">Programação</span>'
       : (aud === 'friends' ? '<span class="post-aud-pill">amigos</span>' : '');
+    var handleLine = handle
+      ? '<span class="post-handle">@' + esc(handle) + '</span>'
+      : '';
+    var nameEl = handle
+      ? '<a class="post-nick" href="profile.html?u=' + encodeURIComponent(handle) + '" data-visit-handle="' + esc(handle) + '">' + esc(displayName) + '</a>'
+      : '<span class="post-nick">' + esc(displayName) + '</span>';
     var meowBtn = (!official && handle)
-      ? '<a class="meow-chip" href="profile.html?u=' + encodeURIComponent(handle) + '" title="Mandar Meow anônimo pra @' + esc(handle) + '">' +
-          '<span aria-hidden="true">🐾</span> Meow' +
-        '</a>'
+      ? '<a class="post-act meow-chip" href="profile.html?u=' + encodeURIComponent(handle) + '" title="Meow anônimo">🐾</a>'
       : '';
     return (
       '<article class="post-card' + (official ? ' post-card--official' : '') + '" data-post-id="' + esc(p.id) + '">' +
         avatarHTML(p, official) +
         '<div class="post-body">' +
           '<div class="post-head">' +
-            '<span class="post-name">' +
-              (handle
-                ? '<a class="post-nick" href="profile.html?u=' + encodeURIComponent(handle) + '" data-visit-handle="' + esc(handle) + '">' + esc(nickLabel) + '</a>'
-                : esc(name)) +
-            '</span>' +
-            badge +
-            meowBtn +
+            '<div class="post-identity">' +
+              '<span class="post-name">' + nameEl + '</span>' +
+              handleLine +
+              (when ? '<span class="post-dot" aria-hidden="true">·</span><span class="post-time">' + esc(when) + '</span>' : '') +
+              badge +
+            '</div>' +
           '</div>' +
           '<p class="post-text">' + esc(text) + '</p>' +
-          '<div class="post-meta">' +
-            (place ? '<span class="post-place">' + esc(place) + '</span>' : '') +
-            (when ? '<span class="post-time">' + esc(when) + '</span>' : '') +
+          (place ? '<p class="post-place">📍 ' + esc(place) + '</p>' : '') +
+          '<div class="post-actions" role="group" aria-label="Ações">' +
+            '<button type="button" class="post-act" data-act="reply" aria-label="Responder" title="Responder">' +
+              '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4H5l-3 3V11.5A8.4 8.4 0 0 1 21 11.5z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="post-act" data-act="repost" aria-label="Repostar" title="Repostar">' +
+              '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>' +
+            '</button>' +
+            '<button type="button" class="post-act post-like-btn" data-act="like" data-post-id="' + esc(p.id) + '" aria-label="Curtir" aria-pressed="false" title="Curtir">' +
+              '<span class="like-icon-wrap" aria-hidden="true">' +
+                '<svg class="like-heart" viewBox="0 0 24 24" width="20" height="20">' +
+                  '<path class="like-heart-path" d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>' +
+                '</svg>' +
+                '<span class="like-burst"></span>' +
+              '</span>' +
+              '<span class="post-act-count like-count"' + (Number(p.like_count || 0) > 0 ? '' : ' hidden') + '>' + esc(String(Number(p.like_count || 0))) + '</span>' +
+            '</button>' +
+            meowBtn +
+            '<button type="button" class="post-act post-share-btn" data-act="share" data-post-id="' + esc(p.id) + '" aria-label="Compartilhar" title="Compartilhar">' +
+              '<span class="share-icon-wrap" aria-hidden="true">' +
+                '<svg class="share-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>' +
+                  '<path class="share-arrow" d="M12 16V4"/>' +
+                  '<path class="share-arrow-head" d="M8 8l4-4 4 4"/>' +
+                '</svg>' +
+                '<span class="share-rays"></span>' +
+              '</span>' +
+            '</button>' +
           '</div>' +
         '</div>' +
       '</article>'
@@ -4704,80 +5711,396 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
       place: r.place_name || '',
       is_official: false,
       author_id: r.author_id,
-      audience: r.audience || 'public'
+      audience: r.audience || 'public',
+      view_count: Number(r.view_count || 0),
+      like_count: Number(r.like_count || r.likes_count || 0)
     };
   }
-  async function loadFeed() {
+
+  /* ── Ranking estilo Threads: recência + engajamento ── */
+  function rankScore(p) {
+    var ageH = Math.max(0, (Date.now() - new Date(p.created_at || 0).getTime()) / 3600000);
+    // decay suave: posts novos sobem; com o tempo views/likes sustentam
+    var recency = 1 / Math.pow(ageH + 2, 1.15);
+    var views = Math.log10((p.view_count || 0) + 1);
+    var likes = Math.log10((p.like_count || 0) + 1);
+    return recency * 12 + views * 2.2 + likes * 3.5;
+  }
+  function sortRanked(rows) {
+    return (rows || []).slice().sort(function (a, b) {
+      var d = rankScore(b) - rankScore(a);
+      if (Math.abs(d) > 0.0001) return d;
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    });
+  }
+
+  var PAGE = 30;
+  var state = {
+    public: { rows: [], shown: 0, done: false },
+    friends: { rows: [], shown: 0, done: false },
+    fetching: false,
+    me: null,
+    allowSet: {}
+  };
+
+  function activeTabId() {
+    var t = document.querySelector('[data-feed-tab].active, [data-feed-tab][aria-selected="true"]');
+    return (t && t.getAttribute('data-feed-tab')) || 'geral';
+  }
+
+  function ensureSentinel(listId) {
+    var list = document.getElementById(listId);
+    if (!list) return null;
+    var parent = list.parentElement || list;
+    var s = parent.querySelector('.feed-sentinel');
+    if (!s) {
+      s = document.createElement('div');
+      s.className = 'feed-sentinel';
+      s.setAttribute('aria-hidden', 'true');
+      s.innerHTML = '<span class="feed-loading" hidden>carregando mais…</span><span class="feed-end" hidden>fim do mural</span>';
+      parent.appendChild(s);
+    }
+    return s;
+  }
+
+  function appendCards(listId, emptyId, rows, reset) {
+    var list = document.getElementById(listId);
+    var empty = document.getElementById(emptyId);
+    if (!list) return;
+    if (reset) list.innerHTML = '';
+    if (!rows || !rows.length) {
+      if (reset && empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+    list.insertAdjacentHTML('beforeend', rows.map(cardHTML).join(''));
+  }
+
+  function showMore(tabKey) {
+    var st = state[tabKey];
+    if (!st || st.done) return false;
+    if (st.shown >= st.rows.length) {
+      st.done = true;
+      updateSentinelUI(tabKey);
+      return false;
+    }
+    var next = st.rows.slice(st.shown, st.shown + PAGE);
+    if (!next.length) {
+      st.done = true;
+      updateSentinelUI(tabKey);
+      return false;
+    }
+    var isFirst = st.shown === 0;
+    st.shown += next.length;
+    if (st.shown >= st.rows.length) st.done = true;
+    var listId = tabKey === 'friends' ? 'feed-list-agora' : 'feed-list-geral';
+    var emptyId = tabKey === 'friends' ? 'feed-empty-agora' : 'feed-empty-geral';
+    appendCards(listId, emptyId, next, isFirst);
+    observeVisiblePosts();
+    updateSentinelUI(tabKey);
+    try { applyLikedStateToDOM(); } catch (_) {}
+    return true;
+  }
+
+  /* Enche a viewport até ter scroll ou acabar os posts — sem clique */
+  function fillUntilScrollable(tabKey) {
+    var guard = 0;
+    while (guard < 40) {
+      guard++;
+      var st = state[tabKey];
+      if (!st || st.done) break;
+      var docH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      // se ainda cabe na tela, carrega mais automaticamente
+      if (docH > window.innerHeight + 120 && st.shown > 0) break;
+      if (!showMore(tabKey)) break;
+    }
+  }
+
+  function updateSentinelUI(tabKey) {
+    var listId = tabKey === 'friends' ? 'feed-list-agora' : 'feed-list-geral';
+    var s = ensureSentinel(listId);
+    if (!s) return;
+    var st = state[tabKey] || {};
+    var loading = s.querySelector('.feed-loading');
+    var end = s.querySelector('.feed-end');
+    if (loading) loading.hidden = true;
+    if (end) end.hidden = !st.done || !st.rows || !st.rows.length;
+  }
+
+  function observeVisiblePosts() {
+    if (!('IntersectionObserver' in window)) return;
+    if (!window.__cricriViewObs) {
+      window.__cricriViewObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting || en.intersectionRatio < 0.45) return;
+          var el = en.target;
+          var id = el.getAttribute('data-post-id');
+          if (!id || id.indexOf('fasc-prog') === 0) return;
+          if (el.getAttribute('data-viewed') === '1') return;
+          el.setAttribute('data-viewed', '1');
+          bumpView(id);
+        });
+      }, { threshold: [0.5], rootMargin: '0px 0px -10% 0px' });
+    }
+    document.querySelectorAll('.post-card[data-post-id]:not([data-viewed="1"])').forEach(function (el) {
+      window.__cricriViewObs.observe(el);
+    });
+  }
+
+  var _viewQueue = {};
+  function bumpView(id) {
+    if (_viewQueue[id]) return;
+    _viewQueue[id] = 1;
+    var db = window.fascDb;
+    if (!db) return;
+    // tenta RPC; se não existir, update direto (pode falhar por RLS — ok)
+    try {
+      db.rpc('increment_post_view', { p_id: id }).then(function () {}).catch(function () {
+        try {
+          db.from('posts').update({ view_count: undefined }).eq('id', id);
+        } catch (_) {}
+      });
+    } catch (_) {}
+  }
+
+  async function resolveMeAndFriends() {
+    var me = null;
+    try {
+      if (window.fascAuth && window.fascAuth.user) me = await window.fascAuth.user();
+    } catch (_) {}
+    var allowed = [];
+    if (me && window.CricriFriends && typeof window.CricriFriends.visibleAuthorIds === 'function') {
+      try { allowed = await window.CricriFriends.visibleAuthorIds(); } catch (_) { allowed = []; }
+    } else if (me && window.CricriFriends && typeof window.CricriFriends.listMutualFriendIds === 'function') {
+      try {
+        allowed = await window.CricriFriends.listMutualFriendIds();
+        if (me.id) allowed = [me.id].concat(allowed || []);
+      } catch (_) { allowed = me ? [me.id] : []; }
+    } else if (me) {
+      // fallback: conexões accepted/pending mútuas ou legadas
+      try {
+        var db = window.fascDb;
+        if (db) {
+          var out = await db.from('connections').select('to_id, status').eq('from_id', me.id);
+          var inn = await db.from('connections').select('from_id, status').eq('to_id', me.id);
+          var outSet = {}, inSet = {};
+          (out.data || []).forEach(function (r) {
+            if (!r.status || r.status === 'accepted' || r.status === 'pending') outSet[r.to_id] = 1;
+          });
+          (inn.data || []).forEach(function (r) {
+            if (!r.status || r.status === 'accepted' || r.status === 'pending') inSet[r.from_id] = 1;
+          });
+          Object.keys(outSet).forEach(function (id) {
+            if (inSet[id]) allowed.push(id);
+          });
+          // se não há status (legado), qualquer A→B e B→A
+          if (!allowed.length) {
+            (out.data || []).forEach(function (r) {
+              if (inSet[r.to_id] || (inn.data || []).some(function (x) { return x.from_id === r.to_id; })) {
+                allowed.push(r.to_id);
+              }
+            });
+          }
+        }
+      } catch (_) {}
+      allowed = [me.id].concat(allowed);
+    }
+    var allowSet = {};
+    (allowed || []).forEach(function (id) { if (id) allowSet[id] = 1; });
+    state.me = me;
+    state.allowSet = allowSet;
+    return { me: me, allowSet: allowSet };
+  }
+
+  async function fetchAllPosts() {
+    var db = window.fascDb;
+    if (!db) return [];
+    var pageSize = 100;
+    var all = [];
+    var from = 0;
+    var hasView = true;
+    var selectFull = 'id, content, place_name, status, created_at, author_id, audience, view_count, profiles:author_id(name, handle, photo_url)';
+    var selectNoView = 'id, content, place_name, status, created_at, author_id, audience, profiles:author_id(name, handle, photo_url)';
+    var selectMin = 'id, content, place_name, status, created_at, author_id, profiles:author_id(name, handle, photo_url)';
+
+    while (true) {
+      var cols = hasView ? selectFull : selectNoView;
+      var res = await db.from('posts')
+        .select(cols)
+        .order('created_at', { ascending: false })
+        .range(from, from + pageSize - 1);
+
+      if (res.error && /view_count|column|schema/i.test(res.error.message || '')) {
+        hasView = false;
+        res = await db.from('posts')
+          .select(selectNoView)
+          .order('created_at', { ascending: false })
+          .range(from, from + pageSize - 1);
+      }
+      if (res.error && /audience|column|schema/i.test(res.error.message || '')) {
+        res = await db.from('posts')
+          .select(selectMin)
+          .order('created_at', { ascending: false })
+          .range(from, from + pageSize - 1);
+      }
+      if (res.error && /photo_url/i.test(res.error.message || '')) {
+        res = await db.from('posts')
+          .select(cols.replace(', photo_url', '').replace('photo_url, ', ''))
+          .order('created_at', { ascending: false })
+          .range(from, from + pageSize - 1);
+      }
+      if (res.error) throw res.error;
+      var batch = res.data || [];
+      all = all.concat(batch);
+      if (batch.length < pageSize) break;
+      from += pageSize;
+      // teto de segurança
+      if (from > 2000) break;
+    }
+    return all;
+  }
+
+  async function loadFeed(opts) {
+    opts = opts || {};
     var db = window.fascDb;
     if (!db) {
       renderLists([], [], curatedProgram());
       return;
     }
+    if (state.fetching) return;
+    state.fetching = true;
     try {
-      var me = null;
-      try {
-        if (window.fascAuth && window.fascAuth.user) me = await window.fascAuth.user();
-      } catch (_) {}
-
-      var allowed = [];
-      if (me && window.CricriFriends && typeof window.CricriFriends.visibleAuthorIds === 'function') {
-        try { allowed = await window.CricriFriends.visibleAuthorIds(); } catch (_) { allowed = []; }
-      } else if (me && window.CricriFriends && typeof window.CricriFriends.listMutualFriendIds === 'function') {
-        try {
-          allowed = await window.CricriFriends.listMutualFriendIds();
-          if (me.id) allowed = [me.id].concat(allowed || []);
-        } catch (_) { allowed = me ? [me.id] : []; }
-      } else if (me) {
-        allowed = [me.id];
-      }
-
-      var selectCols = 'id, content, place_name, status, created_at, author_id, audience, profiles:author_id(name, handle, photo_url)';
-      var res = await db.from('posts')
-        .select(selectCols)
-        .order('created_at', { ascending: false })
-        .limit(80);
-
-      if (res.error && /audience|column|schema/i.test(res.error.message || '')) {
-        res = await db.from('posts')
-          .select('id, content, place_name, status, created_at, author_id, profiles:author_id(name, handle, photo_url)')
-          .order('created_at', { ascending: false })
-          .limit(80);
-      }
-      if (res.error && /photo_url/i.test(res.error.message || '')) {
-        res = await db.from('posts')
-          .select('id, content, place_name, status, created_at, author_id, audience, profiles:author_id(name, handle)')
-          .order('created_at', { ascending: false })
-          .limit(80);
-      }
-      if (res.error) throw res.error;
-
-      var allowSet = {};
-      (allowed || []).forEach(function (id) { allowSet[id] = 1; });
-
+      await resolveMeAndFriends();
+      var raw = await fetchAllPosts();
       var publicRows = [];
       var friendRows = [];
-      (res.data || []).forEach(function (r) {
+      var me = state.me;
+      var allowSet = state.allowSet;
+
+      raw.forEach(function (r) {
         if (r.status === 'programacao') return;
         var aud = r.audience || 'public';
         var row = mapRow(r);
-        // Geral: posts públicos (e legados sem audience)
+        // GERAL: todas as publicações públicas → todo mundo vê
         if (aud === 'public' || !r.audience) {
           publicRows.push(row);
         }
-        // Amigos: audience friends + autor é eu ou amigo
-        if (aud === 'friends') {
-          if (!me) return;
-          if (allowSet[r.author_id]) friendRows.push(row);
+        // AMIGOS: audience=friends do autor (eu ou amigo mútuo) — sempre na aba Amigos
+        if (aud === 'friends' && me && allowSet[r.author_id]) {
+          friendRows.push(row);
+        }
+        // também mostra no Amigos posts públicos de amigos (rede social)
+        if ((aud === 'public' || !r.audience) && me && r.author_id !== me.id && allowSet[r.author_id]) {
+          // já está no geral; no amigos só se quiser eco da rede — opcional
+          // user pediu: publicações dos amigos sempre em amigos
+          friendRows.push(row);
         }
       });
 
-      renderLists(publicRows, friendRows, curatedProgram());
+      // dedupe friends by id
+      var seenF = {};
+      friendRows = friendRows.filter(function (p) {
+        if (seenF[p.id]) return false;
+        seenF[p.id] = 1;
+        return true;
+      });
+
+      publicRows = sortRanked(publicRows);
+      friendRows = sortRanked(friendRows);
+
+      state.public = { rows: publicRows, shown: 0, done: false };
+      state.friends = { rows: friendRows, shown: 0, done: false };
+
+      // render primeira página
+      var listG = document.getElementById('feed-list-geral');
+      var listA = document.getElementById('feed-list-agora');
+      if (listG) listG.innerHTML = '';
+      if (listA) listA.innerHTML = '';
+      var emptyG = document.getElementById('feed-empty-geral');
+      var emptyA = document.getElementById('feed-empty-agora');
+      if (emptyG) emptyG.hidden = publicRows.length > 0;
+      if (emptyA) emptyA.hidden = friendRows.length > 0;
+
+      // exibe automaticamente (sem botão "carregar mais")
+      showMore('public');
+      showMore('friends');
+      fillUntilScrollable('public');
+      fillUntilScrollable('friends');
+      fillList('feed-list-programacao', 'feed-empty-programacao', curatedProgram());
+      // reforço após layout
+      requestAnimationFrame(function () {
+        fillUntilScrollable(activeTabId() === 'agora' ? 'friends' : 'public');
+      });
+
+      var note = document.getElementById('feed-agora-note');
+      if (note) {
+        var guest = document.body.classList.contains('is-guest') ||
+          (window.CricriGuest && window.CricriGuest.isGuest && window.CricriGuest.isGuest());
+        if (guest) {
+          note.innerHTML = 'Mural de amigos: <a href="login.html">entre na conta</a> pra ver posts da sua rede.';
+        } else {
+          note.textContent = 'Posts de amigos e interações privadas (destino Amigos). Ordenados por relevância.';
+        }
+      }
     } catch (e) {
       console.warn('[CRICRI feed] API:', e.message || e);
       renderLists([], [], curatedProgram());
+    } finally {
+      state.fetching = false;
+      updateSentinelUI('public');
+      updateSentinelUI('friends');
     }
   }
-    function wireFeedTabs() {
+
+  function wireInfiniteScroll() {
+    if (window.__cricriInfScroll) return;
+    window.__cricriInfScroll = true;
+
+    function tabKey() {
+      return activeTabId() === 'agora' ? 'friends' : 'public';
+    }
+    function maybeLoadMore() {
+      var key = tabKey();
+      if (activeTabId() === 'programacao') return;
+      showMore(key);
+      // se ainda perto do fim, continua
+      var near = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 480);
+      if (near) showMore(key);
+    }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          maybeLoadMore();
+        });
+      }, { root: null, rootMargin: '400px 0px', threshold: 0 });
+      window.__cricriFeedIO = io;
+      ['feed-list-geral', 'feed-list-agora'].forEach(function (id) {
+        var s = ensureSentinel(id);
+        if (s) io.observe(s);
+      });
+    }
+
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var near = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 500);
+        if (near) maybeLoadMore();
+      });
+    }, { passive: true });
+
+    // touch mobile
+    window.addEventListener('touchmove', function () {
+      var near = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 500);
+      if (near) maybeLoadMore();
+    }, { passive: true });
+  }
+
+  function wireFeedTabs() {
     var tabs = document.querySelectorAll('[data-feed-tab]');
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
@@ -4790,26 +6113,289 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
         document.querySelectorAll('[data-feed-panel]').forEach(function (panel) {
           panel.hidden = panel.getAttribute('data-feed-panel') !== id;
         });
+        // garante mais itens se aba vazia na viewport
+        if (id === 'agora') showMore('friends');
+        if (id === 'geral') showMore('public');
       });
     });
   }
-  window.__cricriLoadFeed = loadFeed;
+
+  window.__cricriLoadFeed = function () { return loadFeed({ reset: true }); };
+
   function subscribeFeed() {
     var db = window.fascDb;
     if (!db || !db.channel) return;
     try {
       db.channel('cricri-posts')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, function () {
-          loadFeed();
+          loadFeed({ reset: true });
         })
         .subscribe();
     } catch (e) {
       console.warn('[CRICRI feed] realtime', e.message || e);
     }
   }
+  /* ── Likes com animação (estilo Threads) ── */
+  var LIKE_KEY = 'cricri-likes-v1';
+  function loadLocalLikes() {
+    try { return JSON.parse(localStorage.getItem(LIKE_KEY) || '{}') || {}; } catch (_) { return {}; }
+  }
+  function saveLocalLikes(map) {
+    try { localStorage.setItem(LIKE_KEY, JSON.stringify(map)); } catch (_) {}
+  }
+  function heartSVG(filled) {
+    // paths already in DOM
+  }
+  function setLikeUI(btn, liked, count, animate) {
+    if (!btn) return;
+    btn.classList.toggle('is-liked', !!liked);
+    btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    btn.setAttribute('aria-label', liked ? 'Descurtir' : 'Curtir');
+    var countEl = btn.querySelector('.like-count');
+    if (countEl) {
+      var n = Math.max(0, Number(count) || 0);
+      countEl.textContent = n > 0 ? String(n) : '';
+      countEl.hidden = n <= 0;
+    }
+    if (animate && liked) {
+      btn.classList.remove('like-pop');
+      // reflow
+      void btn.offsetWidth;
+      btn.classList.add('like-pop');
+      var wrap = btn.querySelector('.like-icon-wrap');
+      if (wrap) {
+        wrap.classList.remove('burst-on');
+        void wrap.offsetWidth;
+        wrap.classList.add('burst-on');
+      }
+      setTimeout(function () {
+        btn.classList.remove('like-pop');
+        if (wrap) wrap.classList.remove('burst-on');
+      }, 700);
+    }
+  }
+  async function toggleLike(btn) {
+    var postId = btn.getAttribute('data-post-id');
+    if (!postId || postId.indexOf('fasc-prog') === 0) return;
+    if (btn.getAttribute('data-busy') === '1') return;
+    btn.setAttribute('data-busy', '1');
+
+    var liked = btn.classList.contains('is-liked');
+    var countEl = btn.querySelector('.like-count');
+    var count = Number((countEl && countEl.textContent) || 0) || 0;
+    var nextLiked = !liked;
+    var nextCount = Math.max(0, count + (nextLiked ? 1 : -1));
+
+    // optimistic UI + animação
+    setLikeUI(btn, nextLiked, nextCount, nextLiked);
+
+    var local = loadLocalLikes();
+    if (nextLiked) local[postId] = 1;
+    else delete local[postId];
+    saveLocalLikes(local);
+
+    // persistência Supabase se logado
+    try {
+      var me = null;
+      if (window.fascAuth && window.fascAuth.user) me = await window.fascAuth.user();
+      var db = window.fascDb;
+      if (me && db) {
+        if (nextLiked) {
+          var ins = await db.from('post_likes').insert({ post_id: postId, user_id: me.id });
+          if (ins.error && !/duplicate|unique|23505/i.test(ins.error.message || '')) {
+            console.warn('[like]', ins.error.message);
+          }
+        } else {
+          await db.from('post_likes').delete().eq('post_id', postId).eq('user_id', me.id);
+        }
+      }
+    } catch (e) {
+      console.warn('[like]', e.message || e);
+    }
+
+    btn.removeAttribute('data-busy');
+  }
+  function applyLikedStateToDOM() {
+    var local = loadLocalLikes();
+    document.querySelectorAll('.post-like-btn[data-post-id]').forEach(function (btn) {
+      var id = btn.getAttribute('data-post-id');
+      if (local[id]) {
+        var countEl = btn.querySelector('.like-count');
+        var count = Number((countEl && countEl.textContent) || 0) || 0;
+        setLikeUI(btn, true, count || 1, false);
+      }
+    });
+  }
+  function wireLikes() {
+    if (window.__cricriLikesWired) return;
+    window.__cricriLikesWired = true;
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.post-like-btn, [data-act="like"]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      toggleLike(btn);
+    });
+    // double-tap no card (mobile) para like — estilo Instagram/Threads
+    var lastTap = 0;
+    var lastCard = null;
+    document.addEventListener('click', function (e) {
+      var card = e.target.closest && e.target.closest('.post-card[data-post-id]');
+      if (!card) return;
+      if (e.target.closest('.post-act, a, button')) return;
+      var now = Date.now();
+      if (lastCard === card && now - lastTap < 320) {
+        var btn = card.querySelector('.post-like-btn');
+        if (btn && !btn.classList.contains('is-liked')) {
+          toggleLike(btn);
+          // heart float no centro do card
+          spawnFloatHeart(card, e);
+        }
+        lastTap = 0;
+        lastCard = null;
+      } else {
+        lastTap = now;
+        lastCard = card;
+      }
+    }, true);
+  }
+  function spawnFloatHeart(card, e) {
+    var h = document.createElement('div');
+    h.className = 'like-float-heart';
+    h.textContent = '♥';
+    var rect = card.getBoundingClientRect();
+    var x = (e && e.clientX) ? e.clientX - rect.left : rect.width / 2;
+    var y = (e && e.clientY) ? e.clientY - rect.top : rect.height / 2;
+    h.style.left = x + 'px';
+    h.style.top = y + 'px';
+    card.style.position = card.style.position || 'relative';
+    card.appendChild(h);
+    requestAnimationFrame(function () { h.classList.add('is-on'); });
+    setTimeout(function () { h.remove(); }, 900);
+  }
+  // re-aplica estado após render
+  var _origShowMore = typeof showMore === 'function' ? showMore : null;
+  // após append de cards, marca likes locais
+  document.addEventListener('cricri:feed-rendered', applyLikedStateToDOM);
+
+  /* ── Compartilhar com animação ── */
+  function showShareToast(msg, ok) {
+    var el = document.getElementById('cricri-share-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'cricri-share-toast';
+      el.className = 'share-toast';
+      el.setAttribute('role', 'status');
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.toggle('is-ok', !!ok);
+    el.classList.remove('is-show');
+    void el.offsetWidth;
+    el.classList.add('is-show');
+    clearTimeout(el._hide);
+    el._hide = setTimeout(function () {
+      el.classList.remove('is-show');
+    }, 2200);
+  }
+
+  function buildSharePayload(card, postId) {
+    var textEl = card && card.querySelector('.post-text');
+    var nameEl = card && card.querySelector('.post-nick, .post-name');
+    var text = (textEl && textEl.textContent || '').trim();
+    var name = (nameEl && nameEl.textContent || '').trim();
+    var origin = location.origin || '';
+    var path = location.pathname || '/feed.html';
+    // deep link pro post
+    var url = origin + path.replace(/\/?$/, '') + (path.indexOf('feed') >= 0 ? '' : '/feed.html');
+    if (postId && postId.indexOf('fasc-prog') !== 0) {
+      url += (url.indexOf('?') >= 0 ? '&' : '?') + 'post=' + encodeURIComponent(postId);
+    }
+    var snippet = text.length > 120 ? text.slice(0, 117) + '…' : text;
+    var title = name ? (name + ' no CRICRI') : 'CRICRI · mural';
+    var body = (snippet ? snippet + '\n\n' : '') + url;
+    return { title: title, text: body, url: url, snippet: snippet };
+  }
+
+  async function doShare(btn) {
+    if (!btn || btn.getAttribute('data-busy') === '1') return;
+    btn.setAttribute('data-busy', '1');
+    btn.classList.remove('share-fly');
+    void btn.offsetWidth;
+    btn.classList.add('share-fly');
+
+    var postId = btn.getAttribute('data-post-id') || '';
+    var card = btn.closest('.post-card');
+    var payload = buildSharePayload(card, postId);
+
+    var shared = false;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: payload.title,
+          text: payload.snippet || payload.title,
+          url: payload.url
+        });
+        shared = true;
+        showShareToast('Compartilhado ✓', true);
+      }
+    } catch (e) {
+      // user cancel → AbortError — não é falha
+      if (e && (e.name === 'AbortError' || /abort/i.test(String(e.message || '')))) {
+        shared = true; // silencia
+      }
+    }
+
+    if (!shared) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(payload.url);
+          showShareToast('Link copiado ✓', true);
+        } else {
+          // fallback legacy
+          var ta = document.createElement('textarea');
+          ta.value = payload.url;
+          ta.setAttribute('readonly', '');
+          ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          showShareToast('Link copiado ✓', true);
+        }
+      } catch (err) {
+        showShareToast('Não deu pra compartilhar', false);
+      }
+    }
+
+    setTimeout(function () {
+      btn.classList.remove('share-fly');
+      btn.removeAttribute('data-busy');
+    }, 650);
+  }
+
+  function wireShare() {
+    if (window.__cricriShareWired) return;
+    window.__cricriShareWired = true;
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.post-share-btn, [data-act="share"]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      doShare(btn);
+    });
+  }
+
   function boot() {
     wireFeedTabs();
-    loadFeed();
+    wireInfiniteScroll();
+    wireLikes();
+    wireShare();
+    loadFeed({ reset: true }).then(function () {
+      applyLikedStateToDOM();
+    }).catch(function () {
+      applyLikedStateToDOM();
+    });
     subscribeFeed();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () {
@@ -4817,6 +6403,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   });
   else setTimeout(boot, 400);
 })();
+
 </script>
 
 

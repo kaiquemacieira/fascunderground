@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-a11y-theme="dark" data-theme="dark" data-a11y-theme="dark">
 <head>
+
+  <script>
+  /* CRICRI · a11y boot (anti-FOUC + multi-página) */
+  (function () {
+    try {
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('cricri-a11y-v2') || '{}') || {}; } catch (_) {}
+      try {
+        var leg = JSON.parse(localStorage.getItem('fasc-a11y-v1') || '{}') || {};
+        if (!s.theme && leg.theme) s.theme = leg.theme;
+      } catch (_) {}
+      var h = document.documentElement;
+      var t = s.theme === 'light' ? 'light' : 'dark';
+      h.setAttribute('data-theme', t);
+      h.setAttribute('data-a11y-theme', t);
+      h.style.colorScheme = t;
+      var keys = ['text','contrast','motion','font','spacing','links','color','cursor','reading'];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var v = s[k];
+        if (v && v !== 'default' && v !== 'md') h.setAttribute('data-a11y-' + k, v);
+        else h.removeAttribute('data-a11y-' + k);
+      }
+    } catch (_) {}
+  })();
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
 
@@ -216,7 +243,7 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{ba
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
-  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807a">
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807fix1">
   <link rel="stylesheet" href="css/device-adapt.css?v=20260807b">
 </head>
 <body class="page-notifs">
@@ -271,10 +298,10 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/push.js?v=20260805g"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
-  <script src="js/fixed-chrome.js?v=20260807a"></script>
+  <script src="js/fixed-chrome.js?v=20260807fix1"></script>
   <script src="js/sw-register.js?v=7"></script>
   <script src="js/theme.js?v=20260805n"></script>
-  <script src="js/a11y-core.js" defer></script>
+  <script src="js/a11y-core.js?v=20260807fix1" defer></script>
   <script>
   (function () {
     'use strict';
