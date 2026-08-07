@@ -96,14 +96,21 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
 /* BAIXAR APP */
 #cricri-install-btn {
   position: fixed !important;
-  left: max(0.55rem, env(safe-area-inset-left, 0px)) !important;
-  top: max(0.55rem, env(safe-area-inset-top, 0px)) !important;
-  bottom: auto !important;
+  left: max(0.65rem, env(safe-area-inset-left, 0px)) !important;
   right: auto !important;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
   z-index: 2147483001 !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   transform: none !important;
   filter: none !important;
   margin: 0 !important;
+  pointer-events: auto !important;
+}
+#cricri-install-btn[hidden] {
+  display: none !important;
 }
 
 /* VLibras / mãozinha */

@@ -86,15 +86,31 @@
     s.id = 'cricri-install-css';
     s.textContent = [
       '#cricri-install-btn{',
-      'position:fixed!important;left:max(0.55rem,env(safe-area-inset-left));',
-      'top:max(0.55rem,env(safe-area-inset-top,0px));bottom:auto;',
-      'z-index:2147483001;display:inline-flex;align-items:center;gap:0.4rem;',
-      'padding:0.55rem 0.9rem;border-radius:999px;border:1.5px solid #E6BE49;',
-      'background:#E6BE49;color:#1a1400;font:600 0.72rem/1 Oswald,system-ui,sans-serif;',
+      'position:fixed!important;',
+      'left:max(0.65rem,env(safe-area-inset-left,0px))!important;',
+      'right:auto!important;',
+      'bottom:calc(72px + env(safe-area-inset-bottom,0px))!important;',
+      'top:auto!important;',
+      'z-index:2147483001!important;',
+      'display:inline-flex!important;',
+      'visibility:visible!important;',
+      'opacity:1!important;',
+      'align-items:center;gap:0.4rem;',
+      'padding:0.6rem 0.95rem!important;',
+      'min-height:44px!important;',
+      'border-radius:999px!important;',
+      'border:2px solid #1a1400!important;',
+      'background:#E6BE49!important;',
+      'color:#1a1400!important;',
+      'font:700 0.75rem/1 Oswald,system-ui,sans-serif!important;',
       'letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;',
-      'box-shadow:0 6px 18px rgba(227,61,107,0.4)}',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.45),0 0 0 1px rgba(230,190,73,0.35)!important;',
+      'pointer-events:auto!important;',
+      'transform:none!important;filter:none!important;',
+      '-webkit-tap-highlight-color:transparent}',
       '#cricri-install-btn[hidden]{display:none!important}',
-      '#cricri-install-btn svg{width:16px;height:16px}',
+      '#cricri-install-btn svg{width:16px;height:16px;flex-shrink:0}',
+      '@media (max-width:480px){#cricri-install-btn span{display:inline!important}}',
       '#cricri-install-sheet{position:fixed;inset:0;z-index:100130;display:flex;align-items:flex-end;justify-content:center;',
       'background:rgba(0,0,0,0.55);padding-bottom:env(safe-area-inset-bottom,0)}',
       '#cricri-install-sheet .sheet{width:min(100%,400px);max-height:min(92vh,720px);overflow:auto;background:#14110f;border-radius:18px 18px 0 0;',
@@ -126,7 +142,25 @@
   }
 
   function shouldHideButton() {
+    // só esconde se já estiver rodando como app instalado
     return isStandalone();
+  }
+
+  function forceShowStyles(btn) {
+    if (!btn) return;
+    var s = btn.style;
+    s.setProperty('position', 'fixed', 'important');
+    s.setProperty('left', 'max(0.65rem, env(safe-area-inset-left, 0px))', 'important');
+    s.setProperty('right', 'auto', 'important');
+    s.setProperty('bottom', 'calc(72px + env(safe-area-inset-bottom, 0px))', 'important');
+    s.setProperty('top', 'auto', 'important');
+    s.setProperty('z-index', '2147483001', 'important');
+    s.setProperty('display', 'inline-flex', 'important');
+    s.setProperty('visibility', 'visible', 'important');
+    s.setProperty('opacity', '1', 'important');
+    s.setProperty('pointer-events', 'auto', 'important');
+    s.setProperty('transform', 'none', 'important');
+    s.setProperty('filter', 'none', 'important');
   }
 
   function updateVisibility() {
@@ -134,30 +168,36 @@
     if (!btn) return;
     if (shouldHideButton()) {
       btn.hidden = true;
-      btn.style.display = 'none';
+      btn.style.setProperty('display', 'none', 'important');
       return;
     }
     btn.hidden = false;
-    btn.style.display = 'inline-flex';
+    btn.removeAttribute('hidden');
+    forceShowStyles(btn);
   }
 
   function mountButton() {
     if (shouldHideButton()) return;
-    if (document.getElementById('cricri-install-btn')) {
-      updateVisibility();
-      return;
+    var btn = document.getElementById('cricri-install-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'cricri-install-btn';
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Baixar app CRICRI');
+      btn.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/>' +
+        '</svg><span>Baixar app</span>';
+      btn.addEventListener('click', onInstallClick);
+      document.body.appendChild(btn);
+    } else if (btn.parentElement !== document.body) {
+      document.body.appendChild(btn);
     }
-    var btn = document.createElement('button');
-    btn.id = 'cricri-install-btn';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', 'Baixar app CRICRI');
-    btn.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/>' +
-      '</svg><span>Baixar app</span>';
-    btn.addEventListener('click', onInstallClick);
-    document.body.appendChild(btn);
     updateVisibility();
+    // re-pin após fixed-chrome
+    setTimeout(updateVisibility, 100);
+    setTimeout(updateVisibility, 500);
+    setTimeout(updateVisibility, 1500);
   }
 
   function closeSheet() {
@@ -332,10 +372,13 @@
     }
     injectHead();
     injectCss();
-    if (shouldHideButton()) return;
-    mountButton();
     wirePrompt();
-    setTimeout(updateVisibility, 1200);
+    if (!shouldHideButton()) {
+      mountButton();
+      setTimeout(mountButton, 300);
+      setTimeout(updateVisibility, 800);
+      setTimeout(updateVisibility, 2000);
+    }
   }
 
   if (document.readyState === 'loading') {

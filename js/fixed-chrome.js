@@ -93,11 +93,18 @@
     if (inst) {
       if (inst.parentElement !== document.body) document.body.appendChild(inst);
       forceFixed(inst, {
-        left: 'max(0.75rem, env(safe-area-inset-left, 0px))',
+        left: 'max(0.65rem, env(safe-area-inset-left, 0px))',
+        right: 'auto',
         bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
         top: 'auto',
-        'z-index': '2147483001'
+        'z-index': '2147483001',
+        display: 'inline-flex',
+        visibility: 'visible',
+        opacity: '1'
       });
+      if (!inst.hidden) {
+        inst.style.setProperty('display', 'inline-flex', 'important');
+      }
     }
 
     // VLibras
