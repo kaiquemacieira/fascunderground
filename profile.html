@@ -1223,6 +1223,43 @@
       text-align: right;
     }
 
+
+    #auth-msg {
+      margin-top: 0.75rem !important;
+      min-height: 1.25rem;
+      font-size: 0.85rem !important;
+      line-height: 1.4;
+      color: #f5a3b8;
+      word-break: break-word;
+    }
+    #auth-msg.ok, #auth-msg[data-ok="1"] {
+      color: #6dcca0 !important;
+    }
+    #login-card .tabs {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem;
+      margin-bottom: 0.85rem;
+      position: relative;
+      z-index: 2;
+    }
+    #login-card .tab {
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      min-height: 44px;
+    }
+    #login-card #auth-submit {
+      width: 100%;
+      min-height: 48px;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 2;
+    }
+    #login-card, #auth-form {
+      pointer-events: auto !important;
+    }
+
     /* Regras de criar conta */
     .auth-rules {
       margin: 0.65rem 0 0.85rem;
@@ -3562,7 +3599,7 @@ main > h1.title { display: none !important; }
         <button type="button" class="tab" id="tab-login" aria-selected="true">Entrar</button>
         <button type="button" class="tab" id="tab-signup" aria-selected="false">Criar conta</button>
       </div>
-      <form id="auth-form">
+      <form id="auth-form" novalidate>
         <div id="name-wrap" hidden>
           <label class="label" for="name">Nome</label>
           <input class="input" id="name" type="text" maxlength="80" autocomplete="name" placeholder="Como te chamam na rua">
@@ -3911,15 +3948,22 @@ window.fascEventEnded = function () {
       return s ? s.user : null;
     },
     async signUp(email, password, name) {
+      var redirect;
+      try {
+        redirect = new URL('profile.html', window.location.href).href;
+      } catch (_) {
+        redirect = profileRedirect();
+      }
       var res = await client.auth.signUp({
         email: String(email || '').trim(),
         password: String(password || ''),
         options: {
-          emailRedirectTo: profileRedirect(),
+          emailRedirectTo: redirect,
           data: { name: name || 'novo usuário' }
         }
       });
       if (res.error) throw res.error;
+      // Supabase às vezes retorna user sem session (confirmação de e-mail)
       return res.data;
     },
     async signIn(email, password) {
@@ -4841,13 +4885,26 @@ window.fascEventEnded = function () {
       var signup = m === 'signup';
       if (tabLogin) tabLogin.setAttribute('aria-selected', signup ? 'false' : 'true');
       if (tabSignup) tabSignup.setAttribute('aria-selected', signup ? 'true' : 'false');
-      if (nameWrap) nameWrap.hidden = !signup;
-      if (submit) submit.textContent = signup ? 'Criar conta' : 'Entrar';
+      if (nameWrap) {
+        nameWrap.hidden = !signup;
+        if (signup) nameWrap.removeAttribute('hidden');
+        else nameWrap.setAttribute('hidden', '');
+      }
+      if (submit) {
+        submit.textContent = signup ? 'Criar conta' : 'Entrar';
+        submit.disabled = false;
+        submit.type = 'submit';
+      }
       if ($('password')) $('password').autocomplete = signup ? 'new-password' : 'current-password';
       var rules = $('auth-rules');
-      if (rules) rules.hidden = !signup;
+      if (rules) {
+        rules.hidden = !signup;
+        if (signup) rules.removeAttribute('hidden');
+        else rules.setAttribute('hidden', '');
+      }
       msg('auth-msg', '', true);
       if (signup) updateAuthRules();
+      console.info('[CRICRI auth] modo =', mode);
     }
 
     function passwordScore(password, email) {
@@ -4971,8 +5028,23 @@ window.fascEventEnded = function () {
       }
       return m || 'Não foi possível criar a conta. Tente de novo.';
     }
-    if (tabLogin) tabLogin.onclick = function () { setMode('login'); };
-    if (tabSignup) tabSignup.onclick = function () { setMode('signup'); };
+    if (tabLogin) {
+      tabLogin.onclick = function (e) {
+        if (e) e.preventDefault();
+        setMode('login');
+      };
+    }
+    if (tabSignup) {
+      tabSignup.onclick = function (e) {
+        if (e) e.preventDefault();
+        setMode('signup');
+      };
+      // toque também no texto/filho
+      tabSignup.addEventListener('click', function (e) {
+        e.preventDefault();
+        setMode('signup');
+      }, true);
+    }
 
     if (form) {
       var emailEl = $('email');
