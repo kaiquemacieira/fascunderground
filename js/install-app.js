@@ -1,9 +1,11 @@
 /**
  * CRICRI · Baixar app (PWA)
- * Botão sempre visível no mobile (exceto se já estiver instalado).
+ * Visível e estável no mobile (sem piscar).
  */
 (function () {
   'use strict';
+  if (window.__CRICRI_INSTALL_STABLE__) return;
+  window.__CRICRI_INSTALL_STABLE__ = true;
 
   var STORAGE_KEY = 'cricri-app-downloaded-v1';
   var deferredPrompt = null;
@@ -37,8 +39,7 @@
   }
 
   function injectCss() {
-    var old = document.getElementById('cricri-install-css');
-    if (old) old.remove();
+    if (document.getElementById('cricri-install-css')) return;
     var s = document.createElement('style');
     s.id = 'cricri-install-css';
     s.textContent = [
@@ -56,7 +57,6 @@
       'justify-content:center!important;',
       'gap:0.4rem!important;',
       'min-height:48px!important;',
-      'min-width:48px!important;',
       'padding:0.65rem 1rem!important;',
       'border-radius:999px!important;',
       'border:2px solid #0a0a0a!important;',
@@ -71,12 +71,10 @@
       'transform:none!important;',
       'filter:none!important;',
       '-webkit-tap-highlight-color:transparent!important;',
-      'touch-action:manipulation!important;',
       '}',
-      '#' + BTN_ID + '.is-standalone-hidden{display:none!important}',
+      /* só some no app instalado — nunca por [hidden] genérico */
+      'html.cricri-standalone #' + BTN_ID + '{display:none!important;visibility:hidden!important;pointer-events:none!important}',
       '#' + BTN_ID + ' svg{width:18px;height:18px;flex-shrink:0;pointer-events:none}',
-      '#' + BTN_ID + ' span{pointer-events:none}',
-      /* sheet */
       '#cricri-install-sheet{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;justify-content:center;',
       'background:rgba(0,0,0,0.55);padding-bottom:env(safe-area-inset-bottom,0)}',
       '#cricri-install-sheet .sheet{width:min(100%,400px);max-height:min(92vh,720px);overflow:auto;background:#14110f;border-radius:18px 18px 0 0;',
@@ -103,41 +101,32 @@
     document.head.appendChild(s);
   }
 
-  function forceShow(btn) {
-    if (!btn) return;
-    btn.classList.remove('is-standalone-hidden');
+  function markStandaloneClass() {
+    try {
+      if (isStandalone()) document.documentElement.classList.add('cricri-standalone');
+      else document.documentElement.classList.remove('cricri-standalone');
+    } catch (_) {}
+  }
+
+  function pinButton(btn) {
+    if (!btn || isStandalone()) return;
+    // remove hidden que outros scripts possam ter colocado
     btn.removeAttribute('hidden');
     btn.hidden = false;
-    var st = btn.style;
-    st.setProperty('position', 'fixed', 'important');
-    st.setProperty('left', 'max(0.7rem, env(safe-area-inset-left, 0px))', 'important');
-    st.setProperty('right', 'auto', 'important');
-    st.setProperty('bottom', 'calc(76px + env(safe-area-inset-bottom, 0px))', 'important');
-    st.setProperty('top', 'auto', 'important');
-    st.setProperty('z-index', '2147483645', 'important');
-    st.setProperty('display', 'inline-flex', 'important');
-    st.setProperty('visibility', 'visible', 'important');
-    st.setProperty('opacity', '1', 'important');
-    st.setProperty('pointer-events', 'auto', 'important');
-    st.setProperty('transform', 'none', 'important');
-    st.setProperty('filter', 'none', 'important');
-  }
-
-  function forceHide(btn) {
-    if (!btn) return;
-    btn.classList.add('is-standalone-hidden');
-    btn.hidden = true;
-    btn.style.setProperty('display', 'none', 'important');
-  }
-
-  function updateVisibility() {
-    var btn = document.getElementById(BTN_ID);
-    if (!btn) return;
-    if (isStandalone()) forceHide(btn);
-    else forceShow(btn);
+    if (btn.parentElement !== document.body) {
+      document.body.appendChild(btn);
+    }
+    // estilos estáveis via attribute (não fica brigando com class toggle)
+    btn.setAttribute('data-cricri-install', '1');
   }
 
   function ensureButton() {
+    markStandaloneClass();
+    if (isStandalone()) {
+      var existing = document.getElementById(BTN_ID);
+      if (existing) existing.setAttribute('hidden', '');
+      return null;
+    }
     var btn = document.getElementById(BTN_ID);
     if (!btn) {
       btn = document.createElement('button');
@@ -150,14 +139,11 @@
         '</svg><span>Baixar app</span>';
       document.body.appendChild(btn);
     }
-    if (btn.parentElement !== document.body) {
-      document.body.appendChild(btn);
-    }
-    if (!btn.__cricriShareBound) {
-      btn.__cricriShareBound = true;
+    pinButton(btn);
+    if (!btn.__cricriBound) {
+      btn.__cricriBound = true;
       btn.addEventListener('click', onInstallClick);
     }
-    updateVisibility();
     return btn;
   }
 
@@ -229,9 +215,7 @@
       });
     }
     var now = document.getElementById('cricri-install-now');
-    if (now) {
-      now.addEventListener('click', function () { triggerNativeInstall(); });
-    }
+    if (now) now.addEventListener('click', function () { triggerNativeInstall(); });
     var ios = document.getElementById('cricri-install-ios');
     if (ios) {
       ios.addEventListener('click', function () {
@@ -262,7 +246,6 @@
       if (choice && choice.outcome === 'accepted') {
         try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
         setStatus('Instalando…', true);
-        updateVisibility();
       } else {
         setStatus('Instalação cancelada', false);
       }
@@ -276,10 +259,6 @@
       e.preventDefault();
       e.stopPropagation();
     }
-    if (deferredPrompt) {
-      showSheet();
-      return;
-    }
     showSheet();
   }
 
@@ -287,13 +266,11 @@
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
       deferredPrompt = e;
-      ensureButton();
-      updateVisibility();
     });
     window.addEventListener('appinstalled', function () {
       deferredPrompt = null;
       try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
-      updateVisibility();
+      markStandaloneClass();
       closeSheet();
     });
   }
@@ -306,20 +283,8 @@
     injectCss();
     wirePrompt();
     ensureButton();
-    // reafirma várias vezes (chrome / a11y / SW podem interferir)
-    [100, 400, 1000, 2500, 5000].forEach(function (ms) {
-      setTimeout(function () {
-        ensureButton();
-        updateVisibility();
-      }, ms);
-    });
-    // se o body for reescrito tarde
-    try {
-      var mo = new MutationObserver(function () {
-        if (!document.getElementById(BTN_ID) && !isStandalone()) ensureButton();
-      });
-      mo.observe(document.documentElement, { childList: true, subtree: true });
-    } catch (_) {}
+    // um único reforço tardio (sem loop que pisca)
+    setTimeout(ensureButton, 600);
   }
 
   if (document.readyState === 'loading') {
@@ -331,7 +296,7 @@
   window.CricriInstall = {
     prompt: onInstallClick,
     isStandalone: isStandalone,
-    show: function () { ensureButton(); updateVisibility(); },
-    refresh: function () { ensureButton(); updateVisibility(); }
+    show: ensureButton,
+    refresh: ensureButton
   };
 })();

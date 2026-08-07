@@ -133,3 +133,14 @@ div[vw] {
 body {
   padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+
+/* Install estável — não piscar */
+#cricri-install-btn[data-cricri-install="1"] {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+html.cricri-standalone #cricri-install-btn {
+  display: none !important;
+}

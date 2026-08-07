@@ -88,23 +88,18 @@
       });
     }
 
-    // install
+    // install — só posiciona; visibilidade é do install-app.js (evita piscar)
     var inst = document.getElementById('cricri-install-btn');
-    if (inst) {
+    if (inst && !document.documentElement.classList.contains('cricri-standalone')) {
       if (inst.parentElement !== document.body) document.body.appendChild(inst);
+      inst.removeAttribute('hidden');
       forceFixed(inst, {
-        left: 'max(0.65rem, env(safe-area-inset-left, 0px))',
+        left: 'max(0.7rem, env(safe-area-inset-left, 0px))',
         right: 'auto',
-        bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+        bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
         top: 'auto',
-        'z-index': '2147483001',
-        display: 'inline-flex',
-        visibility: 'visible',
-        opacity: '1'
+        'z-index': '2147483645'
       });
-      if (!inst.hidden) {
-        inst.style.setProperty('display', 'inline-flex', 'important');
-      }
     }
 
     // VLibras
