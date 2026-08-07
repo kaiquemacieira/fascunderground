@@ -93,7 +93,12 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
   filter: none !important;
 }
 
-/* BAIXAR APP */
+
+
+
+/* ═══════════════════════════════════════════
+   BAIXAR APP — estático, sem JS de visibilidade
+   ═══════════════════════════════════════════ */
 #cricri-install-btn {
   position: fixed !important;
   left: max(0.7rem, env(safe-area-inset-left, 0px)) !important;
@@ -104,42 +109,23 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  min-height: 48px !important;
+  padding: 0.65rem 1rem !important;
+  border-radius: 999px !important;
+  border: 2px solid #0a0a0a !important;
+  background: #E6BE49 !important;
+  color: #1a1400 !important;
+  font: 700 0.78rem/1 Oswald, system-ui, sans-serif !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5) !important;
+  pointer-events: auto !important;
   transform: none !important;
   filter: none !important;
   margin: 0 !important;
-  pointer-events: auto !important;
-}
-#cricri-install-btn[hidden] {
-  display: none !important;
-}
-
-/* VLibras / mãozinha */
-.vw-plugin-wrapper,
-.vlibras-wrapper,
-[vw],
-div[vw] {
-  position: fixed !important;
-  z-index: 2147483005 !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-/* Guest banner e chrome superior também fora do filtro */
-.cricri-guest-banner {
-  filter: none !important;
-}
-
-/* espaço pro conteúdo não ficar atrás do menu */
-body {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-}
-
-
-/* Install estável — não piscar */
-#cricri-install-btn[data-cricri-install="1"] {
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  cursor: pointer !important;
 }
 html.cricri-standalone #cricri-install-btn {
   display: none !important;

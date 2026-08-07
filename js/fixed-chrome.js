@@ -10,7 +10,6 @@
     'nav.bottom-nav',
     '#a11y-wrap',
     '.a11y-wrap',
-    '#cricri-install-btn',
     '[vw]',
     '.vw-plugin-wrapper',
     '.vlibras-wrapper'
@@ -88,19 +87,9 @@
       });
     }
 
-    // install — só posiciona; visibilidade é do install-app.js (evita piscar)
-    var inst = document.getElementById('cricri-install-btn');
-    if (inst && !document.documentElement.classList.contains('cricri-standalone')) {
-      if (inst.parentElement !== document.body) document.body.appendChild(inst);
-      inst.removeAttribute('hidden');
-      forceFixed(inst, {
-        left: 'max(0.7rem, env(safe-area-inset-left, 0px))',
-        right: 'auto',
-        bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
-        top: 'auto',
-        'z-index': '2147483645'
-      });
-    }
+    // install: NÃO pinado aqui (botão estático no HTML — evita piscar)
+
+    
 
     // VLibras
     document.querySelectorAll('[vw], .vw-plugin-wrapper, .vlibras-wrapper').forEach(function (el) {
