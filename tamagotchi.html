@@ -2299,39 +2299,6 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       }
     }
 
-
-    .tama-casas-btn,
-    #casas-open.tama-casas-btn,
-    body.tama-page-bg #casas-open {
-      position: fixed !important;
-      top: max(0.55rem, env(safe-area-inset-top)) !important;
-      left: max(0.55rem, env(safe-area-inset-left)) !important;
-      right: auto !important;
-      bottom: auto !important;
-      z-index: 2147483005 !important;
-      width: 44px !important;
-      height: 44px !important;
-      border-radius: 12px !important;
-      border: 1.5px solid rgba(250,250,247,0.22) !important;
-      background: rgba(20,20,20,0.92) !important;
-      color: #E6BE49 !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      cursor: pointer !important;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
-      pointer-events: auto !important;
-    }
-    /* esconde gear legado se ainda existir */
-    #cricri-top-tools, #cricri-gear-btn, #cricri-gear-panel {
-      display: none !important;
-    }
-    /* install/app btn não compete no canto esquerdo alto */
-    body.tama-page-bg #cricri-install-btn {
-      bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-      top: auto !important;
-    }
-
     /* —— Desktop / layout Tamagotchi —— */
     #tama-app {
       max-width: 26rem;
@@ -3062,11 +3029,61 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </script>
 
 <body class="tama-page-bg">
-  <button type="button" id="casas-open" class="casas-open-btn tama-casas-btn" aria-label="Abrir comunidades" title="Comunidades">
-    <span class="dots-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-  </button>
+  <div id="cricri-top-tools" class="cricri-top-tools" aria-label="Ferramentas">
+    <button type="button" id="cricri-gear-btn" aria-label="Menu" aria-expanded="false" aria-controls="cricri-gear-panel">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="6" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18" r="1.8"/></svg>
+    </button>
+    <div id="cricri-gear-panel" hidden style="display:none;position:absolute;top:48px;left:0;min-width:180px;background:#1a1512;border:1px solid rgba(230,190,73,.35);border-radius:12px;padding:.5rem;z-index:2147483006">
+      <button type="button" class="gear-link" id="cricri-gear-a11y" style="display:flex;width:100%;gap:.5rem;padding:.55rem .65rem;background:transparent;border:none;color:#ebe3cf;cursor:pointer;border-radius:8px;font:600 .8rem Inter,system-ui;text-align:left">♿ Acessibilidade</button>
+      <button type="button" class="gear-link" id="cricri-gear-theme" style="display:flex;width:100%;gap:.5rem;padding:.55rem .65rem;background:transparent;border:none;color:#ebe3cf;cursor:pointer;border-radius:8px;font:600 .8rem Inter,system-ui;text-align:left">🌓 Alternar tema</button>
+      <a href="index.html" style="display:flex;width:100%;gap:.5rem;padding:.55rem .65rem;color:#ebe3cf;text-decoration:none;border-radius:8px;font:600 .8rem Inter,system-ui">← Home</a>
+    </div>
+  </div>
 
-
+<script id="cricri-gear-inline">
+(function () {
+  function init() {
+    var btn = document.getElementById('cricri-gear-btn');
+    var panel = document.getElementById('cricri-gear-panel');
+    if (!btn || !panel || btn.getAttribute('data-wired') === '1') return;
+    btn.setAttribute('data-wired', '1');
+    panel.style.cssText = 'position:fixed;top:52px;left:max(0.55rem,env(safe-area-inset-left));min-width:200px;background:#1a1512;border:1.5px solid rgba(230,190,73,0.45);border-radius:14px;padding:0.45rem;z-index:2147483647;box-shadow:0 12px 32px rgba(0,0,0,0.55);display:none;';
+    function open() { panel.removeAttribute('hidden'); panel.style.display = 'block'; btn.setAttribute('aria-expanded', 'true'); }
+    function close() { panel.style.display = 'none'; panel.setAttribute('hidden', ''); btn.setAttribute('aria-expanded', 'false'); }
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (panel.style.display === 'block') close(); else open();
+    }, true);
+    document.addEventListener('click', function (e) {
+      if (panel.style.display !== 'block') return;
+      if (panel.contains(e.target) || btn.contains(e.target)) return;
+      close();
+    }, true);
+    var a11y = document.getElementById('cricri-gear-a11y');
+    if (a11y) a11y.addEventListener('click', function (e) {
+      e.stopPropagation(); close();
+      var t = document.querySelector('.a11y-toggle,#a11y-toggle'); if (t) t.click();
+    });
+    var th = document.getElementById('cricri-gear-theme');
+    if (th) th.addEventListener('click', function (e) {
+      e.stopPropagation();
+      try {
+        var h = document.documentElement;
+        var next = h.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        h.setAttribute('data-theme', next);
+        h.setAttribute('data-a11y-theme', next === 'light' ? 'light' : 'dark');
+        h.style.colorScheme = next;
+        var s = {}; try { s = JSON.parse(localStorage.getItem('fasc-a11y-v1')||'{}')||{}; } catch(_){}
+        s.theme = next; localStorage.setItem('fasc-a11y-v1', JSON.stringify(s));
+      } catch(_){}
+      close();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
 
   <a class="skip-link" href="#tama-main">Ir para o conteúdo</a>
   <div class="top">
@@ -3362,14 +3379,14 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/notif-bell.js?v=20260805g"></script>
   <script src="js/install-app.js?v=20260805g"></script>
   <script src="js/sw-register.js?v=9"></script>
-  <script src="js/casas.js?v=20260807c"></script>
-  <script src="js/bottom-nav.js?v=20260807nav"></script>
+  <script src="js/casas.js?v=20260806d"></script>
+  <script src="js/bottom-nav.js?v=20260806nav3"></script>
   <script src="js/fixed-chrome.js?v=20260807a"></script>
 
   <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-motion.js"></script>
   <!-- notif-bell desligado no Meow (evita FABs fantasmas no mobile) -->
-<script src="js/footer.js?v=20260807f"></script>
+<script src="js/footer.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/config.js?v=20260805g"></script>
   <script src="js/supabase-client.js"></script>
@@ -3378,7 +3395,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/tamagotchi.js?v=20260807x"></script>
   <script src="js/profile-tama-card.js"></script>
   <script src="js/tama-postcard.js"></script>
-  <script src="js/a11y-core.js?v=20260807a11y" defer></script>
+  <script src="js/a11y-core.js" defer></script>
   <script src="js/keyboard-nav.js" defer></script>
   <script src="js/touch-gestures.js" defer></script>
   <script src="js/sync-monitor.js" defer></script>

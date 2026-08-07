@@ -29,13 +29,7 @@
     if (!sheet) return;
     sheet.setAttribute('hidden', '');
     sheet.style.setProperty('display', 'none', 'important');
-    sheet.style.setProperty('visibility', 'hidden', 'important');
-    sheet.style.setProperty('pointer-events', 'none', 'important');
     sheet.setAttribute('aria-hidden', 'true');
-    try {
-      var openers = document.querySelectorAll('.bn-create, #bn-create-btn');
-      openers.forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
-    } catch (_) {}
   }
 
   function openCreateSheet() {
@@ -54,7 +48,7 @@
         '<a href="profile.html" style="border:1px solid rgba(250,250,247,.14);border-radius:14px;padding:.9rem;text-align:center;color:#FAFAF7;text-decoration:none;font:600 .8rem Inter,system-ui">☺ Perfil</a>' +
         '<a href="tamagotchi.html" style="border:1px solid rgba(250,250,247,.14);border-radius:14px;padding:.9rem;text-align:center;color:#FAFAF7;text-decoration:none;font:600 .8rem Inter,system-ui">♡ Cri</a>' +
         '</div>' +
-        '<button type="button" id="cs-close" class="cs-close" data-cs-close="1" style="margin-top:.75rem;width:100%;border:1px solid rgba(250,250,247,.18);border-radius:12px;background:rgba(250,250,247,.06);color:rgba(250,250,247,.85);font:600 .8rem Inter,system-ui;padding:.85rem;cursor:pointer;pointer-events:auto;position:relative;z-index:3">Cancelar</button>' +
+        '<button type="button" id="cs-close" class="cs-close" style="margin-top:.75rem;width:100%;border:1px solid rgba(250,250,247,.18);border-radius:12px;background:rgba(250,250,247,.06);color:rgba(250,250,247,.85);font:600 .8rem Inter,system-ui;padding:.85rem;cursor:pointer;pointer-events:auto;position:relative;z-index:3">Cancelar</button>' +
         '</div>';
       sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);pointer-events:auto';
       document.body.appendChild(sheet);
@@ -76,30 +70,11 @@
     sheet.removeAttribute('hidden');
     sheet.setAttribute('aria-hidden', 'false');
     sheet.style.setProperty('display', 'flex', 'important');
-    sheet.style.setProperty('visibility', 'visible', 'important');
-    sheet.style.setProperty('pointer-events', 'auto', 'important');
     // garantir acima da bottom-nav
     sheet.style.setProperty('z-index', '2147483646', 'important');
     var btn = sheet.querySelector('#cs-close');
     if (btn) btn.focus();
   }
-
-
-  // Delegação global — Cancelar funciona no mobile mesmo com re-render
-  document.addEventListener('click', function (e) {
-    var t = e.target && e.target.closest && e.target.closest('#cs-close, [data-cs-close]');
-    if (!t) return;
-    e.preventDefault();
-    e.stopPropagation();
-    closeCreateSheet();
-  }, true);
-  document.addEventListener('touchend', function (e) {
-    var t = e.target && e.target.closest && e.target.closest('#cs-close, [data-cs-close]');
-    if (!t) return;
-    e.preventDefault();
-    e.stopPropagation();
-    closeCreateSheet();
-  }, { capture: true, passive: false });
 
   function markActive() {
     var p = (location.pathname || '').split('/').pop() || 'index.html';
