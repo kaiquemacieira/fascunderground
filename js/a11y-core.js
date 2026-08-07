@@ -109,17 +109,70 @@
 
   function ensureFilters() {
     if (document.getElementById('cricri-a11y-svg')) return;
-    var div = document.createElement('div');
-    div.id = 'cricri-a11y-svg';
-    div.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
-    div.setAttribute('aria-hidden', 'true');
-    // Matrizes aproximadas de simulação/correção assistiva de daltonismo
-    div.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' +
-      '<filter id="cricri-protanopia"><feColorMatrix type="matrix" values="0.567 0.433 0 0 0 0.558 0.442 0 0 0 0 0.242 0.758 0 0 0 0 0 1 0"/></filter>' +
-      '<filter id="cricri-deuteranopia"><feColorMatrix type="matrix" values="0.625 0.375 0 0 0 0.7 0.3 0 0 0 0 0.3 0.7 0 0 0 0 0 1 0"/></filter>' +
-      '<filter id="cricri-tritanopia"><feColorMatrix type="matrix" values="0.95 0.05 0 0 0 0 0.433 0.567 0 0 0 0.475 0.525 0 0 0 0 0 1 0"/></filter>' +
-      '</svg>';
-    document.body.appendChild(div);
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('id', 'cricri-a11y-svg');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;left:-9999px;top:-9999px;pointer-events:none';
+    svg.innerHTML =
+      '<defs>' +
+      '<filter id="cricri-protanopia" color-interpolation-filters="sRGB">' +
+        '<feColorMatrix type="matrix" values="0.567 0.433 0 0 0 0.558 0.442 0 0 0 0 0.242 0.758 0 0 0 0 0 1 0"/></filter>' +
+      '<filter id="cricri-deuteranopia" color-interpolation-filters="sRGB">' +
+        '<feColorMatrix type="matrix" values="0.625 0.375 0 0 0 0.7 0.3 0 0 0 0 0.3 0.7 0 0 0 0 0 1 0"/></filter>' +
+      '<filter id="cricri-tritanopia" color-interpolation-filters="sRGB">' +
+        '<feColorMatrix type="matrix" values="0.95 0.05 0 0 0 0 0.433 0.567 0 0 0 0.475 0.525 0 0 0 0 0 1 0"/></filter>' +
+      '</defs>';
+    (document.body || document.documentElement).appendChild(svg);
+  }
+
+  function buildBodyFilter(state) {
+    var parts = [];
+    var color = (state && state.color) || 'default';
+    var contrast = (state && state.contrast) || 'default';
+    var base = '';
+    try { base = String(window.location.href || '').split('#')[0]; } catch (_) {}
+    function svgFilter(id) {
+      // fallback CSS se SVG falhar em ambiente estranho
+      return 'url("' + base + '#' + id + '")';
+    }
+    if (color === 'protanopia') parts.push(svgFilter('cricri-protanopia'));
+    else if (color === 'deuteranopia') parts.push(svgFilter('cricri-deuteranopia'));
+    else if (color === 'tritanopia') parts.push(svgFilter('cricri-tritanopia'));
+    else if (color === 'gray') parts.push('grayscale(1)');
+    if (contrast === 'soft') parts.push('contrast(0.88)');
+    else if (contrast === 'invert') {
+      parts.push('invert(1)');
+      parts.push('hue-rotate(180deg)');
+    }
+    return parts.join(' ');
+  }
+
+  function applyBodyFilter(state) {
+    try {
+      ensureFilters();
+      var f = buildBodyFilter(state);
+      if (document.body) {
+        if (f) document.body.style.setProperty('filter', f);
+        else document.body.style.removeProperty('filter');
+      }
+    } catch (e) {
+      console.warn('[a11y filter]', e);
+      // fallback CSS puro
+      try {
+        var c = (state && state.color) || 'default';
+        var fb = {
+          protanopia: 'saturate(0.75) hue-rotate(-20deg) contrast(1.05)',
+          deuteranopia: 'saturate(0.7) hue-rotate(25deg) contrast(1.05)',
+          tritanopia: 'saturate(0.8) hue-rotate(-50deg) contrast(1.05)',
+          gray: 'grayscale(1)'
+        };
+        var f2 = fb[c] || '';
+        if ((state && state.contrast) === 'soft') f2 += ' contrast(0.88)';
+        if ((state && state.contrast) === 'invert') f2 += ' invert(1) hue-rotate(180deg)';
+        if (document.body) document.body.style.setProperty('filter', f2.trim() || 'none');
+      } catch (_) {}
+    }
   }
 
   function panelHTML() {
@@ -288,6 +341,7 @@
       if (v === 'default' || v === 'md') root.removeAttribute('data-a11y-' + k);
       else root.setAttribute('data-a11y-' + k, v);
     });
+    try { applyBodyFilter(state); } catch (_) {}
     var panel = document.getElementById('a11y-panel') || document.getElementById('a11y-drawer');
     if (panel) {
       panel.querySelectorAll('[data-a11y-set]').forEach(function (btn) {

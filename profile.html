@@ -3547,8 +3547,7 @@ main > h1.title { display: none !important; }
 <body class="page-profile">
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
 
-  <!-- A11y FAB — mesmo ícone/dimensão da HOME; painel montado por js/a11y-core.js -->
-  <div class="a11y-wrap" id="a11y-wrap">
+  <!-- A11y FAB — mesmo ícone/dimensão da HOME; painel montado por js/a11y-core.js?v=20260807a11y"a11y-wrap" id="a11y-wrap">
     <button type="button" class="a11y-toggle" id="a11y-toggle"
       aria-expanded="false" aria-controls="a11y-panel"
       aria-label="Abrir opções de acessibilidade" title="Acessibilidade">
@@ -4050,11 +4049,7 @@ window.fascEventEnded = function () {
     });
   }
 
-  // A11y FAB: controlado por js/a11y-core.js (mesmo da HOME).
-  // Fallback mínimo se o core não carregar.
-  function wireA11y() {
-    if (window.CricriA11y) return;
-    var toggle = $('a11y-toggle');
+  // A11y FAB: controlado por js/a11y-core.js?v=20260807a11y'a11y-toggle');
     var wrap = $('a11y-wrap');
     if (!toggle || !wrap) return;
     var panel = document.getElementById('a11y-panel');
@@ -4066,7 +4061,7 @@ window.fascEventEnded = function () {
       panel.setAttribute('role', 'dialog');
       panel.innerHTML =
         '<h2 id="a11y-panel-title">Acessibilidade</h2>' +
-        '<p class="a11y-note">Carregue js/a11y-core.js para o painel completo.</p>';
+        '<p class="a11y-note">Carregue js/a11y-core.js?v=20260807a11y';
       wrap.appendChild(panel);
     }
     toggle.onclick = function (e) {
@@ -6022,7 +6017,7 @@ window.fascEventEnded = function () {
   <script src="js/push.js?v=20260805g"></script>
 
   <script src="js/theme.js?v=20260805n"></script>
-  <script src="js/a11y-core.js" defer></script>
+  <script src="js/a11y-core.js?v=20260807a11y" defer></script>
   <script src="js/keyboard-nav.js" defer></script>
   <script src="js/touch-gestures.js" defer></script>
   <script src="js/sync-monitor.js" defer></script>
@@ -6221,7 +6216,7 @@ window.fascEventEnded = function () {
   <script src="js/hostile-filter.js"></script>
   <script src="js/tama-state-read.js"></script>
   <script src="js/pet-reactions.js"></script>
-<script src="js/footer.js?v=20260806d"></script>
+<script src="js/footer.js?v=20260807f"></script>
   <div id="site-footer-slot"></div>
 
   <div id="bottom-nav-slot">
@@ -6238,7 +6233,7 @@ window.fascEventEnded = function () {
   <script src="js/sw-register.js?v=8"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
-  <script src="js/bottom-nav.js?v=20260806nav3"></script>
+  <script src="js/bottom-nav.js?v=20260807nav"></script>
   <script src="js/fixed-chrome.js?v=20260807a"></script>
   <!-- chip de nick removido do topbar — sininho global em js/notif-bell.js -->
 

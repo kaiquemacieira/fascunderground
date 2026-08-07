@@ -22,6 +22,12 @@
     '.cricri-footer-a11y-text strong{color:#FAFAF7;font-size:.78rem;font-family:"Bebas Neue",Oswald,sans-serif;',
     'letter-spacing:.04em;text-transform:uppercase}',
     'html[data-theme="light"] .cricri-footer-a11y-text strong,html[data-a11y-theme="light"] .cricri-footer-a11y-text strong{color:#111111}',
+    '.cricri-footer-credit{margin:1.15rem auto 0;text-align:center}',
+    '.cricri-footer-credit-label{display:block;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;',
+    'color:rgba(230,190,73,.75);font-family:Oswald,system-ui,sans-serif;margin-bottom:.2rem}',
+    '.cricri-footer-credit-name{margin:0;font:700 1rem/1.2 "Bebas Neue",Oswald,system-ui,sans-serif;',
+    'letter-spacing:.06em;color:#FAFAF7}',
+    'html[data-theme="light"] .cricri-footer-credit-name,html[data-a11y-theme="light"] .cricri-footer-credit-name{color:#111}',
     '.cricri-footer-glow{pointer-events:none;position:absolute;inset:auto 10% -40%;height:5rem;',
     'background:radial-gradient(ellipse at center,rgba(230,190,73,.1),transparent 70%);z-index:0}'
   ].join('');
@@ -35,6 +41,10 @@
             '<strong>Certificado digital de acessibilidade</strong>' +
             '<span>Contraste, texto, movimento, teclado, gestos e Libras. WCAG 2.2 · eMAG. Selo interno CRICRI.</span>' +
           '</div>' +
+        '</div>' +
+        '<div class="cricri-footer-credit">' +
+          '<span class="cricri-footer-credit-label">Desenvolvedora e idealizadora</span>' +
+          '<p class="cricri-footer-credit-name">AcidBurn2026</p>' +
         '</div>' +
       '</div>' +
       '<div class="cricri-footer-glow" aria-hidden="true"></div>' +
