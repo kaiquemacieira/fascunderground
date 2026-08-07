@@ -86,9 +86,9 @@
     s.id = 'cricri-install-css';
     s.textContent = [
       '#cricri-install-btn{',
-      'position:fixed;left:max(0.75rem,env(safe-area-inset-left));',
+      'position:fixed!important;left:max(0.75rem,env(safe-area-inset-left));',
       'bottom:calc(5.25rem + env(safe-area-inset-bottom,0px));',
-      'z-index:5600;display:inline-flex;align-items:center;gap:0.4rem;',
+      'z-index:2147483001;display:inline-flex;align-items:center;gap:0.4rem;',
       'padding:0.55rem 0.9rem;border-radius:999px;border:1.5px solid #E6BE49;',
       'background:#E6BE49;color:#1a1400;font:600 0.72rem/1 Oswald,system-ui,sans-serif;',
       'letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;',

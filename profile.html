@@ -3228,7 +3228,7 @@ html[data-theme="light"] .meow-public-btn {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 50;
+  z-index: 2147483000;
   pointer-events: none;
 }
 #bottom-nav-slot .bottom-nav {
@@ -3239,13 +3239,13 @@ html[data-theme="light"] .meow-public-btn {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  z-index: 50 !important;
+  z-index: 2147483000 !important;
   height: calc(64px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #0c0a09;
   border-top: 2px solid rgba(230, 220, 196, 0.12);
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-columns: repeat(5, 1fr) !important;
   gap: 0 !important;
   align-items: stretch;
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
@@ -3343,6 +3343,18 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{ba
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807a">
+<style id="profile-hero-clear">
+/* sem título acima da foto */
+main > h1.title { display: none !important; }
+#profile-hero { margin-top: 0.5rem !important; }
+#profile-hero .avatar-wrap {
+  margin-top: 0 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+.profile-topbar { margin-bottom: 0.25rem !important; }
+</style>
 </head>
 <body class="page-profile">
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -3371,7 +3383,6 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
     </header>
 
 <main id="conteudo-principal" tabindex="-1">
-    <h1 class="title">Perfil <span>CRICRI</span></h1>
 <!-- P1.2 — presentear cartão duplicado (visitante logado no perfil alheio) -->
       <div class="tama-gift-host" id="tama-gift-host" hidden></div>
 <div class="pet-react-host" id="pet-react-host" hidden></div>
@@ -5796,6 +5807,7 @@ window.fascEventEnded = function () {
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
+  <script src="js/fixed-chrome.js?v=20260807a"></script>
   <!-- chip de nick removido do topbar — sininho global em js/notif-bell.js -->
 
 <script>

@@ -386,7 +386,7 @@
       position: fixed; left: 0; right: 0; bottom: 0;
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
       padding: 0.4rem 0.15rem calc(0.4rem + env(safe-area-inset-bottom));
-      background: rgba(12,10,9,0.94); border-top: 1px solid rgba(230,220,196,0.1); z-index: 50;
+      background: rgba(12,10,9,0.94); border-top: 1px solid rgba(230,220,196,0.1); z-index: 2147483000;
     }
     .bottom-nav a {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1261,6 +1261,7 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{ba
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807a">
 </head>
 
 <script>
@@ -1577,6 +1578,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/sw-register.js?v=20260805g"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
+  <script src="js/fixed-chrome.js?v=20260807a"></script>
 
   <script src="js/theme.js?v=20260805n"></script>
   <script src="js/a11y-motion.js"></script>
