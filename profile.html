@@ -6261,7 +6261,7 @@ window.fascEventEnded = function () {
   <script src="js/visit-sheet.js?v=20260806d"></script>
   <script src="js/friends.js?v=20260807f"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
-  <script src="js/install-app.js?v=20260807inst1"></script>
+  <script src="js/install-app.js?v=20260807inst2"></script>
   <script src="js/sw-register.js?v=8"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
@@ -6338,6 +6338,13 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- botão Baixar app (visível no mobile; JS reforça) -->
+<button type="button" id="cricri-install-btn" aria-label="Baixar app CRICRI" style="position:fixed;left:max(0.7rem,env(safe-area-inset-left,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));top:auto;z-index:2147483645;display:inline-flex;align-items:center;gap:0.4rem;min-height:48px;padding:0.65rem 1rem;border-radius:999px;border:2px solid #0a0a0a;background:#E6BE49;color:#1a1400;font:700 0.78rem/1 Oswald,system-ui,sans-serif;letter-spacing:0.06em;text-transform:uppercase;box-shadow:0 6px 24px rgba(0,0,0,0.5);cursor:pointer;">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>
+  <span>Baixar app</span>
+</button>
+
 <nav class="bottom-nav" data-cricri-nav="1" aria-label="Navegação principal">
   <a class="bn-item" data-bn="home" href="index.html">
     <span class="bn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h3.5a1 1 0 0 0 1-1V9.5"/></svg></span>

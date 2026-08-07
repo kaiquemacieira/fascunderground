@@ -96,11 +96,11 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
 /* BAIXAR APP */
 #cricri-install-btn {
   position: fixed !important;
-  left: max(0.65rem, env(safe-area-inset-left, 0px)) !important;
+  left: max(0.7rem, env(safe-area-inset-left, 0px)) !important;
   right: auto !important;
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
   top: auto !important;
-  z-index: 2147483001 !important;
+  z-index: 2147483645 !important;
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
