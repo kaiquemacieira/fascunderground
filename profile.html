@@ -2,10 +2,24 @@
 <html lang="pt-BR" data-theme="dark" data-a11y-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="dark light">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+
+  <!-- PWA / Apple / Android — compatibilidade multi-aparelho -->
   <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#f6efdc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#F7F6F3" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CRICRI">
+  <meta name="application-name" content="CRICRI">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-TileColor" content="#0A0A0A">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
   <script>
   /* CRICRI · tema escuro nativo antes do paint (anti-FOUC) */
   (function () {
@@ -35,7 +49,6 @@
 
   <title>Área do Usuário · CRICRI</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <meta name="theme-color" content="#0A0A0A">
   <meta name="view-transition" content="same-origin">
   <script>
   (function () {
@@ -3355,6 +3368,7 @@ main > h1.title { display: none !important; }
 }
 .profile-topbar { margin-bottom: 0.25rem !important; }
 </style>
+  <link rel="stylesheet" href="css/device-adapt.css?v=20260807b">
 </head>
 <body class="page-profile">
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -5579,7 +5593,7 @@ window.fascEventEnded = function () {
 
   <!-- Notifs locais + Web Push opcional -->
   <script src="js/cricri-notifs.js"></script>
-  <script src="js/connection-notifs.js"></script>
+  <script src="js/connection-notifs.js?v=20260807f"></script>
   <script>
     // Gere com: npx web-push generate-vapid-keys
     // window.FASC_VAPID_PUBLIC_KEY = 'SUA_CHAVE_PUBLICA';
@@ -5800,10 +5814,10 @@ window.fascEventEnded = function () {
   <script src="js/cri-svg.js"></script>
   <script src="js/guest-mode.js"></script>
   <script src="js/visit-sheet.js?v=20260806d"></script>
-  <script src="js/friends.js?v=20260805g"></script>
+  <script src="js/friends.js?v=20260807f"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
   <script src="js/install-app.js?v=20260805g"></script>
-  <script src="js/sw-register.js?v=20260805g"></script>
+  <script src="js/sw-register.js?v=7"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>

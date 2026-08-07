@@ -2,12 +2,24 @@
 <html lang="pt-BR" data-a11y-theme="dark" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+
+  <!-- PWA / Apple / Android — compatibilidade multi-aparelho -->
+  <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F7F6F3" media="(prefers-color-scheme: light)">
   <meta name="color-scheme" content="dark light">
-  <meta name="theme-color" content="#0A0A0A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CRICRI">
+  <meta name="application-name" content="CRICRI">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-TileColor" content="#0A0A0A">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
   <title>CRICRI — Home · São Cristóvão</title>
   <script>
   (function () {
@@ -494,6 +506,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
 
   <link rel="stylesheet" href="css/fixed-chrome.css?v=20260807a">
+  <link rel="stylesheet" href="css/device-adapt.css?v=20260807b">
 </head>
 <body class="page-home">
   <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
@@ -594,7 +607,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/fixed-chrome.js?v=20260807a"></script>
   <script src="js/notif-bell.js"></script>
   <script src="js/install-app.js"></script>
-  <script src="js/sw-register.js"></script>
+  <script src="js/sw-register.js?v=7"></script>
   <script>
   (function () {
     // Contagem regressiva até 19/11/2026 18:00 (horário de Brasília, approx -03)

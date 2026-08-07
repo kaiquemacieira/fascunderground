@@ -1,48 +1,46 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#e33d6b">
-  <title>CRICRI · Offline</title>
+  <meta name="theme-color" content="#0A0A0A">
+  <title>Offline · CRICRI</title>
   <style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
     body {
       margin: 0; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #0c0a09; color: #ebe3cf; padding: 1.5rem; text-align: center;
+      font-family: Inter, system-ui, sans-serif; background: #0A0A0A; color: #FAFAF7;
+      padding: 1.5rem; text-align: center;
     }
     .card {
-      max-width: 22rem; padding: 1.5rem 1.25rem;
-      border: 1.5px solid rgba(230,220,196,0.14); border-radius: 16px;
-      background: #171412;
+      max-width: 22rem; width: 100%;
+      border: 1px solid rgba(250,250,247,.12); border-radius: 16px;
+      padding: 1.75rem 1.35rem; background: #141414;
     }
-    h1 {
-      margin: 0 0 0.5rem; font-size: 1.35rem; letter-spacing: 0.06em;
-      text-transform: uppercase; color: #e33d6b;
-    }
-    p { margin: 0 0 1rem; line-height: 1.45; color: #cfc5b4; font-size: 0.95rem; }
+    .mark { font-weight: 800; letter-spacing: -0.02em; font-size: 1.35rem; margin: 0 0 .35rem; }
+    .mark span { color: #E6BE49; }
+    p { margin: 0 0 1.25rem; color: rgba(250,250,247,.62); font-size: .92rem; line-height: 1.45; }
     a, button {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 0.65rem 1rem; border-radius: 999px; text-decoration: none;
-      font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
-      border: none; cursor: pointer;
+      padding: .7rem 1.2rem; border-radius: 999px; border: none;
+      background: #E6BE49; color: #1a1400; font-weight: 700; font-size: .88rem;
+      text-decoration: none; cursor: pointer; min-height: 44px;
     }
-    .primary { background: #e33d6b; color: #fff; margin: 0.25rem; }
-    .ghost { background: transparent; color: #ebe3cf; border: 1.5px solid rgba(230,220,196,0.22); margin: 0.25rem; }
+    .ghost {
+      margin-top: .65rem; background: transparent; border: 1px solid rgba(250,250,247,.18);
+      color: rgba(250,250,247,.75);
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>CRICRI offline</h1>
-    <p>Sem rede agora. Páginas e assets já visitados podem abrir; o mapa salvo e o Tamagotchi local continuam.</p>
-    <p style="font-size:0.8rem;color:#8c8376">Quando a internet voltar, os dados sincronizam de novo.</p>
-    <div>
-      <a class="primary" href="./index.html">Tentar Home</a>
-      <button class="ghost" type="button" onclick="location.reload()">Recarregar</button>
-    </div>
+    <p class="mark">CRI<span>CRI</span></p>
+    <p>Você está offline. O shell do app continua disponível — tente de novo quando a rede voltar.</p>
+    <button type="button" onclick="location.reload()">Tentar novamente</button>
+    <br>
+    <a class="ghost" href="./index.html">Ir à Home</a>
   </div>
-  <script src="js/sw-register.js"></script>
+  <script src="js/sw-register.js?v=7"></script>
 </body>
 </html>

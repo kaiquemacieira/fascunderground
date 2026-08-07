@@ -262,6 +262,27 @@
     try {
       window.dispatchEvent(new CustomEvent('cricri:friend-request-sent', { detail: { toId: toId } }));
     } catch (_) {}
+    // tenta gravar notificação no banco (destinatário lê na caixa)
+    try {
+      var meN = await currentUserId();
+      var labelN = 'Alguém';
+      try {
+        var prN = await client.from('profiles').select('handle,name').eq('id', meN).maybeSingle();
+        if (prN.data) labelN = prN.data.handle ? '@' + prN.data.handle : (prN.data.name || labelN);
+      } catch (_) {}
+      var notifPayload = {
+        user_id: toId,
+        kind: 'friend_request',
+        title: 'Pedido de amizade',
+        body: labelN + ' quer conectar com você no CRICRI',
+        href: '/notifications.html',
+        meta: { from_id: meN }
+      };
+      var nres = await client.from('notifications').insert(notifPayload);
+      if (nres.error && !/relation|schema|notifications/i.test(nres.error.message || '')) {
+        console.info('[friends] notif table', nres.error.message);
+      }
+    } catch (_) {}
     // push pro destinatário
     try {
       if (window.CricriPush && window.CricriPush.notifyUser) {

@@ -13,7 +13,7 @@
   'use strict';
 
   var SEEN_KEY = 'cricri-conn-seen-v1';
-  var POLL_MS = 45000;
+  var POLL_MS = 15000;
   var timer = null;
   var booted = false;
 
@@ -63,19 +63,30 @@
   async function fetchIncoming(me) {
     var client = db();
     if (!client || !me) return [];
+    // tenta pending primeiro (schema novo)
     var res = await client
       .from('connections')
-      .select('id, from_id, created_at')
+      .select('id, from_id, status, created_at')
       .eq('to_id', me)
+      .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(40);
     if (res.error) {
-      // policy antiga: não consegue ler incoming
-      if (/policy|permission|RLS/i.test(res.error.message || '')) {
-        console.info('[CRICRI conn-notif] rode migration connections_incoming_select');
-      } else {
-        console.warn('[CRICRI conn-notif]', res.error.message);
+      // coluna status pode não existir — fallback legado
+      if (/status|column/i.test(res.error.message || '')) {
+        res = await client
+          .from('connections')
+          .select('id, from_id, created_at')
+          .eq('to_id', me)
+          .order('created_at', { ascending: false })
+          .limit(40);
+      } else if (/policy|permission|RLS/i.test(res.error.message || '')) {
+        console.info('[CRICRI conn-notif] RLS bloqueia leitura de pedidos recebidos — rode migration connections_incoming_select');
+        return [];
       }
+    }
+    if (res.error) {
+      console.warn('[CRICRI conn-notif]', res.error.message);
       return [];
     }
     return res.data || [];
@@ -232,7 +243,7 @@
     function tick() {
       tries++;
       if (db() && window.fascAuth) {
-        checkOnce().then(startPolling).catch(startPolling);
+        checkOnce().then(function () { startPolling(); subscribeRealtime(); }).catch(function () { startPolling(); subscribeRealtime(); });
         return;
       }
       if (tries < 40) setTimeout(tick, 150);
@@ -247,6 +258,37 @@
         }
         if (ev === 'SIGNED_OUT') stopPolling();
       });
+    }
+  }
+
+
+  function subscribeRealtime() {
+    try {
+      var client = db();
+      if (!client || typeof client.channel !== 'function') return;
+      myId().then(function (me) {
+        if (!me) return;
+        try {
+          var ch = client
+            .channel('connections-in-' + me)
+            .on('postgres_changes', {
+              event: '*',
+              schema: 'public',
+              table: 'connections',
+              filter: 'to_id=eq.' + me
+            }, function () {
+              checkOnce().catch(function () {});
+            })
+            .subscribe(function (status) {
+              console.info('[CRICRI conn-notif] realtime', status);
+            });
+          window.__cricriConnChannel = ch;
+        } catch (e) {
+          console.info('[CRICRI conn-notif] realtime fail', e && e.message);
+        }
+      });
+    } catch (e) {
+      console.info('[CRICRI conn-notif] realtime skip', e && e.message);
     }
   }
 

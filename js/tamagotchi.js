@@ -100,10 +100,35 @@
   function lifeRemainingMs() { return Math.max(0, EVENT_END - Date.now()); }
   function ageHours(s) { return Math.max(0, (Date.now() - s.bornAt) / 3600000); }
 
+
+  var SPECIES = [
+    { id: 'unicornio', name: 'Unicórnio', emoji: '🦄', blurb: 'Magia da praça' },
+    { id: 'grilo', name: 'Grilo', emoji: '🦗', blurb: 'O som do CRICRI' },
+    { id: 'viralata', name: 'Vira-lata', emoji: '🐕', blurb: 'Coração de rua' },
+    { id: 'preguica', name: 'Bicho-preguiça', emoji: '🦥', blurb: 'Calma sergipana' },
+    { id: 'gaviao', name: 'Gavião-carijó', emoji: '🦅', blurb: 'Olho na cidade' },
+    { id: 'jabuti', name: 'Jabuti', emoji: '🐢', blurb: 'Passo firme' },
+    { id: 'suindara', name: 'Suindara', emoji: '🦉', blurb: 'Noite na roda' },
+    { id: 'prea', name: 'Preá', emoji: '🐹', blurb: 'Esperto do mato' }
+  ];
+
+  function speciesById(id) {
+    for (var i = 0; i < SPECIES.length; i++) {
+      if (SPECIES[i].id === id) return SPECIES[i];
+    }
+    return SPECIES[0];
+  }
+
+  function speciesEmoji(s, stageId) {
+    var sp = speciesById(s && s.speciesId);
+    if (!stageId || stageId === 'ovo') return '🥚';
+    return sp.emoji || '🐾';
+  }
+
   function defaultState() {
     var now = Date.now();
     return {
-      started: false, name: 'Cri', bornAt: now, started_at: now, lastTick: now,
+      started: false, speciesId: null, name: 'Cri', bornAt: now, started_at: now, lastTick: now,
       hunger: 85, happy: 85, energy: 85, hygiene: 85, health: 100,
       shell: 'rosa', sleeping: false, sick: false, alive: true,
       careScore: 0, feedCount: 0, playCount: 0, cleanCount: 0,
@@ -844,6 +869,7 @@
   }
 
   var state = load();
+  try { if (state) ensureSpeciesChosen(state); else { var _boot = defaultState(); ensureSpeciesChosen(_boot); } } catch (_) {}
   if (recoverPrematureEnd(state)) {
     // reabre se localStorage ficou com fim prematuro (comum no mobile)
     try { console.info('[CRICRI] recoverPrematureEnd', new Date(window.__CRICRI_EVENT_END || 0).toISOString()); } catch (_) {}
@@ -1342,6 +1368,54 @@
   else boot();
 
   // API de leitura (perfil / outros) — mesma instância de load/cloudLoad
+  
+  function showSpeciesPicker(onPick) {
+    if (document.getElementById('tama-species-picker')) return;
+    var overlay = document.createElement('div');
+    overlay.id = 'tama-species-picker';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', 'Escolha seu bichinho');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:1rem;padding-bottom:calc(1rem + env(safe-area-inset-bottom,0px))';
+    var card = document.createElement('div');
+    card.style.cssText = 'width:min(100%,420px);max-height:min(88dvh,640px);overflow:auto;background:#141414;color:#FAFAF7;border-radius:18px 18px 14px 14px;border:1px solid rgba(250,250,247,.12);padding:1.1rem 1rem 1.25rem';
+    card.innerHTML = '<h2 style="margin:0 0 .35rem;font:800 1.15rem/1.2 Inter,system-ui;letter-spacing:-.02em">Escolha seu bichinho</h2>' +
+      '<p style="margin:0 0 1rem;color:rgba(250,250,247,.55);font-size:.85rem;line-height:1.4">Ele vai te acompanhar na roda CRICRI. Dá pra sentir o pulso da cidade com ele.</p>' +
+      '<div id="tama-species-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem"></div>';
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    var grid = card.querySelector('#tama-species-grid');
+    SPECIES.forEach(function (sp) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.cssText = 'appearance:none;border:1.5px solid rgba(250,250,247,.14);border-radius:14px;background:rgba(250,250,247,.04);color:#FAFAF7;padding:.85rem .6rem;cursor:pointer;text-align:center;font:600 .78rem/1.25 Inter,system-ui';
+      btn.innerHTML = '<div style="font-size:1.85rem;line-height:1.2;margin-bottom:.35rem">' + sp.emoji + '</div><strong style="display:block;font-size:.82rem">' + sp.name + '</strong><span style="display:block;margin-top:.2rem;color:rgba(250,250,247,.45);font-weight:500;font-size:.7rem">' + sp.blurb + '</span>';
+      btn.addEventListener('click', function () {
+        try { overlay.remove(); } catch (_) {}
+        if (typeof onPick === 'function') onPick(sp.id);
+      });
+      btn.addEventListener('mouseenter', function () { btn.style.borderColor = 'rgba(230,190,73,.55)'; });
+      btn.addEventListener('mouseleave', function () { btn.style.borderColor = 'rgba(250,250,247,.14)'; });
+      grid.appendChild(btn);
+    });
+  }
+
+  function ensureSpeciesChosen(s) {
+    if (s && s.speciesId) return s;
+    showSpeciesPicker(function (id) {
+      var base = s || defaultState();
+      base.speciesId = id;
+      var sp = speciesById(id);
+      if (!base.name || base.name === 'Cri') base.name = sp.name;
+      base.started = true;
+      try { save(base); } catch (_) {}
+      try { state = base; } catch (_) {}
+      try { location.reload(); } catch (_) {}
+    });
+    return s;
+  }
+
+
+
   window.CricriTamaRead = window.CricriTamaRead || {
     loadLocal: load,
     cloudLoad: cloudLoad,
@@ -1361,7 +1435,9 @@
       var st = stageForAge(ageHours(s));
       var shellId = s.shell || 'rosa';
       var labels = { rosa: 'Rosa', ocre: 'Ocre', azul: 'Azul', tuxedo: 'Tuxedo' };
-      var emoji = { ovo: '🥚', bebe: '🐱', filhote: '🐱', cria: '🐱', festa: '🐱', adulta: '🐱', ancia: '🐱' };
+      var emoji = { ovo: '🥚' };
+      var se = speciesEmoji(s, st.id);
+      ['bebe','filhote','cria','festa','adulta','ancia'].forEach(function (k) { emoji[k] = se; });
       var formId = s.formId || null;
       var form = formId && FORM_META[formId] ? FORM_META[formId].label : '';
       return {
