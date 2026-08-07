@@ -45,7 +45,9 @@
     write(arr);
 
     try {
-      console.warn('[CRICRI sync fail]', item.source, item.tag || '', item.message);
+      if (!/periodic-background-sync|permission|negada/i.test(String(item.message||'') + String(item.tag||''))) {
+        console.warn('[CRICRI sync fail]', item.source, item.tag || '', item.message);
+      }
     } catch (_) {}
 
     try {

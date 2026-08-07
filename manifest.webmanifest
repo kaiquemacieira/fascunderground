@@ -1,14 +1,17 @@
 {
+  "id": "/",
   "name": "CRICRI — São Cristóvão",
   "short_name": "CRICRI",
-  "description": "Mapa, rolê, after e suporte do festival em São Cristóvão · SE",
+  "description": "Linha do tempo viva de São Cristóvão · mapa, after, CRICRI pet e o fluxo da cidade em tempo real.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#0c0a08",
   "theme_color": "#0c0a08",
   "lang": "pt-BR",
+  "dir": "ltr",
   "categories": ["entertainment", "social", "travel"],
   "icons": [
     {
@@ -24,10 +27,42 @@
       "purpose": "any"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshots/splash-portrait.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "CRICRI · São Cristóvão"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "CRICRI Pet",
+      "short_name": "Pet",
+      "description": "Cuidar do mascote do festival",
+      "url": "./tamagotchi.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Explorar",
+      "short_name": "Mapa",
+      "description": "Mapa e spots de São Cristóvão",
+      "url": "./explorar.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
 }

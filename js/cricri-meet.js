@@ -120,6 +120,17 @@
         var spotName = row.spot_name || (currentSpot && currentSpot.name) || sid;
         markToasted(fid, sid);
         showMeetToast(label, spotName);
+        try {
+          global.dispatchEvent(new CustomEvent('cricri:friend-meet', {
+            detail: {
+              friendId: fid,
+              friendName: label,
+              spotId: sid,
+              spotName: spotName,
+              speciesId: row.species_id || row.tama_species || null
+            }
+          }));
+        } catch (_) {}
       });
     } catch (e) {
       console.info('[cricri-meet] meets', e && e.message);

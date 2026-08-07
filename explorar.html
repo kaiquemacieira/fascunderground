@@ -177,6 +177,34 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   }
   /* bottom-nav sempre fixo na viewport */
   body.page-explorar nav.bottom-nav,
+  /* heat map controls */
+  .heat-toggle {
+    border-color: rgba(212, 47, 98, 0.45) !important;
+    background: rgba(212, 47, 98, 0.12) !important;
+    color: #E6BE49 !important;
+  }
+  .heat-toggle.is-on,
+  .heat-toggle[aria-pressed="true"] {
+    background: rgba(212, 47, 98, 0.35) !important;
+    border-color: rgba(212, 47, 98, 0.85) !important;
+    color: #fff !important;
+  }
+  .heat-optin-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.35rem 0.15rem 0.55rem;
+    font-size: 0.78rem;
+    color: rgba(250, 250, 247, 0.62);
+    line-height: 1.35;
+  }
+  .heat-optin-row input {
+    margin-top: 0.15rem;
+    accent-color: #E6BE49;
+  }
+  .heat-optin-row label { cursor: pointer; }
+  html[data-theme="light"] .heat-optin-row { color: #5c564c; }
+
   body.page-explorar nav.bottom-nav[data-cricri-nav="1"]{
     position: fixed !important;
     bottom: 0 !important;
@@ -209,8 +237,13 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
       <button type="button" class="map-layer-chip is-on" data-map-layer="spots" aria-pressed="true">Spots</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="hospedagem" aria-pressed="true">Hospedagem</button>
       <button type="button" class="map-layer-chip is-on" data-map-layer="gastronomia" aria-pressed="true">Gastronomia</button>
-<button type="button" class="map-layer-chip is-on" data-map-layer="eventos" aria-pressed="true">Eventos</button>
+      <button type="button" class="map-layer-chip is-on" data-map-layer="eventos" aria-pressed="true">Eventos</button>
       <button type="button" class="map-layer-chip" data-map-layer="fit" id="map-fit-all">Ver todos</button>
+      <button type="button" class="map-layer-chip heat-toggle" id="btn-heat-toggle" aria-pressed="false" title="Mapa de calor de presença (últimos 25 min)">Calor</button>
+    </div>
+    <div class="heat-optin-row" id="heat-optin-row">
+      <input type="checkbox" id="heat-optin" name="heat-optin" />
+      <label for="heat-optin"><span id="heat-optin-hint">Ative para somar sua posição ao calor (login + GPS). Célula ~50 m, sem nome.</span></label>
     </div>
     <div id="cr-filter-host" class="cr-filter-host" aria-label="Filtro por avaliação"></div>
     <div class="map-proximity" id="map-proximity" role="group" aria-label="Filtro por proximidade">
@@ -392,7 +425,7 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
   <script src="js/fixed-chrome.js?v=20260807a"></script>
   <script src="js/install-app.js?v=20260806c"></script>
-  <script src="js/sw-register.js?v=7"></script>
+  <script src="js/sw-register.js?v=8"></script>
   <script src="js/a11y-core.js" defer></script>
 
   <script>

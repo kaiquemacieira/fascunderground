@@ -24,14 +24,22 @@
     }
   }
 
+  function closeCreateSheet() {
+    var sheet = document.getElementById('cricri-create-sheet');
+    if (!sheet) return;
+    sheet.setAttribute('hidden', '');
+    sheet.style.setProperty('display', 'none', 'important');
+    sheet.setAttribute('aria-hidden', 'true');
+  }
+
   function openCreateSheet() {
     var sheet = document.getElementById('cricri-create-sheet');
     if (!sheet) {
       sheet = document.createElement('div');
       sheet.id = 'cricri-create-sheet';
-      sheet.setAttribute('hidden', '');
+      sheet.setAttribute('role', 'presentation');
       sheet.innerHTML =
-        '<div class="cs-card" role="dialog" aria-label="Criar" style="width:min(100%,400px);background:#141414;border-radius:18px 18px 0 0;border:1px solid rgba(250,250,247,.12);padding:1rem;color:#FAFAF7;margin-top:auto">' +
+        '<div class="cs-card" role="dialog" aria-modal="true" aria-label="Criar" style="width:min(100%,400px);background:#141414;border-radius:18px 18px 0 0;border:1px solid rgba(250,250,247,.12);padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px));color:#FAFAF7;margin-top:auto;position:relative;z-index:2;pointer-events:auto">' +
         '<div style="width:40px;height:4px;border-radius:99px;background:rgba(250,250,247,.2);margin:0 auto .85rem"></div>' +
         '<h2 style="margin:0 0 .75rem;font:700 .95rem Inter,system-ui;text-align:center">O que você quer fazer?</h2>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem">' +
@@ -40,16 +48,32 @@
         '<a href="profile.html" style="border:1px solid rgba(250,250,247,.14);border-radius:14px;padding:.9rem;text-align:center;color:#FAFAF7;text-decoration:none;font:600 .8rem Inter,system-ui">☺ Perfil</a>' +
         '<a href="tamagotchi.html" style="border:1px solid rgba(250,250,247,.14);border-radius:14px;padding:.9rem;text-align:center;color:#FAFAF7;text-decoration:none;font:600 .8rem Inter,system-ui">♡ Cri</a>' +
         '</div>' +
-        '<button type="button" id="cs-close" style="margin-top:.75rem;width:100%;border:0;background:transparent;color:rgba(250,250,247,.5);font:600 .75rem Inter,system-ui;padding:.65rem;cursor:pointer">Fechar</button>' +
+        '<button type="button" id="cs-close" class="cs-close" style="margin-top:.75rem;width:100%;border:1px solid rgba(250,250,247,.18);border-radius:12px;background:rgba(250,250,247,.06);color:rgba(250,250,247,.85);font:600 .8rem Inter,system-ui;padding:.85rem;cursor:pointer;pointer-events:auto;position:relative;z-index:3">Cancelar</button>' +
         '</div>';
-      sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483001;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55)';
+      sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);pointer-events:auto';
       document.body.appendChild(sheet);
-      sheet.addEventListener('click', function (e) { if (e.target === sheet) sheet.setAttribute('hidden', ''); });
+      sheet.addEventListener('click', function (e) {
+        if (e.target === sheet) closeCreateSheet();
+      });
       var cl = sheet.querySelector('#cs-close');
-      if (cl) cl.addEventListener('click', function () { sheet.setAttribute('hidden', ''); });
+      if (cl) {
+        cl.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeCreateSheet();
+        });
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeCreateSheet();
+      });
     }
     sheet.removeAttribute('hidden');
-    sheet.style.display = 'flex';
+    sheet.setAttribute('aria-hidden', 'false');
+    sheet.style.setProperty('display', 'flex', 'important');
+    // garantir acima da bottom-nav
+    sheet.style.setProperty('z-index', '2147483646', 'important');
+    var btn = sheet.querySelector('#cs-close');
+    if (btn) btn.focus();
   }
 
   function markActive() {

@@ -4,7 +4,7 @@
  */
 /* eslint-disable no-restricted-globals */
 
-var VERSION = 'v7';
+var VERSION = 'v9';
 var SHELL = 'cricri-shell-' + VERSION;
 var RUNTIME = 'cricri-runtime-' + VERSION;
 var MAP = 'cricri-map-' + VERSION;
@@ -35,7 +35,9 @@ var PRECACHE = [
   './js/notif-bell.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/icon-512-maskable.png',
+  './icons/screenshots/splash-portrait.png'
 ];
 
 self.addEventListener('install', function (event) {

@@ -98,6 +98,9 @@
     try {
       var res = await window.fascDb.from('presence_samples').insert(payload);
       if (res.error) console.warn('[FASC heat] insert', res.error.message);
+      else {
+        try { window.dispatchEvent(new CustomEvent('cricri:heat-sample')); } catch (_) {}
+      }
     } catch (e) {
       console.warn('[FASC heat] insert', e.message || e);
     }
