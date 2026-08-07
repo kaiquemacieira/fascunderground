@@ -1,0 +1,12 @@
+CRICRI — pacote de implementações
+================================
+Copie os arquivos por cima do projeto no Live Server (127.0.0.1:5500).
+
+Principais:
+- profile.html       → criar conta, validação de senha, medidor
+- tamagotchi.html + js/tamagotchi.js → pet, LAR, genética, árvore, menu ⋮
+- manifest.webmanifest + icons/ + sw.js → PWA
+
+Depois:
+1) Application → Service Workers → Unregister
+2) Ctrl+Shift+R (hard refresh)

@@ -47,7 +47,9 @@
     var client = db();
     if (!client) return false;
     try {
+      // probe silencioso — 400 no network é esperado se coluna/status ou RLS bloquear
       var res = await client.from('connections').select('status').limit(1);
+
       if (res.error && /status|column|schema/i.test(res.error.message || '')) {
         hasStatusCol = false;
       } else {

@@ -1167,6 +1167,143 @@
       to { transform: scale(2.6); opacity: 0; }
     }
 
+    
+
+    .pw-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.45rem;
+      align-items: stretch;
+      margin-bottom: 0.15rem;
+    }
+    .pw-row .input { margin: 0; width: 100%; }
+    .pw-toggle {
+      appearance: none;
+      border: 1.5px solid rgba(230,190,73,0.35);
+      background: rgba(230,190,73,0.1);
+      color: #E6BE49;
+      border-radius: 10px;
+      padding: 0 0.75rem;
+      font: 600 0.72rem/1 Inter, system-ui, sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .pw-toggle[aria-pressed="true"] {
+      background: rgba(230,190,73,0.22);
+      border-color: rgba(230,190,73,0.55);
+    }
+    .pw-meter {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      margin: 0 0 0.65rem;
+    }
+    .pw-meter-track {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(250,250,247,0.1);
+      overflow: hidden;
+    }
+    .pw-meter-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: #8c8376;
+      transition: width 0.2s ease, background 0.2s ease;
+    }
+    .pw-meter-fill.lvl-1 { background: #e33d6b; }
+    .pw-meter-fill.lvl-2 { background: #d49a2c; }
+    .pw-meter-fill.lvl-3 { background: #E6BE49; }
+    .pw-meter-fill.lvl-4 { background: #6dcca0; }
+    .pw-meter-label {
+      font: 600 0.68rem/1 Inter, system-ui, sans-serif;
+      color: rgba(250,250,247,0.55);
+      min-width: 4.5rem;
+      text-align: right;
+    }
+
+    /* Regras de criar conta */
+    .auth-rules {
+      margin: 0.65rem 0 0.85rem;
+      padding: 0.85rem 0.95rem;
+      border-radius: 14px;
+      border: 1.5px solid rgba(230, 190, 73, 0.35);
+      background:
+        radial-gradient(ellipse 90% 80% at 0% 0%, rgba(230,190,73,0.12), transparent 55%),
+        rgba(20, 16, 12, 0.55);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .auth-rules[hidden] { display: none !important; }
+    .auth-rules-title {
+      margin: 0 0 0.55rem;
+      font: 700 0.72rem/1.2 Inter, system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #E6BE49;
+    }
+    .auth-rules-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.45rem;
+    }
+    .auth-rules-list li {
+      display: grid;
+      grid-template-columns: 2.1rem 1fr;
+      gap: 0.5rem;
+      align-items: start;
+      padding: 0.4rem 0.45rem;
+      border-radius: 10px;
+      background: rgba(250,250,247,0.03);
+      border: 1px solid rgba(250,250,247,0.06);
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: rgba(250,250,247,0.78);
+    }
+    .auth-rules-list li.ok {
+      border-color: rgba(80, 180, 120, 0.35);
+      background: rgba(80, 180, 120, 0.08);
+    }
+    .auth-rules-list li.bad {
+      border-color: rgba(227, 61, 107, 0.35);
+      background: rgba(227, 61, 107, 0.08);
+    }
+    .auth-rules-list .rule-ico {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 1.5rem;
+      font: 700 0.65rem/1 Inter, system-ui, sans-serif;
+      color: #E6BE49;
+    }
+    .auth-rules-list li.ok .rule-ico { color: #6dcca0; }
+    .auth-rules-list li.bad .rule-ico { color: #f5a3b8; }
+    .auth-rules-list strong { color: #f2e8d2; font-weight: 600; }
+    .auth-rules-list code {
+      font-size: 0.72rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 6px;
+      background: rgba(230,190,73,0.12);
+      color: #E6BE49;
+    }
+    .auth-rules-note {
+      margin: 0.55rem 0 0;
+      font-size: 0.72rem;
+      line-height: 1.4;
+      color: rgba(250,250,247,0.5);
+    }
+    html[data-theme="light"] .auth-rules {
+      background: rgba(255,255,255,0.7);
+      border-color: rgba(180,140,40,0.35);
+    }
+    html[data-theme="light"] .auth-rules-list li {
+      background: rgba(0,0,0,0.03);
+      color: #3a3228;
+    }
+    html[data-theme="light"] .auth-rules-list strong { color: #1a1510; }
+
     .msg { margin: 0.7rem 0 0; font-size: 0.85rem; min-height: 1.15em; }
     .msg.ok { color: #7dce8e; }
     .msg.err { color: #f08a7a; }
@@ -3433,7 +3570,40 @@ main > h1.title { display: none !important; }
         <label class="label" for="email">E-mail</label>
         <input class="input" id="email" type="email" required autocomplete="email" placeholder="seu@email.com">
         <label class="label" for="password">Senha</label>
-        <input class="input" id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="mín. 6 caracteres">
+        <div class="pw-row">
+          <input class="input" id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="mín. 6 caracteres" aria-describedby="auth-rules">
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+        </div>
+        <div class="auth-rules" id="auth-rules" hidden>
+          <p class="auth-rules-title">Validação de senha</p>
+          <div class="pw-meter" id="pw-meter" aria-hidden="true">
+            <div class="pw-meter-track"><div class="pw-meter-fill" id="pw-meter-fill"></div></div>
+            <span class="pw-meter-label" id="pw-meter-label">—</span>
+          </div>
+          <ul class="auth-rules-list">
+            <li data-rule="email">
+              <span class="rule-ico" aria-hidden="true">○</span>
+              <span><strong>E-mail válido</strong> — formato <code>voce@email.com</code></span>
+            </li>
+            <li data-rule="len">
+              <span class="rule-ico" aria-hidden="true">○</span>
+              <span><strong>Mínimo 6 caracteres</strong> (obrigatório pelo servidor)</span>
+            </li>
+            <li data-rule="letter">
+              <span class="rule-ico" aria-hidden="true">○</span>
+              <span>Pelo menos <strong>1 letra</strong> (A–Z ou a–z)</span>
+            </li>
+            <li data-rule="number">
+              <span class="rule-ico" aria-hidden="true">○</span>
+              <span>Pelo menos <strong>1 número</strong> (0–9)</span>
+            </li>
+            <li data-rule="space">
+              <span class="rule-ico" aria-hidden="true">○</span>
+              <span>Não pode ser só espaços nem igual ao e-mail</span>
+            </li>
+          </ul>
+          <p class="auth-rules-note">Exemplo forte: <code>cricri26</code> ou <code>Festa#SC26</code>. Após criar, confirme o e-mail se o sistema pedir.</p>
+        </div>
         <div class="actions">
           <button type="submit" class="btn btn-primary" id="auth-submit">Entrar</button>
         </div>
@@ -4674,20 +4844,158 @@ window.fascEventEnded = function () {
       if (nameWrap) nameWrap.hidden = !signup;
       if (submit) submit.textContent = signup ? 'Criar conta' : 'Entrar';
       if ($('password')) $('password').autocomplete = signup ? 'new-password' : 'current-password';
+      var rules = $('auth-rules');
+      if (rules) rules.hidden = !signup;
       msg('auth-msg', '', true);
+      if (signup) updateAuthRules();
+    }
+
+    function passwordScore(password, email) {
+      var p = String(password || '');
+      var e = String(email || '').trim().toLowerCase();
+      var score = 0;
+      var checks = {
+        len: p.length >= 6,
+        letter: /[A-Za-zÀ-ÿ]/.test(p),
+        number: /[0-9]/.test(p),
+        space: p.trim().length >= 6 && p.toLowerCase() !== e,
+        longer: p.length >= 8,
+        symbol: /[^A-Za-z0-9]/.test(p),
+        upper: /[A-ZÀ-Ý]/.test(p)
+      };
+      if (checks.len) score += 1;
+      if (checks.letter) score += 1;
+      if (checks.number) score += 1;
+      if (checks.space) score += 1;
+      if (checks.longer) score += 1;
+      if (checks.symbol) score += 1;
+      if (checks.upper) score += 1;
+      // 0-7 → meter levels 0-4
+      var level = 0;
+      if (score <= 1) level = 1;
+      else if (score <= 3) level = 2;
+      else if (score <= 5) level = 3;
+      else level = 4;
+      if (!p.length) level = 0;
+      return { score: score, level: level, checks: checks };
+    }
+
+    function updateAuthRules() {
+      var rules = $('auth-rules');
+      if (!rules || rules.hidden) return;
+      var email = (($('email') && $('email').value) || '').trim();
+      var password = ($('password') && $('password').value) || '';
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      var sc = passwordScore(password, email);
+      var typed = email.length > 0 || password.length > 0;
+
+      function mark(sel, ok) {
+        var li = rules.querySelector('[data-rule="' + sel + '"]');
+        if (!li) return;
+        li.classList.toggle('ok', !!ok);
+        li.classList.toggle('bad', !ok && typed);
+        var ico = li.querySelector('.rule-ico');
+        if (ico) ico.textContent = ok ? '✓' : (typed && !ok ? '!' : '○');
+      }
+      mark('email', emailOk);
+      mark('len', sc.checks.len);
+      mark('letter', sc.checks.letter || !password.length);
+      mark('number', sc.checks.number || !password.length);
+      mark('space', sc.checks.space || !password.length);
+
+      var fill = $('pw-meter-fill');
+      var label = $('pw-meter-label');
+      if (fill) {
+        var pct = password.length ? Math.min(100, Math.round((sc.score / 7) * 100)) : 0;
+        fill.style.width = pct + '%';
+        fill.className = 'pw-meter-fill' + (sc.level ? (' lvl-' + sc.level) : '');
+      }
+      if (label) {
+        var names = ['—', 'Fraca', 'Razoável', 'Boa', 'Forte'];
+        label.textContent = password.length ? names[sc.level] : '—';
+      }
+    }
+
+    function validateSignup(email, password) {
+      if (!email) return 'Digite um e-mail.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return 'E-mail inválido. Use o formato voce@email.com';
+      }
+      if (!password || password.length < 6) {
+        return 'A senha precisa ter no mínimo 6 caracteres.';
+      }
+      if (!password.trim()) {
+        return 'A senha não pode ser só espaços.';
+      }
+      if (password.toLowerCase() === email.toLowerCase()) {
+        return 'A senha não pode ser igual ao e-mail.';
+      }
+      // Aviso suave: letras+números recomendados, mas não bloqueia se só letras (Supabase aceita 6 chars)
+      return null;
+    }
+
+    function wirePasswordToggle() {
+      var btn = $('pw-toggle');
+      var input = $('password');
+      if (!btn || !input || btn.getAttribute('data-wired') === '1') return;
+      btn.setAttribute('data-wired', '1');
+      btn.addEventListener('click', function () {
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Ocultar' : 'Mostrar';
+        btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        btn.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+      });
+    }
+
+    function friendlyAuthError(err) {
+      var m = (err && (err.message || err.error_description || err.msg)) || '';
+      var low = String(m).toLowerCase();
+      if (/already|registered|exists|já cadastrado|user already/.test(low)) {
+        return 'Este e-mail já tem conta. Use a aba Entrar ou recupere a senha.';
+      }
+      if (/password|senha|weak|least|characters|6/.test(low) && /password|senha|weak|short|characters/.test(low)) {
+        return 'Senha rejeitada. Use no mínimo 6 caracteres (ideal: letras + números).';
+      }
+      if (/rate|limit|too many|security/.test(low)) {
+        return 'Muitas tentativas. Espere um minuto e tente de novo.';
+      }
+      if (/network|fetch|failed to fetch/.test(low)) {
+        return 'Sem conexão com o servidor. Verifique a internet.';
+      }
+      if (/confirm|verification|email not confirmed/.test(low)) {
+        return 'Confirme o e-mail pelo link que enviamos antes de entrar.';
+      }
+      if (/invalid login|invalid credentials|invalid email or password/.test(low)) {
+        return 'E-mail ou senha incorretos.';
+      }
+      return m || 'Não foi possível criar a conta. Tente de novo.';
     }
     if (tabLogin) tabLogin.onclick = function () { setMode('login'); };
     if (tabSignup) tabSignup.onclick = function () { setMode('signup'); };
 
     if (form) {
+      var emailEl = $('email');
+      var passEl = $('password');
+      if (emailEl) emailEl.addEventListener('input', updateAuthRules);
+      if (passEl) passEl.addEventListener('input', updateAuthRules);
+
       form.onsubmit = async function (e) {
         e.preventDefault();
         if (!window.fascAuth) {
-          msg('auth-msg', 'Login indisponível (Supabase não carregou).', false);
+          msg('auth-msg', 'Login indisponível (Supabase não carregou). Confira a conexão e recarregue.', false);
           return;
         }
         var email = ($('email') && $('email').value.trim()) || '';
         var password = ($('password') && $('password').value) || '';
+        if (mode === 'signup') {
+          var v = validateSignup(email, password);
+          if (v) {
+            msg('auth-msg', v, false);
+            updateAuthRules();
+            return;
+          }
+        }
         if (submit) submit.disabled = true;
         try {
           if (mode === 'signup') {
@@ -4695,20 +5003,28 @@ window.fascEventEnded = function () {
             var name = ($('name') && $('name').value.trim()) || '';
             var data = await window.fascAuth.signUp(email, password, name);
             if (data && data.session) {
-              msg('auth-msg', 'Conta criada.', true);
+              msg('auth-msg', 'Conta criada e já logada. Bem-vindo ao CRICRI!', true);
               await refreshSession();
+            } else if (data && data.user && !data.session) {
+              msg('auth-msg', 'Conta criada! Abra o e-mail e confirme o link (só uma vez). Depois volte e entre com a senha.', true);
+              setMode('login');
             } else {
-              msg('auth-msg', 'Conta criada. Confirme o e-mail (só uma vez) e depois entre com a senha.', true);
+              msg('auth-msg', 'Conta criada. Se pedir confirmação, veja o e-mail e depois entre na aba Entrar.', true);
               setMode('login');
             }
           } else {
+            if (!email || !password) {
+              msg('auth-msg', 'Preencha e-mail e senha.', false);
+              return;
+            }
             msg('auth-msg', 'Entrando…', true);
             await window.fascAuth.signIn(email, password);
-            msg('auth-msg', 'Ok.', true);
+            msg('auth-msg', 'Ok. Você entrou.', true);
             await refreshSession();
           }
         } catch (err) {
-          msg('auth-msg', err.message || 'Falha na autenticação', false);
+          msg('auth-msg', friendlyAuthError(err), false);
+          console.warn('[CRICRI auth]', err);
         } finally {
           if (submit) submit.disabled = false;
         }
@@ -5817,7 +6133,7 @@ window.fascEventEnded = function () {
   <script src="js/friends.js?v=20260807f"></script>
   <script src="js/notif-bell.js?v=20260805g"></script>
   <script src="js/install-app.js?v=20260805g"></script>
-  <script src="js/sw-register.js?v=7"></script>
+  <script src="js/sw-register.js?v=8"></script>
   <script src="js/realtime-sync.js"></script>
   <script src="js/casas.js?v=20260806d"></script>
   <script src="js/bottom-nav.js?v=20260806nav3"></script>
