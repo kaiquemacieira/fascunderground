@@ -1,0 +1,111 @@
+/* CRICRI × Threads aesthetic
+   Tokens do projeto original (estetica-v2) + limpeza visual estilo Threads */
+
+:root,
+html[data-theme="dark"] {
+  --gold: #C1523E;
+  --gold-deep: #8F3A2A;
+  --gold-soft: rgba(193, 82, 62, 0.16);
+
+  --bg: #0c0a08;
+  --bg-raised: #161210;
+  --bg-sunken: #080605;
+  --bg-hover: #1c1713;
+
+  --text: #FAF4EA;
+  --text-2: rgba(250, 244, 234, 0.62);
+  --text-3: rgba(250, 244, 234, 0.40);
+
+  --border: rgba(250, 244, 234, 0.10);
+  --border-strong: rgba(250, 244, 234, 0.18);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --nav-height: 56px;
+  --header-height: 52px;
+
+  --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --gold: #A8452F;
+  --gold-deep: #7A2E1F;
+  --gold-soft: rgba(168, 69, 47, 0.12);
+
+  --bg: #F7F6F3;
+  --bg-raised: #FFFFFF;
+  --bg-sunken: #EFEDE8;
+  --bg-hover: #F0EEE9;
+
+  --text: #1A1210;
+  --text-2: rgba(26, 18, 16, 0.62);
+  --text-3: rgba(26, 18, 16, 0.40);
+
+  --border: rgba(26, 18, 16, 0.10);
+  --border-strong: rgba(26, 18, 16, 0.18);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Scrollbar discreto */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
