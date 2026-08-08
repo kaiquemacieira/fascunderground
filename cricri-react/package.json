@@ -6,7 +6,7 @@
   "description": "CRICRI — app social estilo Threads para o Festival de Artes de São Cristóvão",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview"
   },
   "dependencies": {
