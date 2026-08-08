@@ -29,11 +29,13 @@ export function Profile() {
   const [notFound, setNotFound] = useState(false);
   const [following, setFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
+  const [followError, setFollowError] = useState<string | null>(null);
 
   const targetId = paramId || user?.id || null;
   const isOwn = !!(user && targetId && user.id === targetId);
 
   const load = useCallback(async () => {
+    // /perfil sem login e sem :id → tela de entrar
     if (!targetId) {
       setLoading(false);
       setProfile(null);
@@ -97,6 +99,7 @@ export function Profile() {
     if (!targetId || isOwn || followBusy) return;
 
     setFollowBusy(true);
+    setFollowError(null);
     const prev = following;
     setFollowing(!prev);
     setStats((s) => ({
@@ -107,17 +110,19 @@ export function Profile() {
     try {
       if (prev) await unfollowUser(user.id, targetId);
       else await followUser(user.id, targetId);
-    } catch {
+    } catch (err) {
       setFollowing(prev);
       setStats((s) => ({
         ...s,
         followers: Math.max(0, s.followers + (prev ? 1 : -1)),
       }));
+      setFollowError(err instanceof Error ? err.message : 'Não foi possível seguir');
     } finally {
       setFollowBusy(false);
     }
   }
 
+  // /perfil sem estar logado
   if (!paramId && !authLoading && !user) {
     return (
       <div className="page">
@@ -233,6 +238,7 @@ export function Profile() {
                 <button type="button" className="btn-ghost" onClick={() => signOut()}>
                   Sair
                 </button>
+
               </>
             ) : (
               <>
@@ -257,6 +263,12 @@ export function Profile() {
               </>
             )}
           </div>
+          {followError && (
+            <p className="login__error" style={{ textAlign: 'center', marginTop: 10 }}>
+              {followError}
+            </p>
+          )}
+
         </div>
 
         <div className="profile__posts">

@@ -37,7 +37,6 @@ export async function fetchProfileStats(userId: string): Promise<ProfileStats> {
   };
 }
 
-/** Posts de um autor, com contagens de like/comentário e liked_by_me */
 export async function fetchUserPosts(
   authorId: string,
   viewerId?: string | null,
@@ -79,72 +78,95 @@ export async function fetchUserPosts(
     myLiked.add(row.post_id);
   }
 
-  return data.map((p: Record<string, unknown>) => {
-    const authorRaw = p.author as Record<string, unknown> | Record<string, unknown>[] | null;
-    const authorRow = Array.isArray(authorRaw) ? authorRaw[0] : authorRaw;
+  return data.map((row: Record<string, unknown>) => {
+    const authorRaw = row.author as Record<string, unknown> | null;
     return {
-      id: p.id as string,
-      author_id: p.author_id as string,
-      content: p.content as string,
-      created_at: p.created_at as string,
-      author: normalizeProfile(authorRow) ?? undefined,
-      likes_count: likeCount.get(p.id as string) ?? 0,
-      comments_count: commentCount.get(p.id as string) ?? 0,
-      liked_by_me: myLiked.has(p.id as string),
-    };
+      id: row.id as string,
+      author_id: row.author_id as string,
+      content: (row.content as string) || '',
+      created_at: row.created_at as string,
+      author: authorRaw ? normalizeProfile(authorRaw) : null,
+      likes_count: likeCount.get(row.id as string) ?? 0,
+      comments_count: commentCount.get(row.id as string) ?? 0,
+      liked_by_me: myLiked.has(row.id as string),
+    } as Post;
   });
 }
 
-/** true se fromId já segue toId */
 export async function isFollowing(fromId: string, toId: string): Promise<boolean> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('connections')
     .select('id')
     .eq('from_id', fromId)
     .eq('to_id', toId)
     .maybeSingle();
+  if (error) {
+    console.warn('[follow] isFollowing', error.message);
+    return false;
+  }
   return !!data;
 }
 
-/** Seguir usuário (insert em connections) */
+/** Seguir — tenta com status (schema novo) e sem (legado) */
 export async function followUser(fromId: string, toId: string): Promise<void> {
   if (fromId === toId) throw new Error('Não é possível seguir a si mesmo');
-  const { error } = await supabase.from('connections').insert({
+
+  // Já segue?
+  const exists = await isFollowing(fromId, toId);
+  if (exists) return;
+
+  // Schema com status (amizade/pedido)
+  const withStatus = await supabase.from('connections').insert({
     from_id: fromId,
     to_id: toId,
+    status: 'accepted',
   });
-  if (error) throw error;
 
+  if (!withStatus.error) return;
+
+  const msg = withStatus.error.message || '';
+  // Coluna status inexistente → legado
+  if (/status|column/i.test(msg)) {
+    const leg = await supabase.from('connections').insert({
+      from_id: fromId,
+      to_id: toId,
+    });
+    if (leg.error) {
+      if (/duplicate|unique|already/i.test(leg.error.message || '')) return;
+      throw new Error(leg.error.message);
+    }
+    return;
+  }
+
+  if (/duplicate|unique|already/i.test(msg)) return;
+
+  // RLS / auth
+  if (/row-level security|RLS|permission|jwt|not authenticated/i.test(msg)) {
+    throw new Error('Faça login de novo para seguir pessoas.');
+  }
+
+  throw new Error(msg || 'Não foi possível seguir');
 }
 
-/** Deixar de seguir */
 export async function unfollowUser(fromId: string, toId: string): Promise<void> {
   const { error } = await supabase
     .from('connections')
     .delete()
     .eq('from_id', fromId)
     .eq('to_id', toId);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
-/** Busca pessoas por nome ou handle (mín. 2 caracteres) */
 export async function searchProfiles(query: string, limit = 20): Promise<Profile[]> {
-  const q = query.trim().replace(/[%_,]/g, '');
+  const q = query.trim();
   if (q.length < 2) return [];
 
-  const pattern = `%${q}%`;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(PROFILE_SELECT)
+    .or(`name.ilike.%${q}%,handle.ilike.%${q}%`)
+    .limit(limit);
 
-  const [byName, byHandle] = await Promise.all([
-    supabase.from('profiles').select(PROFILE_SELECT).ilike('name', pattern).limit(limit),
-    supabase.from('profiles').select(PROFILE_SELECT).ilike('handle', pattern).limit(limit),
-  ]);
-
-  const map = new Map<string, Profile>();
-  for (const row of [...(byName.data ?? []), ...(byHandle.data ?? [])]) {
-    const p = normalizeProfile(row as Record<string, unknown>);
-    if (p) map.set(p.id, p);
-  }
-  return Array.from(map.values()).slice(0, limit);
+  if (error || !data) return [];
+  return data.map((row) => normalizeProfile(row as Record<string, unknown>));
 }
-
-

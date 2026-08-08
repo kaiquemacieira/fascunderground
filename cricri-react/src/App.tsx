@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './lib/auth';
+import { ThemeProvider } from './lib/theme';
 import { Layout } from './components/Layout';
 import { Feed } from './pages/Feed';
 import { Explore } from './pages/Explore';
@@ -14,8 +15,9 @@ import { Install } from './pages/Install';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Feed />} />
@@ -33,5 +35,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </ThemeProvider>
   );
 }

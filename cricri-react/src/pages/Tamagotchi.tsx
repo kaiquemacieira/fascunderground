@@ -2,15 +2,20 @@ import { useCallback, useEffect, useState } from 'react';
 import { Header } from '../components/Header';
 import { CriSprite } from '../components/CriSprite';
 import {
+  SPECIES,
   ageLabel,
   applyAction,
+  displayEmoji,
   eventIsOver,
   loadState,
+  nextStageInfo,
   saveState,
+  speciesById,
   stageMeta,
   startPet,
   tickState,
   type CareAction,
+  type SpeciesId,
   type TamaState,
 } from '../lib/tamagotchi';
 import { FEATURES } from '../lib/features';
@@ -43,8 +48,8 @@ export function Tamagotchi() {
   const [msg, setMsg] = useState('');
   const [nameInput, setNameInput] = useState('Cri');
   const [shell, setShell] = useState<TamaState['shell']>('rosa');
+  const [speciesId, setSpeciesId] = useState<SpeciesId>('caramelo');
 
-  // tick periódico
   useEffect(() => {
     const id = setInterval(() => {
       setState((prev) => {
@@ -56,7 +61,6 @@ export function Tamagotchi() {
     return () => clearInterval(id);
   }, []);
 
-  // tick ao focar a aba
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === 'visible') {
@@ -86,7 +90,6 @@ export function Tamagotchi() {
     });
   }, []);
 
-
   if (!FEATURES.tamagotchi) {
     return (
       <div className="page">
@@ -100,16 +103,17 @@ export function Tamagotchi() {
 
   const over = eventIsOver();
   const stage = stageMeta(state.stageId);
+  const sp = speciesById(state.speciesId);
+  const nextInfo = nextStageInfo(state);
 
-  // onboarding
   if (!state.started) {
     return (
       <div className="page">
         <Header title="Cri Cabrunco" showBack />
         <div className="page-body tama-onboard">
           <p className="tama-lead">
-            Cuide do <strong>Cri</strong>, o cabrunco de São Cristóvão. Alimente, limpe, brinque e
-            evolua até a Anciã.
+            Escolha a espécie do <strong>Cri</strong> — os mesmos bichinhos do app original — e cuide
+            até a Anciã.
           </p>
 
           <label className="field">
@@ -121,6 +125,21 @@ export function Tamagotchi() {
               placeholder="Cri"
             />
           </label>
+
+          <p className="tama-shell-label">Espécie</p>
+          <div className="tama-species">
+            {SPECIES.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={speciesId === s.id ? 'tama-species__btn tama-species__btn--on' : 'tama-species__btn'}
+                onClick={() => setSpeciesId(s.id)}
+              >
+                <span className="tama-species__emoji">{s.emoji}</span>
+                <span className="tama-species__name">{s.name}</span>
+              </button>
+            ))}
+          </div>
 
           <p className="tama-shell-label">Cor da pelagem</p>
           <div className="tama-shells">
@@ -142,21 +161,15 @@ export function Tamagotchi() {
             className="btn-primary"
             style={{ marginTop: 20 }}
             onClick={() => {
-              const s = startPet(nameInput, shell);
+              const s = startPet(nameInput, shell, speciesId);
               setState(s);
-              setMsg(`${s.name} nasceu na roda!`);
+              setMsg(`${s.name} o ${speciesById(speciesId).name} nasceu na roda!`);
+              playSfx('success');
             }}
             disabled={over}
           >
             {over ? 'Festival encerrado' : 'Começar'}
           </button>
-
-          {/* Meow OFF — não deletado, só fora deste fluxo */}
-          {!FEATURES.meow && (
-            <p className="page-hint" style={{ marginTop: 24 }}>
-              Caixinha Meow está desligada neste app.
-            </p>
-          )}
         </div>
       </div>
     );
@@ -170,19 +183,26 @@ export function Tamagotchi() {
           <CriSprite state={state} />
           <div className="tama__meta">
             <span className="tama__stage">
-              {stage.emoji} {stage.label}
+              {displayEmoji(state)} {stage.label}
             </span>
-            <span className="tama__age">{ageLabel(state.bornAt)}</span>
+            <span className="tama__age">
+              {sp.name} · {ageLabel(state.bornAt)}
+            </span>
             <span className="tama__care">Care {state.careScore}</span>
           </div>
+          {nextInfo && (
+            <p className="page-hint" style={{ marginTop: 8 }}>
+              Próximo: {nextInfo.label} · falta {nextInfo.need} care
+            </p>
+          )}
           {state.sleeping && <p className="tama__status">Zzz… dormindo</p>}
           {!state.alive && <p className="tama__status tama__status--dead">Descansando em paz</p>}
-          {state.sick && state.alive && <p className="tama__status tama__status--sick">Precisa de cuidado</p>}
+          {state.sick && state.alive && (
+            <p className="tama__status tama__status--sick">Precisa de cuidado</p>
+          )}
           {msg && <p className="tama__msg">{msg}</p>}
           {over && (
-            <p className="tama__status">
-              A roda fechou. Obrigado por ficar com o Cri até o fim.
-            </p>
+            <p className="tama__status">A roda fechou. Obrigado por ficar com o Cri até o fim.</p>
           )}
         </div>
 
@@ -214,11 +234,6 @@ export function Tamagotchi() {
             </button>
           )}
         </div>
-
-        <p className="page-hint" style={{ padding: '8px 16px 24px' }}>
-          Progresso salvo neste aparelho (mesmo save do app vanilla, se já usou).
-          {!FEATURES.meow && ' · Meow desligado.'}
-        </p>
       </div>
     </div>
   );

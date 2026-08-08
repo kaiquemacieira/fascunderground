@@ -1,12 +1,40 @@
 /**
- * Cri Cabrunco — núcleo do tamagotchi (compatível com localStorage do vanilla: cricri-tama-v3)
- * Versão enxuta para o app React; não porta genoma/híbridos/cards completos.
+ * Cri Cabrunco — compatível com localStorage cricri-tama-v3 (vanilla)
+ * Espécies e estágios alinhados ao tamagotchi original.
  */
 
 export const TAMA_STORAGE = 'cricri-tama-v3';
-const EVENT_END_MS = Date.UTC(2026, 10, 23, 15, 0, 0); // 23/11/2026 12:00 -03
+const EVENT_END_MS = Date.UTC(2026, 10, 23, 15, 0, 0);
 
 export type StageId = 'ovo' | 'filhote' | 'cria' | 'jovem' | 'adulta' | 'ancia';
+export type SpeciesId =
+  | 'unicornio'
+  | 'grilo'
+  | 'caramelo'
+  | 'preguica'
+  | 'gaviao'
+  | 'jabuti'
+  | 'suindara'
+  | 'prea';
+
+export interface Species {
+  id: SpeciesId;
+  name: string;
+  emoji: string;
+  blurb: string;
+}
+
+/** Mesmas espécies do vanilla (sem alias viralata na UI) */
+export const SPECIES: Species[] = [
+  { id: 'unicornio', name: 'Unicórnio', emoji: '🦄', blurb: 'Magia da praça' },
+  { id: 'grilo', name: 'Grilo', emoji: '🦗', blurb: 'O som do CRICRI' },
+  { id: 'caramelo', name: 'Caramelo', emoji: '🐕', blurb: 'Coração de rua' },
+  { id: 'preguica', name: 'Bicho-preguiça', emoji: '🦥', blurb: 'Calma sergipana' },
+  { id: 'gaviao', name: 'Gavião-carijó', emoji: '🦅', blurb: 'Olho na cidade' },
+  { id: 'jabuti', name: 'Jabuti', emoji: '🐢', blurb: 'Passo firme' },
+  { id: 'suindara', name: 'Suindara', emoji: '🦉', blurb: 'Noite na roda' },
+  { id: 'prea', name: 'Preá', emoji: '🐹', blurb: 'Esperto do mato' },
+];
 
 export interface TamaState {
   started: boolean;
@@ -28,7 +56,7 @@ export interface TamaState {
   cleanCount: number;
   stageId: StageId;
   evolutions: number;
-  speciesId: string | null;
+  speciesId: SpeciesId | null;
 }
 
 export const STAGES: {
@@ -62,6 +90,11 @@ export function eventIsOver(now = Date.now()) {
   return now >= EVENT_END_MS;
 }
 
+export function speciesById(id: string | null | undefined): Species {
+  const norm = id === 'viralata' ? 'caramelo' : id;
+  return SPECIES.find((s) => s.id === norm) || SPECIES[2]; // caramelo default
+}
+
 export function defaultState(): TamaState {
   const now = Date.now();
   return {
@@ -92,8 +125,12 @@ export function loadState(): TamaState {
   try {
     const raw = localStorage.getItem(TAMA_STORAGE);
     if (!raw) return defaultState();
-    const parsed = JSON.parse(raw) as Partial<TamaState>;
-    return { ...defaultState(), ...parsed };
+    const parsed = JSON.parse(raw) as Partial<TamaState> & { speciesId?: string };
+    const base = { ...defaultState(), ...parsed };
+    if (parsed.speciesId === 'viralata') base.speciesId = 'caramelo';
+    // normaliza stage
+    if (!STAGES.some((s) => s.id === base.stageId)) base.stageId = 'ovo';
+    return base as TamaState;
   } catch {
     return defaultState();
   }
@@ -103,7 +140,7 @@ export function saveState(s: TamaState) {
   try {
     localStorage.setItem(TAMA_STORAGE, JSON.stringify(s));
   } catch {
-    /* quota */
+    /* */
   }
 }
 
@@ -115,7 +152,13 @@ export function shellColors(shell: TamaState['shell']) {
   return SHELL_COLORS[shell] || SHELL_COLORS.rosa;
 }
 
-/** Decaimento por tempo ausente */
+/** Display emoji: ovo ou espécie */
+export function displayEmoji(s: TamaState) {
+  if (!s.started || s.stageId === 'ovo') return '🥚';
+  if (!s.alive) return '💀';
+  return speciesById(s.speciesId).emoji;
+}
+
 export function tickState(s: TamaState, now = Date.now()): TamaState {
   if (!s.started || !s.alive) {
     return { ...s, lastTick: now };
@@ -127,10 +170,10 @@ export function tickState(s: TamaState, now = Date.now()): TamaState {
 
   const next = { ...s };
   const sleepFactor = next.sleeping ? 0.35 : 1;
-  const away = Math.min(hours, 48); // cap
+  const away = Math.min(hours, 48);
 
   next.hunger = clamp(next.hunger - away * 4 * sleepFactor);
-  next.energy = clamp(next.energy - away * (next.sleeping ? -2 : 3)); // dormindo recupera
+  next.energy = clamp(next.energy - away * (next.sleeping ? -2 : 3));
   next.hygiene = clamp(next.hygiene - away * 2.5 * sleepFactor);
   next.happy = clamp(next.happy - away * 3 * sleepFactor);
 
@@ -148,32 +191,51 @@ export function tickState(s: TamaState, now = Date.now()): TamaState {
   return maybeEvolve(next);
 }
 
+/**
+ * Evolução em cadeia: sobe um estágio por vez quando careScore >= minCare
+ * e o bicho está vivo e com saúde mínima.
+ */
 function maybeEvolve(s: TamaState): TamaState {
   const order: StageId[] = ['ovo', 'filhote', 'cria', 'jovem', 'adulta', 'ancia'];
-  const idx = order.indexOf(s.stageId);
-  if (idx < 0 || idx >= order.length - 1) return s;
+  let next = { ...s };
+  let changed = false;
 
-  const nextStage = STAGES[idx + 1];
-  if (s.careScore >= nextStage.minCare && s.alive) {
-    return {
-      ...s,
-      stageId: nextStage.id,
-      evolutions: s.evolutions + 1,
-      happy: clamp(s.happy + 10),
+  while (true) {
+    const idx = order.indexOf(next.stageId);
+    if (idx < 0 || idx >= order.length - 1) break;
+    const target = STAGES[idx + 1];
+    if (next.careScore < target.minCare || !next.alive || next.health < 25) break;
+
+    next = {
+      ...next,
+      stageId: target.id,
+      evolutions: next.evolutions + 1,
+      happy: clamp(next.happy + 10),
+      health: clamp(next.health + 5),
     };
+    changed = true;
+    // um estágio por tick de ação (não pula Anciã de uma vez na mesma ação)
+    break;
   }
-  return s;
+
+  return changed ? next : s;
 }
 
-export function startPet(name: string, shell: TamaState['shell']): TamaState {
+export function startPet(
+  name: string,
+  shell: TamaState['shell'],
+  speciesId: SpeciesId
+): TamaState {
   const now = Date.now();
   const s: TamaState = {
     ...defaultState(),
     started: true,
     name: name.trim() || 'Cri',
     shell,
+    speciesId,
     bornAt: now,
     lastTick: now,
+    stageId: 'ovo',
   };
   saveState(s);
   return s;
@@ -190,6 +252,7 @@ export function applyAction(s: TamaState, action: CareAction): { state: TamaStat
 
   let next = tickState({ ...s }, Date.now());
   let message = '';
+  const sp = speciesById(next.speciesId);
 
   switch (action) {
     case 'feed':
@@ -198,7 +261,7 @@ export function applyAction(s: TamaState, action: CareAction): { state: TamaStat
       next.happy = clamp(next.happy + 4);
       next.feedCount += 1;
       next.careScore += 1;
-      message = 'Pastel da feira! 🥟';
+      message = `Pastel da feira! ${sp.emoji}`;
       break;
     case 'play':
       if (next.sleeping) return { state: next, message: 'Está dormindo. Acorde primeiro.' };
@@ -208,7 +271,7 @@ export function applyAction(s: TamaState, action: CareAction): { state: TamaStat
       next.hunger = clamp(next.hunger - 5);
       next.playCount += 1;
       next.careScore += 1;
-      message = 'Cortejo na praça! 🎉';
+      message = `Cortejo na praça! ${sp.emoji}`;
       break;
     case 'clean':
       if (next.sleeping) return { state: next, message: 'Está dormindo. Acorde primeiro.' };
@@ -216,7 +279,7 @@ export function applyAction(s: TamaState, action: CareAction): { state: TamaStat
       next.happy = clamp(next.happy + 3);
       next.cleanCount += 1;
       next.careScore += 1;
-      message = 'Banho de caneco 🧼';
+      message = `Banho de caneco ${sp.emoji}`;
       break;
     case 'sleep':
       if (next.sleeping) return { state: next, message: 'Já está dormindo.' };
@@ -227,11 +290,17 @@ export function applyAction(s: TamaState, action: CareAction): { state: TamaStat
       if (!next.sleeping) return { state: next, message: 'Já está acordado.' };
       next.sleeping = false;
       next.energy = clamp(next.energy + 15);
-      message = 'Acordou! Bom dia, Cabrunco.';
+      message = 'Acordou! Bom dia.';
       break;
   }
 
+  const before = next.stageId;
   next = maybeEvolve(next);
+  if (next.stageId !== before) {
+    const st = stageMeta(next.stageId);
+    message = `Evoluiu para ${st.label}! ${displayEmoji(next)}`;
+  }
+
   next.lastTick = Date.now();
   saveState(next);
   return { state: next, message };
@@ -242,4 +311,16 @@ export function ageLabel(bornAt: number, now = Date.now()) {
   if (days <= 0) return 'hoje';
   if (days === 1) return '1 dia';
   return `${days} dias`;
+}
+
+export function nextStageInfo(s: TamaState) {
+  const order: StageId[] = ['ovo', 'filhote', 'cria', 'jovem', 'adulta', 'ancia'];
+  const idx = order.indexOf(s.stageId);
+  if (idx < 0 || idx >= order.length - 1) return null;
+  const next = STAGES[idx + 1];
+  return {
+    ...next,
+    need: Math.max(0, next.minCare - s.careScore),
+    progress: Math.min(100, Math.round((s.careScore / next.minCare) * 100)),
+  };
 }
