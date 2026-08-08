@@ -191,15 +191,34 @@
     return null;
   }
 
+  var SPECIES_META = {
+    unicornio: { name: 'Unicórnio', emoji: '🦄' },
+    grilo: { name: 'Grilo', emoji: '🦗' },
+    caramelo: { name: 'Caramelo', emoji: '🐕' },
+    viralata: { name: 'Caramelo', emoji: '🐕' },
+    preguica: { name: 'Bicho-preguiça', emoji: '🦥' },
+    gaviao: { name: 'Gavião-carijó', emoji: '🦅' },
+    jabuti: { name: 'Jabuti', emoji: '🐢' },
+    suindara: { name: 'Suindara', emoji: '🦉' },
+    prea: { name: 'Preá', emoji: '🐹' }
+  };
+
   function summarize(s) {
     if (!s || !s.started) return null;
     var st = stageOf(s);
     var shellId = s.shell || 'rosa';
+    var sid = s.speciesId || s.species || null;
+    if (sid === 'viralata') sid = 'caramelo';
+    var sp = sid && SPECIES_META[sid] ? SPECIES_META[sid] : null;
+    var emoji = (st.id === 'ovo') ? '🥚' : ((sp && sp.emoji) || STAGE_EMOJI[st.id] || '🐾');
     return {
       name: String(s.name || 'Roda').slice(0, 24),
       stageId: st.id,
       stageLabel: st.label,
-      emoji: STAGE_EMOJI[st.id] || '🐾',
+      emoji: emoji,
+      speciesId: sid || null,
+      speciesName: sp ? sp.name : null,
+      speciesEmoji: sp ? sp.emoji : null,
       shellId: shellId,
       shellLabel: SHELL_LABEL[shellId] || shellId,
       careScore: Math.max(0, Number(s.careScore) || 0),

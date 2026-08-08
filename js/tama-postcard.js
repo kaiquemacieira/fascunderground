@@ -47,6 +47,65 @@
     festa: 'Festeira', adulta: 'Roda', ancia: 'Anciã'
   };
 
+  /* Espécies escolhidas no app (mesmo catálogo do tamagotchi.js) */
+  var SPECIES = {
+    unicornio: { name: 'Unicórnio', emoji: '🦄', blurb: 'Magia da praça', tint: '#c084fc', motif: '✦' },
+    grilo: { name: 'Grilo', emoji: '🦗', blurb: 'O som do CRICRI', tint: '#86efac', motif: '♪' },
+    caramelo: { name: 'Caramelo', emoji: '🐕', blurb: 'Coração de rua', tint: '#fbbf24', motif: '♥' },
+    viralata: { name: 'Caramelo', emoji: '🐕', blurb: 'Coração de rua', tint: '#fbbf24', motif: '♥' },
+    preguica: { name: 'Bicho-preguiça', emoji: '🦥', blurb: 'Calma sergipana', tint: '#a3e635', motif: '…' },
+    gaviao: { name: 'Gavião-carijó', emoji: '🦅', blurb: 'Olho na cidade', tint: '#fb923c', motif: '△' },
+    jabuti: { name: 'Jabuti', emoji: '🐢', blurb: 'Passo firme', tint: '#34d399', motif: '◇' },
+    suindara: { name: 'Suindara', emoji: '🦉', blurb: 'Noite na roda', tint: '#a78bfa', motif: '☾' },
+    prea: { name: 'Preá', emoji: '🐹', blurb: 'Esperto do mato', tint: '#fcd34d', motif: '·' }
+  };
+
+  var FORM_LABEL = {
+    barroco: 'Barroco', azulejo: 'Azulejo', cortejo: 'Cortejo',
+    lenda: 'Lenda', total: 'Mutação Total'
+  };
+
+  function resolveSpecies(s) {
+    var id = (s && (s.speciesId || s.species || s.animalId)) || null;
+    if (id === 'viralata') id = 'caramelo';
+    var sp = (id && SPECIES[id]) ? SPECIES[id] : null;
+    return {
+      id: id || 'desconhecido',
+      name: sp ? sp.name : (s && s.speciesName) || 'CRICRI',
+      emoji: sp ? sp.emoji : (s && s.speciesEmoji) || null,
+      blurb: sp ? sp.blurb : 'Companheiro FASC+',
+      tint: sp ? sp.tint : '#E6BE49',
+      motif: sp ? sp.motif : '✦'
+    };
+  }
+
+  function resolveForm(s) {
+    var fid = s && s.formId;
+    if (!fid) return null;
+    return { id: fid, label: FORM_LABEL[fid] || fid };
+  }
+
+  function resolveMutations(s) {
+    var list = [];
+    try {
+      var muts = (s && (s.mutations || s.muts || (s.genome && s.genome.mutations))) || [];
+      if (!Array.isArray(muts)) muts = [];
+      muts.slice(0, 3).forEach(function (m) {
+        if (!m) return;
+        if (typeof m === 'string') list.push({ id: m, emoji: '✦', name: m });
+        else list.push({ id: m.id || '', emoji: m.emoji || '✦', name: m.name || m.id || '' });
+      });
+    } catch (_) {}
+    return list;
+  }
+
+  function petEmojiFor(summary) {
+    if (!summary) return '🐾';
+    if (summary.stageId === 'ovo') return '🥚';
+    if (summary.speciesEmoji) return summary.speciesEmoji;
+    return summary.emoji || '🐾';
+  }
+
   function getState() {
     if (global.CricriTamaRead && global.CricriTamaRead.loadLocal) {
       return global.CricriTamaRead.loadLocal();
@@ -64,11 +123,28 @@
 
   function summarize(s) {
     if (global.CricriTamaRead && global.CricriTamaRead.summarize) {
-      return global.CricriTamaRead.summarize(s);
+      var base = global.CricriTamaRead.summarize(s);
+      if (base) {
+        var sp2 = resolveSpecies(s);
+        var form2 = resolveForm(s);
+        base.speciesId = sp2.id;
+        base.speciesName = sp2.name;
+        base.speciesEmoji = sp2.emoji;
+        base.speciesBlurb = sp2.blurb;
+        base.speciesTint = sp2.tint;
+        base.speciesMotif = sp2.motif;
+        base.formId = form2 ? form2.id : null;
+        base.formLabel = form2 ? form2.label : null;
+        base.mutations = resolveMutations(s);
+        if (base.stageId !== 'ovo' && sp2.emoji) base.emoji = sp2.emoji;
+      }
+      return base;
     }
     if (!s || !s.started) return null;
     var sid = s.stageId || 'ovo';
     var shellId = s.shell || 'rosa';
+    var sp = resolveSpecies(s);
+    var form = resolveForm(s);
     return {
       name: String(s.name || 'Roda').slice(0, 24),
       stageId: sid,
@@ -76,7 +152,16 @@
       shellId: shellId,
       shellLabel: (SHELLS[shellId] && SHELLS[shellId].label) || shellId,
       careScore: Number(s.careScore) || 0,
-      emoji: STAGE_EMOJI[sid] || '🐾',
+      speciesId: sp.id,
+      speciesName: sp.name,
+      speciesEmoji: sp.emoji,
+      speciesBlurb: sp.blurb,
+      speciesTint: sp.tint,
+      speciesMotif: sp.motif,
+      formId: form ? form.id : null,
+      formLabel: form ? form.label : null,
+      mutations: resolveMutations(s),
+      emoji: (sid === 'ovo') ? '🥚' : (sp.emoji || STAGE_EMOJI[sid] || '🐾'),
       alive: s.alive !== false
     };
   }
@@ -184,6 +269,27 @@
     ctx.restore();
   }
 
+  function hexAlpha(hex, a) {
+    if (!hex || hex[0] !== '#') return 'rgba(230,190,73,' + a + ')';
+    var h = hex.replace('#', '');
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r = parseInt(h.slice(0, 2), 16);
+    var g = parseInt(h.slice(2, 4), 16);
+    var b = parseInt(h.slice(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  function drawGlowOrb(ctx, x, y, r, color, alpha) {
+    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, hexAlpha(color, alpha));
+    g.addColorStop(0.45, hexAlpha(color, alpha * 0.35));
+    g.addColorStop(1, hexAlpha(color, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
   function drawPostcard(summary) {
     var canvas = document.createElement('canvas');
     canvas.width = W;
@@ -192,100 +298,274 @@
     if (!ctx) throw new Error('Canvas indisponível');
 
     var shell = SHELLS[summary.shellId] || SHELLS.rosa;
+    var tint = summary.speciesTint || shell.accent;
+    var motif = summary.speciesMotif || '✦';
+    var petEmoji = petEmojiFor(summary);
+    var name = summary.name || 'Roda';
 
-    // background — cores da casca
-    var grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, shell.bg0);
-    grad.addColorStop(0.45, shell.bg1);
-    grad.addColorStop(1, shell.bg2);
-    ctx.fillStyle = grad;
+    // ─── fundo cinematográfico ───
+    var bg = ctx.createLinearGradient(0, 0, W * 0.2, H);
+    bg.addColorStop(0, '#050308');
+    bg.addColorStop(0.35, shell.bg0);
+    bg.addColorStop(0.7, shell.bg1);
+    bg.addColorStop(1, '#030205');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // decorative dots
-    ctx.fillStyle = shell.accentSoft;
-    for (var i = 0; i < 40; i++) {
-      var dx = (i * 97) % W;
-      var dy = (i * 53) % H;
+    // orbes de luz festiva (neon festival)
+    drawGlowOrb(ctx, W * 0.18, H * 0.22, 320, tint, 0.45);
+    drawGlowOrb(ctx, W * 0.85, H * 0.35, 280, shell.accent, 0.38);
+    drawGlowOrb(ctx, W * 0.5, H * 0.72, 360, tint, 0.22);
+    drawGlowOrb(ctx, W * 0.12, H * 0.85, 200, shell.accent, 0.2);
+
+    // vinheta
+    var vig = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.15, W / 2, H * 0.5, H * 0.72);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+
+    // confete / partículas festivas
+    var confetti = ['✦', '✧', '·', '✶', '✺', motif, '★', '·'];
+    for (var i = 0; i < 55; i++) {
+      var cx = ((i * 137) + 41) % W;
+      var cy = ((i * 89) + 23) % H;
+      var size = 12 + (i % 7) * 5;
+      ctx.globalAlpha = 0.12 + (i % 5) * 0.06;
+      ctx.fillStyle = (i % 3 === 0) ? tint : shell.accent;
+      ctx.font = size + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(confetti[i % confetti.length], cx, cy);
+    }
+    ctx.globalAlpha = 1;
+
+    // linhas de luz diagonais (efeito stage)
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    for (var L = -4; L < 12; L++) {
       ctx.beginPath();
-      ctx.arc(dx, dy, 3 + (i % 4), 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(L * 120, 0);
+      ctx.lineTo(L * 120 + 400, H);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // ─── moldura glass ───
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    roundRect(ctx, 40, 40, W - 80, H - 80, 40);
+    ctx.fill();
+    // borda dupla neon
+    ctx.strokeStyle = hexAlpha(tint, 0.85);
+    ctx.lineWidth = 3;
+    roundRect(ctx, 44, 44, W - 88, H - 88, 38);
+    ctx.stroke();
+    ctx.strokeStyle = hexAlpha(shell.accent, 0.55);
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, 56, 56, W - 112, H - 112, 32);
+    ctx.stroke();
+
+    // ─── header marca ───
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+
+    // chip FASC
+    ctx.fillStyle = hexAlpha(shell.accent, 0.18);
+    roundRect(ctx, W / 2 - 160, 78, 320, 36, 18);
+    ctx.fill();
+    ctx.strokeStyle = hexAlpha(shell.accent, 0.55);
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, W / 2 - 160, 78, 320, 36, 18);
+    ctx.stroke();
+    ctx.fillStyle = shell.accent;
+    ctx.font = '700 20px Oswald, system-ui, sans-serif';
+    ctx.letterSpacing = '0.12em';
+    ctx.fillText('FASC+  ·  19–22 NOV 2026', W / 2, 102);
+
+    // título CRICRI com glow
+    ctx.shadowColor = hexAlpha(tint, 0.7);
+    ctx.shadowBlur = 28;
+    ctx.fillStyle = '#fff8e7';
+    ctx.font = '800 64px Oswald, system-ui, sans-serif';
+    ctx.fillText('CRICRI', W / 2, 175);
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = shell.muted;
+    ctx.font = '500 22px system-ui, sans-serif';
+    ctx.fillText('São Cristóvão · a cidade em tempo real', W / 2, 210);
+
+    // ─── badge espécie premium ───
+    var badgeLabel = ((summary.speciesEmoji || petEmoji) + '   ' + (summary.speciesName || 'CRICRI')).toUpperCase();
+    ctx.font = '700 26px Oswald, system-ui, sans-serif';
+    var bw = Math.min(560, Math.max(280, ctx.measureText(badgeLabel).width + 64));
+    var bx = W / 2 - bw / 2;
+    var by = 240;
+    var bgrad = ctx.createLinearGradient(bx, by, bx + bw, by + 52);
+    bgrad.addColorStop(0, hexAlpha(tint, 0.35));
+    bgrad.addColorStop(1, hexAlpha(shell.accent, 0.25));
+    ctx.fillStyle = bgrad;
+    roundRect(ctx, bx, by, bw, 52, 26);
+    ctx.fill();
+    ctx.strokeStyle = hexAlpha(tint, 0.9);
+    ctx.lineWidth = 2;
+    roundRect(ctx, bx, by, bw, 52, 26);
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(badgeLabel, W / 2, by + 34);
+
+    // ─── stage do pet (spotlight) ───
+    var py = 520;
+    // outer glow ring
+    drawGlowOrb(ctx, W / 2, py, 300, tint, 0.55);
+    drawGlowOrb(ctx, W / 2, py, 160, '#ffffff', 0.18);
+
+    // disco de palco
+    var disk = ctx.createRadialGradient(W / 2, py, 20, W / 2, py, 250);
+    disk.addColorStop(0, hexAlpha(tint, 0.4));
+    disk.addColorStop(0.5, hexAlpha(shell.accent, 0.18));
+    disk.addColorStop(0.85, 'rgba(0,0,0,0.35)');
+    disk.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = disk;
+    ctx.beginPath();
+    ctx.arc(W / 2, py, 250, 0, Math.PI * 2);
+    ctx.fill();
+
+    // anéis concêntricos
+    for (var ring = 0; ring < 3; ring++) {
+      ctx.beginPath();
+      ctx.arc(W / 2, py, 200 + ring * 22, 0, Math.PI * 2);
+      ctx.strokeStyle = hexAlpha(ring % 2 ? shell.accent : tint, 0.35 - ring * 0.08);
+      ctx.lineWidth = 2;
+      ctx.stroke();
     }
 
-    // frame
-    ctx.strokeStyle = shell.frame;
-    ctx.lineWidth = 8;
-    roundRect(ctx, 48, 48, W - 96, H - 96, 36);
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(242,232,210,0.18)';
-    ctx.lineWidth = 2;
-    roundRect(ctx, 64, 64, W - 128, H - 128, 28);
-    ctx.stroke();
+    // faíscas ao redor do pet
+    for (var s = 0; s < 16; s++) {
+      var ang = (s / 16) * Math.PI * 2;
+      var rr = 195 + (s % 3) * 18;
+      var sx = W / 2 + Math.cos(ang) * rr;
+      var sy = py + Math.sin(ang) * rr * 0.92;
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = s % 2 ? tint : shell.accent;
+      ctx.font = (14 + (s % 4) * 4) + 'px serif';
+      ctx.fillText(s % 3 === 0 ? '✦' : '·', sx, sy);
+    }
+    ctx.globalAlpha = 1;
 
-    // brand
-    ctx.fillStyle = shell.accent;
-    ctx.font = '700 42px Oswald, system-ui, sans-serif';
+    // emoji do animal (com sombra suave)
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 10;
+    ctx.font = '220px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",serif';
     ctx.textAlign = 'center';
-    ctx.fillText('CRICRI', W / 2, 140);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(petEmoji, W / 2, py - 6);
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
 
-    ctx.fillStyle = shell.text;
-    ctx.font = '600 28px Oswald, system-ui, sans-serif';
-    ctx.fillText(FESTIVAL, W / 2, 190);
+    // ─── identidade ───
+    ctx.textBaseline = 'alphabetic';
+    // nome com highlight
+    ctx.shadowColor = hexAlpha(tint, 0.55);
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = '#fffdf6';
+    ctx.font = '800 62px Oswald, system-ui, sans-serif';
+    ctx.fillText(name, W / 2, 780);
+    ctx.shadowBlur = 0;
 
     ctx.fillStyle = shell.muted;
     ctx.font = '400 24px system-ui, sans-serif';
-    ctx.fillText(DATES, W / 2, 230);
+    ctx.fillText(summary.speciesBlurb || 'Companheiro FASC+', W / 2, 820);
 
-    // pet circle backdrop
-    ctx.fillStyle = shell.accentSoft;
-    ctx.beginPath();
-    ctx.arc(W / 2, 520, 220, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = shell.fur;
-    ctx.lineWidth = 6;
-    ctx.stroke();
+    // ─── chips de stats (glassmorphism) ───
+    var chips = [];
+    chips.push({ label: summary.stageLabel || 'Estágio', sub: 'ESTÁGIO', color: tint });
+    chips.push({ label: 'Casca ' + (summary.shellLabel || ''), sub: 'CASCA', color: shell.accent });
+    if (summary.formLabel) chips.push({ label: summary.formLabel, sub: 'FORMA', color: tint });
+    chips.push({ label: String(summary.careScore || 0), sub: 'CARE', color: shell.accent });
 
-    // cat
-    if (summary.stageId === 'ovo') {
-      ctx.font = '200px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🥚', W / 2, 520);
+    var chipW = 200;
+    var gap = 18;
+    var totalW = chips.length * chipW + (chips.length - 1) * gap;
+    // se passar, usa 2 linhas
+    var startY = 870;
+    if (chips.length > 3) {
+      chipW = 230;
+      gap = 16;
+      var row1 = chips.slice(0, 2);
+      var row2 = chips.slice(2);
+      function drawChipRow(row, y) {
+        var tw = row.length * chipW + (row.length - 1) * gap;
+        var x0 = W / 2 - tw / 2;
+        row.forEach(function (c, idx) {
+          var x = x0 + idx * (chipW + gap);
+          ctx.fillStyle = 'rgba(12,10,16,0.72)';
+          roundRect(ctx, x, y, chipW, 78, 18);
+          ctx.fill();
+          ctx.strokeStyle = hexAlpha(c.color, 0.65);
+          ctx.lineWidth = 1.8;
+          roundRect(ctx, x, y, chipW, 78, 18);
+          ctx.stroke();
+          ctx.fillStyle = hexAlpha(c.color, 0.9);
+          ctx.font = '600 14px Oswald, system-ui, sans-serif';
+          ctx.fillText(c.sub, x + chipW / 2, y + 26);
+          ctx.fillStyle = '#fff';
+          ctx.font = '700 24px Oswald, system-ui, sans-serif';
+          ctx.fillText(c.label, x + chipW / 2, y + 56);
+        });
+      }
+      drawChipRow(row1, startY);
+      drawChipRow(row2, startY + 94);
     } else {
-      drawCat(ctx, W / 2, 530, 1.55, shell);
+      var x0 = W / 2 - totalW / 2;
+      chips.forEach(function (c, idx) {
+        var x = x0 + idx * (chipW + gap);
+        ctx.fillStyle = 'rgba(12,10,16,0.72)';
+        roundRect(ctx, x, startY, chipW, 78, 18);
+        ctx.fill();
+        ctx.strokeStyle = hexAlpha(c.color, 0.65);
+        ctx.lineWidth = 1.8;
+        roundRect(ctx, x, startY, chipW, 78, 18);
+        ctx.stroke();
+        ctx.fillStyle = hexAlpha(c.color, 0.9);
+        ctx.font = '600 14px Oswald, system-ui, sans-serif';
+        ctx.fillText(c.sub, x + chipW / 2, startY + 26);
+        ctx.fillStyle = '#fff';
+        ctx.font = '700 24px Oswald, system-ui, sans-serif';
+        ctx.fillText(c.label, x + chipW / 2, startY + 56);
+      });
     }
 
-    // name
-    ctx.fillStyle = shell.text;
-    ctx.font = '700 56px Oswald, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(summary.name || 'Roda', W / 2, 820);
-
-    // meta pills — borda na cor da casca
-    ctx.font = '600 26px Oswald, system-ui, sans-serif';
-    var meta = [
-      (STAGE_EMOJI[summary.stageId] || '🐾') + '  ' + (summary.stageLabel || summary.stageId),
-      'Casca ' + (summary.shellLabel || summary.shellId),
-      'Care ' + String(summary.careScore || 0)
-    ];
-    var pillY = 880;
-    meta.forEach(function (line, idx) {
-      var y = pillY + idx * 52;
-      ctx.fillStyle = 'rgba(20,16,14,0.72)';
-      roundRect(ctx, W / 2 - 220, y - 32, 440, 44, 22);
+    // mutações
+    if (summary.mutations && summary.mutations.length) {
+      var mutY = chips.length > 3 ? startY + 200 : startY + 110;
+      var mutTxt = summary.mutations.map(function (m) {
+        return (m.emoji || '✦') + ' ' + (m.name || '');
+      }).join('   ·   ');
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      roundRect(ctx, W / 2 - 280, mutY, 560, 44, 22);
       ctx.fill();
-      ctx.strokeStyle = shell.frame;
-      ctx.lineWidth = 2;
-      roundRect(ctx, W / 2 - 220, y - 32, 440, 44, 22);
+      ctx.strokeStyle = hexAlpha(tint, 0.4);
+      ctx.lineWidth = 1;
+      roundRect(ctx, W / 2 - 280, mutY, 560, 44, 22);
       ctx.stroke();
       ctx.fillStyle = shell.text;
-      ctx.fillText(line, W / 2, y);
-    });
+      ctx.font = '600 20px Oswald, system-ui, sans-serif';
+      ctx.fillText(mutTxt, W / 2, mutY + 29);
+    }
 
-    // footer
-    ctx.fillStyle = shell.muted;
-    ctx.font = '400 22px system-ui, sans-serif';
-    ctx.fillText('São Cristóvão / SE · cricri na roda', W / 2, H - 90);
+    // ─── footer festivo ───
+    ctx.fillStyle = hexAlpha(shell.accent, 0.15);
+    roundRect(ctx, W / 2 - 260, H - 120, 520, 52, 26);
+    ctx.fill();
+    ctx.fillStyle = shell.accent;
+    ctx.font = '700 22px Oswald, system-ui, sans-serif';
+    ctx.fillText('✦  NA RODA DO FASC+  ✦', W / 2, H - 86);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '400 18px system-ui, sans-serif';
+    ctx.fillText('cricri · são cristóvão / se', W / 2, H - 48);
 
     return canvas;
   }
@@ -341,7 +621,12 @@
 
     var shareData = {
       title: 'Meu CRICRI — ' + summary.name,
-      text: summary.name + ' · ' + (summary.stageLabel || '') + ' · FASC+ 19–22/11/2026 · São Cristóvão'
+      text: (summary.speciesEmoji || petEmojiFor(summary)) + ' ' + summary.name +
+        (summary.speciesName ? ' · ' + summary.speciesName : '') +
+        (summary.formLabel ? ' · ' + summary.formLabel : '') +
+        ' · ' + (summary.stageLabel || '') +
+        ' · Casca ' + (summary.shellLabel || '') +
+        ' · FASC+ 19–22/11/2026 · São Cristóvão'
     };
 
     // 1) Share com arquivo (mobile Chrome/Safari moderno)
