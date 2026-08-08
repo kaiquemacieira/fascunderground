@@ -26,8 +26,7 @@ const SHELLS: TamaState['shell'][] = ['rosa', 'ocre', 'azul', 'tuxedo'];
 function safeLoad(): TamaState {
   try {
     return tickState(loadState());
-  } catch (e) {
-    console.warn('[tama] load failed, reset', e);
+  } catch {
     try {
       localStorage.removeItem('cricri-tama-v3');
     } catch {
@@ -48,10 +47,7 @@ function StatBar({ label, value, tone }: { label: string; value: number; tone?: 
       <div className="tama-stat__track">
         <div
           className="tama-stat__fill"
-          style={{
-            width: `${Math.max(0, Math.min(100, v))}%`,
-            background: tone || 'var(--gold)',
-          }}
+          style={{ width: `${Math.max(0, Math.min(100, v))}%`, background: tone || 'var(--gold)' }}
         />
       </div>
     </div>
@@ -63,27 +59,19 @@ export function Tamagotchi() {
   const [msg, setMsg] = useState('');
   const [nameInput, setNameInput] = useState('Cri');
   const [shell, setShell] = useState<TamaState['shell']>('rosa');
-  const [speciesId, setSpeciesId] = useState<SpeciesId>('caramelo');
-  const [bootError, setBootError] = useState<string | null>(null);
+  const [speciesId, setSpeciesId] = useState<SpeciesId>('gato');
+  const [evolving, setEvolving] = useState(false);
 
   useEffect(() => {
-    try {
-      setState(safeLoad());
-    } catch (e) {
-      setBootError(e instanceof Error ? e.message : 'Erro ao abrir o Cri');
-    }
+    setState(safeLoad());
   }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => {
       setState((prev) => {
-        try {
-          const next = tickState(prev);
-          saveState(next);
-          return next;
-        } catch {
-          return prev;
-        }
+        const next = tickState(prev);
+        saveState(next);
+        return next;
       });
     }, 30_000);
     return () => clearInterval(id);
@@ -91,62 +79,27 @@ export function Tamagotchi() {
 
   const act = useCallback((action: CareAction) => {
     setState((prev) => {
-      try {
-        const prevStage = prev.stageId;
-        const { state: next, message } = applyAction(prev, action);
-        setMsg(message);
-        try {
-          if (next.stageId !== prevStage) playSfx('evolve');
-          else if (action === 'feed') playSfx('feed');
-          else if (action === 'play') playSfx('play');
-          else if (action === 'clean') playSfx('clean');
-          else if (action === 'sleep') playSfx('sleep');
-          else playSfx('click');
-        } catch {
-          /* sfx opcional */
-        }
-        return next;
-      } catch (e) {
-        setMsg(e instanceof Error ? e.message : 'Erro na ação');
-        return prev;
-      }
+      const prevStage = prev.stageId;
+      const { state: next, message } = applyAction(prev, action);
+      setMsg(message);
+      if (next.stageId !== prevStage) {
+        setEvolving(true);
+        playSfx('evolve');
+        setTimeout(() => setEvolving(false), 1200);
+      } else if (action === 'feed') playSfx('feed');
+      else if (action === 'play') playSfx('play');
+      else if (action === 'clean') playSfx('clean');
+      else if (action === 'sleep') playSfx('sleep');
+      else playSfx('click');
+      return next;
     });
   }, []);
-
-  if (bootError) {
-    return (
-      <div className="page">
-        <Header title="Cri Cabrunco" showBack />
-        <div className="page-body">
-          <div className="empty-state">
-            <p>Não foi possível abrir o Cri</p>
-            <span>{bootError}</span>
-            <button
-              type="button"
-              className="btn-primary"
-              style={{ marginTop: 16 }}
-              onClick={() => {
-                try {
-                  localStorage.removeItem('cricri-tama-v3');
-                } catch {
-                  /* */
-                }
-                setBootError(null);
-                setState(defaultState());
-              }}
-            >
-              Resetar save
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const over = eventIsOver();
   const stage = stageMeta(state.stageId);
   const sp = speciesById(state.speciesId);
   const nextInfo = nextStageInfo(state);
+  const isEgg = state.started && state.stageId === 'ovo';
 
   if (!state.started) {
     return (
@@ -154,8 +107,8 @@ export function Tamagotchi() {
         <Header title="Cri Cabrunco" showBack />
         <div className="page-body tama-onboard">
           <p className="tama-lead">
-            Escolha a espécie do <strong>Cri</strong> e cuide até a Anciã. Progresso fica neste
-            aparelho.
+            Escolha o bichinho. Começa no <strong>ovo</strong> e, com cuidado (3 ações), quebra a casca
+            e aparece de verdade — com animação.
           </p>
 
           <label className="field">
@@ -168,7 +121,7 @@ export function Tamagotchi() {
             />
           </label>
 
-          <p className="tama-shell-label">Espécie</p>
+          <p className="tama-shell-label">Bichinho</p>
           <div className="tama-species">
             {SPECIES.map((s) => (
               <button
@@ -205,19 +158,14 @@ export function Tamagotchi() {
             style={{ marginTop: 20 }}
             disabled={over}
             onClick={() => {
-              try {
-                const s = startPet(nameInput || 'Cri', shell, speciesId);
-                setState(s);
-                setMsg(`${s.name} nasceu!`);
-                playSfx('success');
-              } catch (e) {
-                setMsg(e instanceof Error ? e.message : 'Erro ao começar');
-              }
+              const s = startPet(nameInput || 'Cri', shell, speciesId);
+              setState(s);
+              setMsg(`Ovo do ${speciesById(speciesId).name} — cuide para ele nascer!`);
+              playSfx('success');
             }}
           >
-            {over ? 'Festival encerrado' : 'Começar'}
+            {over ? 'Festival encerrado' : 'Começar no ovo'}
           </button>
-          {msg && <p className="tama__msg">{msg}</p>}
         </div>
       </div>
     );
@@ -228,26 +176,45 @@ export function Tamagotchi() {
       <Header title={state.name || 'Cri'} showBack />
       <div className="tama">
         <div className="tama__hero">
-          <CriSprite state={state} />
+          <CriSprite state={state} evolving={evolving} />
+
+          {/* Barra de evolução ovo → bichinho / próximo estágio */}
+          {nextInfo && (
+            <div className="evo-bar">
+              <div className="evo-bar__labels">
+                <span>
+                  {nextInfo.fromEmoji} {nextInfo.fromLabel}
+                </span>
+                <span>
+                  {isEgg ? `${sp.emoji} ${sp.name}` : `${nextInfo.toEmoji} ${nextInfo.label}`}
+                </span>
+              </div>
+              <div className="evo-bar__track">
+                <div className="evo-bar__fill" style={{ width: `${nextInfo.progress}%` }} />
+              </div>
+              <p className="evo-bar__hint">
+                {isEgg
+                  ? nextInfo.need > 0
+                    ? `Faltam ${nextInfo.need} cuidados para o ovo quebrar`
+                    : 'Quase saindo do ovo…'
+                  : nextInfo.need > 0
+                    ? `Faltam ${nextInfo.need} care para ${nextInfo.label}`
+                    : `Pronto para ${nextInfo.label}`}
+              </p>
+            </div>
+          )}
+
           <div className="tama__meta">
             <span className="tama__stage">
               {displayEmoji(state)} {stage.label}
+              {!isEgg ? ` · ${sp.name}` : ''}
             </span>
-            <span className="tama__age">
-              {sp.name} · {ageLabel(state.bornAt)}
-            </span>
+            <span className="tama__age">{ageLabel(state.bornAt)}</span>
             <span className="tama__care">Care {state.careScore}</span>
           </div>
-          {nextInfo && (
-            <p className="page-hint" style={{ marginTop: 8 }}>
-              Próximo: {nextInfo.label} · falta {nextInfo.need} care
-            </p>
-          )}
-          {state.sleeping && <p className="tama__status">Zzz… dormindo</p>}
+
+          {state.sleeping && <p className="tama__status">Zzz…</p>}
           {!state.alive && <p className="tama__status tama__status--dead">Descansando em paz</p>}
-          {state.sick && state.alive && (
-            <p className="tama__status tama__status--sick">Precisa de cuidado</p>
-          )}
           {msg && <p className="tama__msg">{msg}</p>}
         </div>
 
@@ -280,13 +247,13 @@ export function Tamagotchi() {
           )}
         </div>
 
-        <p className="page-hint" style={{ padding: '8px 16px 24px', textAlign: 'center' }}>
+        <p className="page-hint" style={{ textAlign: 'center', paddingBottom: 24 }}>
           <button
             type="button"
             className="btn-ghost"
             style={{ fontSize: '0.8rem' }}
             onClick={() => {
-              if (confirm('Apagar o Cri deste aparelho e recomeçar?')) {
+              if (confirm('Resetar o Cri neste aparelho?')) {
                 localStorage.removeItem('cricri-tama-v3');
                 setState(defaultState());
                 setMsg('');

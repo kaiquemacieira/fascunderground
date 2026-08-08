@@ -1541,3 +1541,140 @@ html.hide-vlibras [vw],
 html.hide-vlibras [vw-access-button] {
   display: none !important;
 }
+
+/* ===== Cri sprite + animações por espécie ===== */
+.cri-sprite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.cri-sprite__face {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, var(--fur, #e33d6b) 0%, transparent 70%);
+}
+.cri-sprite__face--egg {
+  background: radial-gradient(circle at 40% 30%, #f6efdc 0%, #e8d5a8 55%, transparent 70%);
+}
+.cri-sprite__emoji {
+  font-size: 72px;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
+}
+.cri-sprite__glow {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  opacity: 0.35;
+  z-index: 1;
+  filter: blur(8px);
+}
+.cri-sprite__badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.cri-sprite--evolve .cri-sprite__emoji {
+  animation: cri-pop 0.9s ease;
+}
+.cri-sprite--sleep .cri-sprite__emoji {
+  animation: cri-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes cri-pop {
+  0% { transform: scale(0.4) rotate(-12deg); opacity: 0.3; }
+  55% { transform: scale(1.2) rotate(6deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes cri-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+@keyframes anim-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes anim-wag {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+@keyframes anim-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes anim-fly {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(0, -14px); }
+}
+@keyframes anim-chirp {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  60% { transform: scale(0.96); }
+}
+@keyframes anim-hop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-12px) scale(1.05); }
+  50% { transform: translateY(0) scale(0.98); }
+}
+
+.anim-gato .cri-sprite__emoji { animation: anim-bounce 1.2s ease-in-out infinite; }
+.anim-caramelo .cri-sprite__emoji { animation: anim-wag 0.7s ease-in-out infinite; }
+.anim-unicornio .cri-sprite__emoji { animation: anim-bounce 1.4s ease-in-out infinite; }
+.anim-grilo .cri-sprite__emoji { animation: anim-chirp 0.55s ease-in-out infinite; }
+.anim-preguica .cri-sprite__emoji { animation: anim-slow 2.8s ease-in-out infinite; }
+.anim-gaviao .cri-sprite__emoji { animation: anim-fly 1.6s ease-in-out infinite; }
+.anim-jabuti .cri-sprite__emoji { animation: anim-slow 2.2s ease-in-out infinite; }
+.anim-suindara .cri-sprite__emoji { animation: anim-fly 2s ease-in-out infinite; }
+.anim-prea .cri-sprite__emoji { animation: anim-hop 0.9s ease-in-out infinite; }
+
+html.a11y-reduce-motion .cri-sprite__emoji {
+  animation: none !important;
+}
+
+/* Barra de evolução */
+.evo-bar {
+  width: min(320px, 100%);
+  margin: 12px auto 0;
+  padding: 0 16px;
+}
+.evo-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.evo-bar__track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.evo-bar__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), #e33d6b);
+  transition: width 0.4s ease;
+}
+.evo-bar__hint {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-3);
+  text-align: center;
+}

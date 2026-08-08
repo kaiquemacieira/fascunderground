@@ -3,6 +3,29 @@ import { Accessibility, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 import { playSfx } from '../lib/sfx';
 
+function forceShowVLibras() {
+  document.documentElement.classList.remove('hide-vlibras');
+  try {
+    // @ts-expect-error VLibras
+    if (window.VLibras && window.VLibras.Widget) {
+      // @ts-expect-error VLibras
+      new window.VLibras.Widget('https://vlibras.gov.br/app');
+    }
+  } catch {
+    /* */
+  }
+  // tenta clicar no botão nativo
+  const btn =
+    document.querySelector<HTMLElement>('[vw-access-button]') ||
+    document.querySelector<HTMLElement>('.access-button');
+  if (btn) {
+    btn.style.display = 'block';
+    btn.style.visibility = 'visible';
+    btn.style.opacity = '1';
+    btn.click();
+  }
+}
+
 export function A11yMenu() {
   const { theme, toggleTheme, a11y, setA11y } = useTheme();
   const [open, setOpen] = useState(false);
@@ -70,14 +93,29 @@ export function A11yMenu() {
               checked={a11y.libras}
               onChange={(e) => {
                 setA11y({ libras: e.target.checked });
+                if (e.target.checked) forceShowVLibras();
                 playSfx('click');
               }}
             />
-            Mostrar botão Libras
+            Libras (VLibras)
           </label>
+
+          <button
+            type="button"
+            className="btn-primary"
+            style={{ width: '100%', padding: '10px' }}
+            onClick={() => {
+              setA11y({ libras: true });
+              forceShowVLibras();
+              playSfx('click');
+            }}
+          >
+            Abrir Libras agora
+          </button>
+
           <p className="a11y-menu__hint">
-            O tradutor em Libras (VLibras) aparece como um ícone azul flutuante. Se não carregar,
-            o site vlibras.gov.br pode estar bloqueado na rede.
+            Procure o ícone azul do VLibras no canto da tela. Se não aparecer, a rede pode estar
+            bloqueando vlibras.gov.br — tente outra conexão.
           </p>
           <button type="button" className="btn-ghost" style={{ width: '100%' }} onClick={() => setOpen(false)}>
             Fechar

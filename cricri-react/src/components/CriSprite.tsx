@@ -3,35 +3,37 @@ import { displayEmoji, shellColors, speciesById, stageMeta } from '../lib/tamago
 
 interface Props {
   state: TamaState;
+  /** pulse ao evoluir */
+  evolving?: boolean;
 }
 
-export function CriSprite({ state }: Props) {
+export function CriSprite({ state, evolving }: Props) {
   const colors = shellColors(state.shell);
   const stage = stageMeta(state.stageId);
   const sp = speciesById(state.speciesId);
-  const eyesShut = state.sleeping || !state.alive;
   const emoji = displayEmoji(state);
+  const isEgg = !state.started || state.stageId === 'ovo';
+  const animClass = !isEgg && state.alive && !state.sleeping ? sp.anim : '';
 
   return (
-    <div className="cri-sprite" aria-hidden>
-      <div className="cri-sprite__emoji-face" style={{ fontSize: state.stageId === 'ovo' ? 72 : 64 }}>
-        {emoji}
-      </div>
-      <svg viewBox="0 0 200 200" width="160" height="100" style={{ marginTop: -24 }}>
-        <ellipse cx="100" cy="70" rx="50" ry="28" fill={colors.fur} opacity="0.85" />
-        <ellipse cx="100" cy="78" rx="30" ry="16" fill={colors.light} opacity="0.9" />
-        {!eyesShut && state.alive && state.stageId !== 'ovo' && (
-          <>
-            <circle cx="88" cy="68" r="3" fill="#1a1210" />
-            <circle cx="112" cy="68" r="3" fill="#1a1210" />
-          </>
+    <div
+      className={`cri-sprite ${evolving ? 'cri-sprite--evolve' : ''} ${state.sleeping ? 'cri-sprite--sleep' : ''}`}
+      aria-hidden
+    >
+      <div
+        className={`cri-sprite__face ${isEgg ? 'cri-sprite__face--egg' : ''} ${animClass}`}
+        style={{ ['--fur' as string]: colors.fur }}
+      >
+        <span className="cri-sprite__emoji">{emoji}</span>
+        {!isEgg && state.alive && (
+          <span className="cri-sprite__glow" style={{ background: colors.light }} />
         )}
-      </svg>
+      </div>
       <div className="cri-sprite__badge">
-        <span className="cri-sprite__emoji">{stage.emoji}</span>
+        <span>{isEgg ? '🥚' : sp.emoji}</span>
         <span className="cri-sprite__stage">
           {stage.label}
-          {state.speciesId && state.stageId !== 'ovo' ? ` · ${sp.name}` : ''}
+          {!isEgg ? ` · ${sp.name}` : ' · chocando'}
         </span>
       </div>
     </div>

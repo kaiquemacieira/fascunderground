@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="CRICRI" />
-    <meta name="application-name" content="CRICRI" />
     <title>CRICRI</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
@@ -19,34 +18,54 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-      /* VLibras acima da bottom nav */
       [vw-access-button],
-      .access-button {
-        bottom: 72px !important;
+      div[vw] {
+        z-index: 9999 !important;
+      }
+      [vw-access-button] {
+        bottom: 80px !important;
+        right: 12px !important;
+      }
+      html.hide-vlibras [vw],
+      html.hide-vlibras [vw-access-button] {
+        display: none !important;
+        visibility: hidden !important;
       }
     </style>
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- VLibras (Libras) — widget oficial -->
+    <!-- Widget VLibras oficial -->
     <div vw class="enabled">
       <div vw-access-button class="active"></div>
       <div vw-plugin-wrapper>
         <div class="vw-plugin-top-wrapper"></div>
       </div>
     </div>
-    <script src="https://vlibras.gov.br/app/vlibras-plugin.js" defer></script>
+
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>
-      window.addEventListener('load', function () {
-        try {
-          if (window.VLibras && window.VLibras.Widget) {
-            new window.VLibras.Widget('https://vlibras.gov.br/app');
+      (function initVLibras() {
+        function boot() {
+          try {
+            if (window.VLibras && window.VLibras.Widget) {
+              new window.VLibras.Widget('https://vlibras.gov.br/app');
+              return true;
+            }
+          } catch (e) {
+            console.warn('[CRICRI VLibras]', e);
           }
-        } catch (e) {
-          console.warn('[CRICRI] VLibras', e);
+          return false;
         }
-      });
+        if (!boot()) {
+          var n = 0;
+          var t = setInterval(function () {
+            n++;
+            if (boot() || n > 20) clearInterval(t);
+          }, 400);
+        }
+      })();
     </script>
 
     <script type="module" src="/src/main.tsx"></script>
