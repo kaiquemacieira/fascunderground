@@ -73,10 +73,11 @@ export function A11yMenu() {
                 playSfx('click');
               }}
             />
-            Libras (VLibras)
+            Mostrar botão Libras
           </label>
           <p className="a11y-menu__hint">
-            Libras ativa o tradutor oficial VLibras do governo federal.
+            O tradutor em Libras (VLibras) aparece como um ícone azul flutuante. Se não carregar,
+            o site vlibras.gov.br pode estar bloqueado na rede.
           </p>
           <button type="button" className="btn-ghost" style={{ width: '100%' }} onClick={() => setOpen(false)}>
             Fechar

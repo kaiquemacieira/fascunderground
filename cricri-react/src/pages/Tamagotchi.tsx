@@ -5,6 +5,7 @@ import {
   SPECIES,
   ageLabel,
   applyAction,
+  defaultState,
   displayEmoji,
   eventIsOver,
   loadState,
@@ -18,23 +19,37 @@ import {
   type SpeciesId,
   type TamaState,
 } from '../lib/tamagotchi';
-import { FEATURES } from '../lib/features';
 import { playSfx } from '../lib/sfx';
 
 const SHELLS: TamaState['shell'][] = ['rosa', 'ocre', 'azul', 'tuxedo'];
 
+function safeLoad(): TamaState {
+  try {
+    return tickState(loadState());
+  } catch (e) {
+    console.warn('[tama] load failed, reset', e);
+    try {
+      localStorage.removeItem('cricri-tama-v3');
+    } catch {
+      /* */
+    }
+    return defaultState();
+  }
+}
+
 function StatBar({ label, value, tone }: { label: string; value: number; tone?: string }) {
+  const v = Number.isFinite(value) ? value : 0;
   return (
     <div className="tama-stat">
       <div className="tama-stat__row">
         <span>{label}</span>
-        <span>{Math.round(value)}</span>
+        <span>{Math.round(v)}</span>
       </div>
       <div className="tama-stat__track">
         <div
           className="tama-stat__fill"
           style={{
-            width: `${Math.max(0, Math.min(100, value))}%`,
+            width: `${Math.max(0, Math.min(100, v))}%`,
             background: tone || 'var(--gold)',
           }}
         />
@@ -44,58 +59,85 @@ function StatBar({ label, value, tone }: { label: string; value: number; tone?: 
 }
 
 export function Tamagotchi() {
-  const [state, setState] = useState<TamaState>(() => tickState(loadState()));
+  const [state, setState] = useState<TamaState>(safeLoad);
   const [msg, setMsg] = useState('');
   const [nameInput, setNameInput] = useState('Cri');
   const [shell, setShell] = useState<TamaState['shell']>('rosa');
   const [speciesId, setSpeciesId] = useState<SpeciesId>('caramelo');
+  const [bootError, setBootError] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => {
+    try {
+      setState(safeLoad());
+    } catch (e) {
+      setBootError(e instanceof Error ? e.message : 'Erro ao abrir o Cri');
+    }
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
       setState((prev) => {
-        const next = tickState(prev);
-        saveState(next);
-        return next;
+        try {
+          const next = tickState(prev);
+          saveState(next);
+          return next;
+        } catch {
+          return prev;
+        }
       });
     }, 30_000);
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    const onVis = () => {
-      if (document.visibilityState === 'visible') {
-        setState((prev) => {
-          const next = tickState(prev);
-          saveState(next);
-          return next;
-        });
-      }
-    };
-    document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
-  }, []);
-
   const act = useCallback((action: CareAction) => {
     setState((prev) => {
-      const prevStage = prev.stageId;
-      const { state: next, message } = applyAction(prev, action);
-      setMsg(message);
-      if (next.stageId !== prevStage) playSfx('evolve');
-      else if (action === 'feed') playSfx('feed');
-      else if (action === 'play') playSfx('play');
-      else if (action === 'clean') playSfx('clean');
-      else if (action === 'sleep') playSfx('sleep');
-      else playSfx('click');
-      return next;
+      try {
+        const prevStage = prev.stageId;
+        const { state: next, message } = applyAction(prev, action);
+        setMsg(message);
+        try {
+          if (next.stageId !== prevStage) playSfx('evolve');
+          else if (action === 'feed') playSfx('feed');
+          else if (action === 'play') playSfx('play');
+          else if (action === 'clean') playSfx('clean');
+          else if (action === 'sleep') playSfx('sleep');
+          else playSfx('click');
+        } catch {
+          /* sfx opcional */
+        }
+        return next;
+      } catch (e) {
+        setMsg(e instanceof Error ? e.message : 'Erro na ação');
+        return prev;
+      }
     });
   }, []);
 
-  if (!FEATURES.tamagotchi) {
+  if (bootError) {
     return (
       <div className="page">
         <Header title="Cri Cabrunco" showBack />
         <div className="page-body">
-          <p className="page-hint">Tamagotchi desativado neste build.</p>
+          <div className="empty-state">
+            <p>Não foi possível abrir o Cri</p>
+            <span>{bootError}</span>
+            <button
+              type="button"
+              className="btn-primary"
+              style={{ marginTop: 16 }}
+              onClick={() => {
+                try {
+                  localStorage.removeItem('cricri-tama-v3');
+                } catch {
+                  /* */
+                }
+                setBootError(null);
+                setState(defaultState());
+              }}
+            >
+              Resetar save
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -112,8 +154,8 @@ export function Tamagotchi() {
         <Header title="Cri Cabrunco" showBack />
         <div className="page-body tama-onboard">
           <p className="tama-lead">
-            Escolha a espécie do <strong>Cri</strong> — os mesmos bichinhos do app original — e cuide
-            até a Anciã.
+            Escolha a espécie do <strong>Cri</strong> e cuide até a Anciã. Progresso fica neste
+            aparelho.
           </p>
 
           <label className="field">
@@ -132,7 +174,9 @@ export function Tamagotchi() {
               <button
                 key={s.id}
                 type="button"
-                className={speciesId === s.id ? 'tama-species__btn tama-species__btn--on' : 'tama-species__btn'}
+                className={
+                  speciesId === s.id ? 'tama-species__btn tama-species__btn--on' : 'tama-species__btn'
+                }
                 onClick={() => setSpeciesId(s.id)}
               >
                 <span className="tama-species__emoji">{s.emoji}</span>
@@ -141,14 +185,13 @@ export function Tamagotchi() {
             ))}
           </div>
 
-          <p className="tama-shell-label">Cor da pelagem</p>
+          <p className="tama-shell-label">Cor</p>
           <div className="tama-shells">
             {SHELLS.map((s) => (
               <button
                 key={s}
                 type="button"
                 className={shell === s ? 'tama-shell tama-shell--on' : 'tama-shell'}
-                data-shell={s}
                 onClick={() => setShell(s)}
               >
                 {s}
@@ -160,16 +203,21 @@ export function Tamagotchi() {
             type="button"
             className="btn-primary"
             style={{ marginTop: 20 }}
-            onClick={() => {
-              const s = startPet(nameInput, shell, speciesId);
-              setState(s);
-              setMsg(`${s.name} o ${speciesById(speciesId).name} nasceu na roda!`);
-              playSfx('success');
-            }}
             disabled={over}
+            onClick={() => {
+              try {
+                const s = startPet(nameInput || 'Cri', shell, speciesId);
+                setState(s);
+                setMsg(`${s.name} nasceu!`);
+                playSfx('success');
+              } catch (e) {
+                setMsg(e instanceof Error ? e.message : 'Erro ao começar');
+              }
+            }}
           >
             {over ? 'Festival encerrado' : 'Começar'}
           </button>
+          {msg && <p className="tama__msg">{msg}</p>}
         </div>
       </div>
     );
@@ -177,7 +225,7 @@ export function Tamagotchi() {
 
   return (
     <div className="page">
-      <Header title={state.name} showBack />
+      <Header title={state.name || 'Cri'} showBack />
       <div className="tama">
         <div className="tama__hero">
           <CriSprite state={state} />
@@ -201,9 +249,6 @@ export function Tamagotchi() {
             <p className="tama__status tama__status--sick">Precisa de cuidado</p>
           )}
           {msg && <p className="tama__msg">{msg}</p>}
-          {over && (
-            <p className="tama__status">A roda fechou. Obrigado por ficar com o Cri até o fim.</p>
-          )}
         </div>
 
         <div className="tama__stats">
@@ -234,6 +279,23 @@ export function Tamagotchi() {
             </button>
           )}
         </div>
+
+        <p className="page-hint" style={{ padding: '8px 16px 24px', textAlign: 'center' }}>
+          <button
+            type="button"
+            className="btn-ghost"
+            style={{ fontSize: '0.8rem' }}
+            onClick={() => {
+              if (confirm('Apagar o Cri deste aparelho e recomeçar?')) {
+                localStorage.removeItem('cricri-tama-v3');
+                setState(defaultState());
+                setMsg('');
+              }
+            }}
+          >
+            Resetar Cri
+          </button>
+        </p>
       </div>
     </div>
   );

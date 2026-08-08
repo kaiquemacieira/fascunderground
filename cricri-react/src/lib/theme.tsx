@@ -10,13 +10,10 @@ import {
 
 export type ThemeMode = 'dark' | 'light';
 export type A11yFlags = {
-  /** Alto contraste */
   contrast: boolean;
-  /** Texto maior */
   largeText: boolean;
-  /** Menos animação */
   reduceMotion: boolean;
-  /** Widget VLibras (Libras) */
+  /** Apenas lembra preferência; widget VLibras vem no index.html */
   libras: boolean;
 };
 
@@ -37,7 +34,7 @@ const defaultA11y: A11yFlags = {
   contrast: false,
   largeText: false,
   reduceMotion: false,
-  libras: false,
+  libras: true,
 };
 
 function loadTheme(): ThemeMode {
@@ -66,45 +63,12 @@ function applyDom(theme: ThemeMode, a11y: A11yFlags) {
   root.classList.toggle('a11y-contrast', a11y.contrast);
   root.classList.toggle('a11y-large', a11y.largeText);
   root.classList.toggle('a11y-reduce-motion', a11y.reduceMotion);
-  root.classList.toggle('a11y-libras', a11y.libras);
 
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', theme === 'dark' ? '#0c0a08' : '#F7F6F3');
-}
 
-function ensureVLibras(on: boolean) {
-  const existing = document.getElementById('vlibras-root');
-  if (!on) {
-    existing?.remove();
-    document.getElementById('vlibras-script')?.remove();
-    return;
-  }
-  if (existing) return;
-
-  const wrap = document.createElement('div');
-  wrap.id = 'vlibras-root';
-  wrap.setAttribute('vw', '');
-  wrap.className = 'enabled';
-  wrap.innerHTML = `
-    <div vw-access-button class="active"></div>
-    <div vw-plugin-wrapper>
-      <div class="vw-plugin-top-wrapper"></div>
-    </div>
-  `;
-  document.body.appendChild(wrap);
-
-  const script = document.createElement('script');
-  script.id = 'vlibras-script';
-  script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
-  script.onload = () => {
-    try {
-      // @ts-expect-error VLibras global
-      if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
-    } catch {
-      /* */
-    }
-  };
-  document.body.appendChild(script);
+  // mostra/esconde botão VLibras
+  document.documentElement.classList.toggle('hide-vlibras', a11y.libras === false);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -123,7 +87,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* */
     }
-    ensureVLibras(a11y.libras);
   }, [theme, a11y]);
 
   const setTheme = useCallback((t: ThemeMode) => setThemeState(t), []);

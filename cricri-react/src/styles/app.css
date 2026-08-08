@@ -1535,3 +1535,9 @@ html.a11y-reduce-motion *::after {
   line-height: 1;
   text-align: center;
 }
+
+/* VLibras */
+html.hide-vlibras [vw],
+html.hide-vlibras [vw-access-button] {
+  display: none !important;
+}
