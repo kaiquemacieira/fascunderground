@@ -1,16 +1,51 @@
-/** Registra service worker (PWA) */
+/** Service worker + install prompt */
+
 export function registerSW() {
   if (!('serviceWorker' in navigator)) return;
-  if (import.meta.env.DEV) return; // evita SW bagunçando HMR no dev
+  if (import.meta.env.DEV) return;
 
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
+  window.addEventListener('load', async () => {
+    try {
+      // limpa SW antigos problemáticos (v1/v2) uma vez
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) {
+        // atualiza para o novo script
+        await reg.update();
+      }
+
+      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            nw.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+    } catch (err) {
       console.warn('[CRICRI PWA] SW register failed', err);
-    });
+    }
   });
 }
 
-/** Captura beforeinstallprompt para botão “Instalar app” */
+/** Apaga caches e desregistra SW — recuperação de tela preta */
+export async function repairPwa(): Promise<void> {
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch {
+    /* */
+  }
+  window.location.href = '/?pwa_repair=1';
+}
+
 let deferred: BeforeInstallPromptEvent | null = null;
 const listeners = new Set<(can: boolean) => void>();
 

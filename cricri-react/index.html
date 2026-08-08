@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-    <meta name="theme-color" content="#0c0a08" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#F7F6F3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0a08" />
     <meta name="color-scheme" content="dark light" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,44 +17,54 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-      [vw-access-button],
-      div[vw] {
-        z-index: 9999 !important;
+      html, body { margin: 0; background: #0c0a08; color: #FAF4EA; font-family: system-ui, sans-serif; }
+      #boot-fallback {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 24px;
+        text-align: center;
       }
-      [vw-access-button] {
-        bottom: 80px !important;
-        right: 12px !important;
+      #boot-fallback button {
+        margin-top: 8px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        border: none;
+        background: #C1523E;
+        color: #fff;
+        font-weight: 700;
       }
-      html.hide-vlibras [vw],
-      html.hide-vlibras [vw-access-button] {
-        display: none !important;
-        visibility: hidden !important;
-      }
+      [vw-access-button] { bottom: 80px !important; z-index: 9999 !important; }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot-fallback">
+        <strong>CRICRI</strong>
+        <span style="opacity:.6;font-size:14px">Carregando…</span>
+        <button type="button" id="boot-repair" style="display:none">Reparar app</button>
+      </div>
+    </div>
 
-    <!-- Widget VLibras oficial -->
     <div vw class="enabled">
       <div vw-access-button class="active"></div>
       <div vw-plugin-wrapper>
         <div class="vw-plugin-top-wrapper"></div>
       </div>
     </div>
-
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>
-      (function initVLibras() {
+      (function () {
         function boot() {
           try {
             if (window.VLibras && window.VLibras.Widget) {
               new window.VLibras.Widget('https://vlibras.gov.br/app');
               return true;
             }
-          } catch (e) {
-            console.warn('[CRICRI VLibras]', e);
-          }
+          } catch (e) {}
           return false;
         }
         if (!boot()) {
@@ -65,9 +74,33 @@
             if (boot() || n > 20) clearInterval(t);
           }, 400);
         }
+        // se React não montar em 8s, mostra reparar
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          var btn = document.getElementById('boot-repair');
+          if (root && root.querySelector('#boot-fallback') && btn) {
+            btn.style.display = 'inline-block';
+            btn.onclick = function () {
+              if (navigator.serviceWorker) {
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                  return Promise.all(regs.map(function (r) { return r.unregister(); }));
+                }).then(function () {
+                  if (window.caches) {
+                    return caches.keys().then(function (keys) {
+                      return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                    });
+                  }
+                }).then(function () {
+                  location.href = '/?repair=1';
+                });
+              } else {
+                location.reload();
+              }
+            };
+          }
+        }, 8000);
       })();
     </script>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
