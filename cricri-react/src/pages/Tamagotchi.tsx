@@ -20,6 +20,7 @@ import {
   type TamaState,
 } from '../lib/tamagotchi';
 import { playSfx } from '../lib/sfx';
+import { ShareCriCard } from '../components/ShareCriCard';
 
 const SHELLS: TamaState['shell'][] = ['rosa', 'ocre', 'azul', 'tuxedo'];
 
@@ -178,6 +179,22 @@ export function Tamagotchi() {
         <div className="tama__hero">
           <CriSprite state={state} evolving={evolving} />
 
+          {isEgg && (
+            <div className="egg-coach" role="note">
+              <p className="egg-coach__title">🥚 Seu Cri está no ovo</p>
+              <ol className="egg-coach__steps">
+                <li>
+                  Toque em <strong>Comer</strong>, <strong>Brincar</strong> ou <strong>Limpar</strong>
+                </li>
+                <li>Cada cuidado enche a barra de evolução</li>
+                <li>
+                  Com <strong>3 cuidados</strong> o ovo quebra e nasce o bichinho de verdade
+                </li>
+              </ol>
+              <p className="egg-coach__tip">Dica: misture as três ações — o Cri gosta de rotina.</p>
+            </div>
+          )}
+
           {/* Barra de evolução ovo → bichinho / próximo estágio */}
           {nextInfo && (
             <div className="evo-bar">
@@ -246,6 +263,8 @@ export function Tamagotchi() {
             </button>
           )}
         </div>
+
+        <ShareCriCard state={state} />
 
         <p className="page-hint" style={{ textAlign: 'center', paddingBottom: 24 }}>
           <button

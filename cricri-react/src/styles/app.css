@@ -1678,3 +1678,79 @@ html.a11y-reduce-motion .cri-sprite__emoji {
   color: var(--text-3);
   text-align: center;
 }
+
+/* ===== Egg coach ===== */
+.egg-coach {
+  margin: 14px 16px 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(212, 154, 44, 0.35);
+  background: linear-gradient(145deg, rgba(193, 82, 62, 0.12), rgba(212, 154, 44, 0.08));
+  text-align: left;
+  max-width: 360px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.egg-coach__title {
+  margin: 0 0 8px;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text);
+}
+.egg-coach__steps {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.egg-coach__steps li {
+  margin-bottom: 4px;
+}
+.egg-coach__tip {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ===== Share Cri ===== */
+.share-cri {
+  padding: 8px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.share-cri__canvas {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.share-cri__btn {
+  width: 100%;
+  max-width: 360px;
+  padding: 14px 20px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(212, 154, 44, 0.5);
+  background: linear-gradient(135deg, #C1523E 0%, #8F3A2A 50%, #d49a2c 140%);
+  color: #FAF4EA;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 24px rgba(193, 82, 62, 0.35);
+}
+.share-cri__btn:disabled {
+  opacity: 0.5;
+}
+.share-cri__btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.share-cri__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-3);
+  text-align: center;
+}
