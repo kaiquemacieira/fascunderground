@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { FEATURES } from '../lib/features';
 import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { PostCard } from '../components/PostCard';
@@ -33,7 +34,6 @@ export function Profile() {
   const isOwn = !!(user && targetId && user.id === targetId);
 
   const load = useCallback(async () => {
-    // /perfil sem login e sem :id → tela de entrar
     if (!targetId) {
       setLoading(false);
       setProfile(null);
@@ -118,7 +118,6 @@ export function Profile() {
     }
   }
 
-  // /perfil sem estar logado
   if (!paramId && !authLoading && !user) {
     return (
       <div className="page">
@@ -201,19 +200,28 @@ export function Profile() {
           <div className="profile__actions">
             {isOwn ? (
               <>
-                <Link
-                  to="/meow"
-                  className="btn-primary"
-                  style={{ width: 'auto', padding: '10px 18px', textAlign: 'center' }}
-                >
-                  🐾 Meow
-                </Link>
+                {FEATURES.meow && (
+                  <Link
+                    to="/meow"
+                    className="btn-primary"
+                    style={{ width: 'auto', padding: '10px 18px', textAlign: 'center' }}
+                  >
+                    🐾 Meow
+                  </Link>
+                )}
                 <Link
                   to="/tamagotchi"
                   className="btn-ghost"
                   style={{ width: 'auto', padding: '10px 14px' }}
                 >
                   Cri
+                </Link>
+                <Link
+                  to="/notifs"
+                  className="btn-ghost"
+                  style={{ width: 'auto', padding: '10px 14px' }}
+                >
+                  Avisos
                 </Link>
                 <Link
                   to="/instalar"
@@ -225,7 +233,6 @@ export function Profile() {
                 <button type="button" className="btn-ghost" onClick={() => signOut()}>
                   Sair
                 </button>
-
               </>
             ) : (
               <>
@@ -238,17 +245,18 @@ export function Profile() {
                 >
                   {followBusy ? '…' : following ? 'Seguindo' : 'Seguir'}
                 </button>
-                <Link
-                  to={`/meow?to=${targetId}`}
-                  className="btn-ghost"
-                  style={{ width: 'auto', padding: '10px 14px' }}
-                >
-                  🐾 Meow
-                </Link>
+                {FEATURES.meow && (
+                  <Link
+                    to={`/meow?to=${targetId}`}
+                    className="btn-ghost"
+                    style={{ width: 'auto', padding: '10px 14px' }}
+                  >
+                    🐾 Meow
+                  </Link>
+                )}
               </>
             )}
           </div>
-
         </div>
 
         <div className="profile__posts">

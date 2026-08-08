@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, Bell, User, Plus } from 'lucide-react';
+import { Home, Search, Cat, User, Plus } from 'lucide-react';
 import clsx from 'clsx';
 import { playSfx } from '../lib/sfx';
 import { subscribeNotifs } from '../lib/notifications';
@@ -9,7 +9,7 @@ const items = [
   { to: '/', icon: Home, label: 'Início' },
   { to: '/explorar', icon: Search, label: 'Explorar' },
   { to: '/compose', icon: Plus, label: 'Publicar', primary: true },
-  { to: '/notifs', icon: Bell, label: 'Avisos', badge: true as const },
+  { to: '/tamagotchi', icon: Cat, label: 'Cri' },
   { to: '/perfil', icon: User, label: 'Perfil' },
 ];
 
@@ -20,7 +20,7 @@ export function BottomNav() {
 
   return (
     <nav className="bottom-nav" aria-label="Navegação principal">
-      {items.map(({ to, icon: Icon, label, primary, badge }) => (
+      {items.map(({ to, icon: Icon, label, primary }) => (
         <NavLink
           key={to}
           to={to}
@@ -36,8 +36,8 @@ export function BottomNav() {
         >
           <span className="bottom-nav__icon">
             <Icon size={primary ? 22 : 24} strokeWidth={primary ? 2.2 : 1.8} />
-            {badge && unread > 0 && (
-              <span className="nav-badge" aria-label={`${unread} não lidos`}>
+            {to === '/perfil' && unread > 0 && (
+              <span className="nav-badge" aria-label={`${unread} avisos`}>
                 {unread > 9 ? '9+' : unread}
               </span>
             )}
