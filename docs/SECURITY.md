@@ -74,13 +74,29 @@ Deploy sugerido **com** verificação de JWT no gateway **e** auth interna (defe
 - Escrever `spots`  
 - Ver `from_profile_id` de recados anônimos de terceiros (dono vê a linha, mas app não precisa exibir o id se `is_anonymous`)
 
-## Rate limit (próximo nível)
+## Rate limit (obrigatório — festival)
 
-Para o festival, considere:
+Implementado em `STEP_X_rate_limits.sql` / migration `202608080001_rate_limits_meow_scraps.sql`.
 
-- Edge middleware / Upstash Redis contando por `user_id` destino  
-- Trigger que rejeita > N inserts/`inbox_anon` por `auth.uid()` / hora  
-- Cap de 10 subscriptions por usuário (já há `.limit(10)` no envio)
+| Canal | Tabela | Teto / hora (auth.uid) | Mesmo destino / hora |
+|-------|--------|------------------------|----------------------|
+| MEOW | `inbox_anon` | **10** | **3** |
+| Scrap | `scraps` | **20** | **8** |
+
+- Trigger `BEFORE INSERT` + tabela `rate_limit_events` (SECURITY DEFINER)  
+- Funciona mesmo com `from_profile_id` null (recado anônimo)  
+- Client **não** acessa `rate_limit_events` (RLS force + revoke)  
+- Erro: `RATE_LIMIT: …` (código `P0001`) — front traduz a mensagem  
+
+```bash
+# SQL Editor ou:
+psql "$DATABASE_URL" -f supabase/STEP_X_rate_limits.sql
+```
+
+Opcional: limpar eventos antigos  
+`select public.cleanup_rate_limit_events();`
+
+Cap de 10 subscriptions por usuário no push (já há `.limit(10)` no envio).
 
 ## Incidentes
 
@@ -98,3 +114,25 @@ Para o festival, considere:
 | `supabase/functions/push-trigger` | Webhook → push autenticado |
 | `supabase/STEP_SECURITY_HARDENING.sql` | Grants + RLS reforçado |
 | `docs/PUSH.md` | Operação de push |
+
+
+## reCAPTCHA v3 (formulários públicos)
+
+Protege **denúncia** e **pedido de rolê/after** contra bots.
+
+1. Crie um site em [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin) — tipo **v3**.
+2. Domínios: `seudominio.com`, `localhost`.
+3. No front (`js/config.js`):
+   ```js
+   recaptchaSiteKey: '6Lc…'  // site key (pública)
+   ```
+4. Secrets no Supabase:
+   ```bash
+   supabase secrets set RECAPTCHA_SECRET_KEY="6Lc…"
+   supabase functions deploy denuncia --no-verify-jwt
+   supabase functions deploy role-request --no-verify-jwt
+   ```
+5. Score mínimo padrão: **0.4** (ajustável em `_shared/recaptcha.ts`).
+6. Sem secret configurado → verificação **pulada** (só para dev). Em prod, sempre defina o secret.
+
+Badge Google: o script v3 é invisível; se precisar do badge obrigatório, mantenha o CSS padrão do Google ou link na política de privacidade.

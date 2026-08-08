@@ -24,6 +24,7 @@
     a { color:#e33d6b; }
   </style>
   <link rel="stylesheet" href="css/estetica-v2.css?v=20260806mock">
+  <link rel="stylesheet" href="css/fixed-chrome.css?v=livrim1">
 </head>
 <body>
   <h1>Admin · Rolê/After</h1>
@@ -36,7 +37,6 @@
   <script src="js/supabase-client.js"></script>
   <script>
   (function () {
-    var ADMIN = (window.FASC_CONFIG && window.FASC_CONFIG.adminEmail) || 'kaaiqq@gmail.com';
     var list = document.getElementById('list');
     var msg = document.getElementById('admin-msg');
 
@@ -60,7 +60,7 @@
       } catch (_) {}
       if (!user) {
         msg.className = 'msg err';
-        msg.innerHTML = 'Faça login em <a href="login.html">login</a> com a conta admin (' + esc(ADMIN) + ').';
+        msg.innerHTML = 'Faça login em <a href="login.html">login</a> com a conta admin.';
         return;
       }
       // lista pending — precisa de policy de select; se só own, admin não vê tudo.

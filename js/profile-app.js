@@ -384,7 +384,14 @@
               is_anonymous: !identify,
               from_profile_id: identify ? user.id : null
             });
-            if (ins.error) throw ins.error;
+            if (ins.error) {
+              var em = (ins.error.message || '') + '';
+              if (/RATE_LIMIT/i.test(em)) {
+                var mm = em.match(/RATE_LIMIT:\s*(.+)/i);
+                throw new Error(mm && mm[1] ? mm[1].trim() : 'Muitas mensagens em pouco tempo. Aguarde um pouco.');
+              }
+              throw ins.error;
+            }
             if ($('send-body')) $('send-body').value = '';
             msg('send-msg', 'Enviado.', true);
           } catch (err) {

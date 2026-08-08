@@ -115,7 +115,7 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
   padding: 0.65rem 1rem !important;
   border-radius: 999px !important;
   border: 2px solid #0a0a0a !important;
-  background: #E6BE49 !important;
+  background: #C1523E !important;
   color: #1a1400 !important;
   font: 700 0.78rem/1 Oswald, system-ui, sans-serif !important;
   letter-spacing: 0.06em !important;
@@ -129,4 +129,52 @@ html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] {
 }
 html.cricri-standalone #cricri-install-btn {
   display: none !important;
+}
+
+/* ═══════════════════════════════════════════
+   MENU INFERIOR — estilo "livrim." (referência)
+   item ativo vira pill preenchida com label;
+   itens inativos ficam só com ícone
+   ═══════════════════════════════════════════ */
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item {
+  gap: 0 !important;
+  padding: 0.35rem 0.4rem !important;
+  border-radius: 999px !important;
+  transition: background 0.2s ease, color 0.2s ease !important;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item .bn-label {
+  display: none !important;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active {
+  flex-direction: row !important;
+  gap: 0.4rem !important;
+  background: var(--accent-2-deep, #2E7D4E) !important;
+  color: #FDF7F0 !important;
+  padding: 0.55rem 1rem !important;
+  min-height: 40px !important;
+  box-shadow: 0 4px 14px rgba(46, 125, 78, 0.35) !important;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active .bn-ico {
+  color: #FDF7F0 !important;
+}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active .bn-label {
+  display: inline-block !important;
+  color: #FDF7F0 !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0 !important;
+}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active {
+  background: var(--accent-2, #2E7D4E) !important;
+  color: #fff !important;
+}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active .bn-ico,
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active .bn-label {
+  color: #fff !important;
+}
+nav.bottom-nav[data-cricri-nav="1"] button.bn-create {
+  border-radius: 999px !important;
+  border: 1.5px solid var(--gold, #C1523E) !important;
+  color: var(--gold, #C1523E) !important;
 }

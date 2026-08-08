@@ -240,15 +240,25 @@ if (form) {
       anonimo: data.anonimo,
       ua: (navigator.userAgent || '').slice(0, 160),
       path: location.pathname,
+      recaptchaToken: '',
     };
 
     if (btn) btn.disabled = true;
     showMsg('Enviando…', true);
 
     try {
+      if (window.CricriRecaptcha && window.CricriRecaptcha.getToken) {
+        try {
+          payload.recaptchaToken = await window.CricriRecaptcha.getToken('denuncia');
+        } catch (_) {}
+      }
+
       const headers = { 'Content-Type': 'application/json' };
       const anonKey = (window.FASC_CONFIG && window.FASC_CONFIG.supabaseAnonKey) || '';
-      if (anonKey) headers['Authorization'] = 'Bearer ' + anonKey;
+      if (anonKey) {
+        headers['Authorization'] = 'Bearer ' + anonKey;
+        headers['apikey'] = anonKey;
+      }
 
       const res = await fetch(url, {
         method: 'POST',
@@ -267,6 +277,7 @@ if (form) {
             if (fieldEls[k]) setFieldError(fieldEls[k], body.fields[k]);
           });
         }
+        if (body && body.error === 'captcha') throw new Error('Não passou na verificação anti-spam. Tente de novo.');
         throw new Error((body && (body.error || body.message)) || 'Falha ' + res.status);
       }
 

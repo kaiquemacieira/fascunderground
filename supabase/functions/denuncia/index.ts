@@ -7,6 +7,7 @@
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import { verifyRecaptcha } from "../_shared/recaptcha.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -53,6 +54,7 @@ const DenunciaSchema = z
     website: z.string().optional(), // honeypot
     path: z.string().max(80).optional().default(""),
     ua: z.string().max(160).optional().default(""),
+    recaptchaToken: z.string().max(4000).optional().default(""),
   })
   .superRefine((data, ctx) => {
     if (data.anonimo) return;
@@ -76,7 +78,6 @@ const DenunciaSchema = z
         path: ["contato"],
         message: "Telefone parece incompleto.",
       });
-    }
     }
   });
 
@@ -109,6 +110,15 @@ serve(async (req) => {
   // honeypot antes do parse estrito
   if (raw && typeof raw === "object" && (raw as { website?: string }).website) {
     return json({ ok: true });
+  }
+
+  const token =
+    raw && typeof raw === "object"
+      ? String((raw as { recaptchaToken?: string }).recaptchaToken || "")
+      : "";
+  const captcha = await verifyRecaptcha(token, "denuncia", 0.4);
+  if (!captcha.ok) {
+    return json({ error: "captcha", code: captcha.error || "captcha" }, 403);
   }
 
   const parsed = DenunciaSchema.safeParse(raw);

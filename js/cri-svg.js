@@ -58,7 +58,7 @@
   function posterMarkup() {
     return (
       '<svg viewBox="0 0 120 160" width="70%" height="70%" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">' +
-        '<rect x="8" y="8" width="104" height="144" fill="#f6efdc" stroke="#a67418" stroke-width="2"/>' +
+        '<rect x="8" y="8" width="104" height="144" fill="#f6efdc" stroke="#7A2E1F" stroke-width="2"/>' +
         '<text x="60" y="40" text-anchor="middle" font-family="Inter, Impact, sans-serif" font-size="18" fill="#e33d6b">CRICRI</text>' +
         '<text x="60" y="58" text-anchor="middle" font-family="Oswald, sans-serif" font-size="8" fill="#17120e" letter-spacing="1">SÃO CRISTÓVÃO</text>' +
         '<circle cx="60" cy="100" r="28" fill="#d49a2c" opacity="0.25"/>' +

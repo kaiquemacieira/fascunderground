@@ -8,11 +8,7 @@
 (function () {
   'use strict';
   if (window.CricriRoleRequest && window.CricriRoleRequest.__v4) return;
-
-  var ADMIN_EMAIL =
-    (window.FASC_CONFIG && window.FASC_CONFIG.adminEmail) || 'kaaiqq@gmail.com';
-
-  var pickMode = false;
+var pickMode = false;
   var pickMarker = null;
   var pickOverlay = null;
   var pickBanner = null;
@@ -420,7 +416,7 @@
       '<div class="rs-card" role="dialog" aria-modal="true" aria-label="Solicitar Rolê/After">' +
         '<div class="rs-handle"></div>' +
         '<h2>Solicitar Rolê/After</h2>' +
-        '<p class="rs-sub">Ponto marcado. O admin recebe no e-mail e decide se publica no mapa.</p>' +
+        '<p class="rs-sub">Ponto marcado. O admin recebe o pedido e decide se publica no mapa.</p>' +
         '<label>Tipo</label>' +
         '<div class="rs-type">' +
           '<button type="button" class="is-on" data-kind="role">Rolê</button>' +
@@ -478,7 +474,7 @@
         await submitRequest(payload);
         if (msg) {
           msg.className = 'rs-msg ok';
-          msg.textContent = 'Solicitação enviada! O admin recebe no e-mail pra aceitar ou recusar.';
+          msg.textContent = 'Solicitação enviada! O admin recebe o pedido pra aceitar ou recusar.';
         }
         setTimeout(function () {
           sheet.hidden = true;
@@ -547,30 +543,56 @@
       localStorage.setItem(key, JSON.stringify(list.slice(0, 30)));
     } catch (_) {}
 
-    var subject = encodeURIComponent(
-      '[CRICRI] Solicitar ' + (payload.kind === 'after' ? 'After' : 'Rolê') + ': ' + payload.title
-    );
-    var body = encodeURIComponent(
-      [
-        'Nova solicitação de ' + (payload.kind === 'after' ? 'After' : 'Rolê') + ' no mapa CRICRI',
-        '', 'Título: ' + payload.title, 'Tipo: ' + payload.kind,
-        'Quando: ' + (payload.when_text || '—'), 'Contato: ' + (payload.contact || '—'),
-        'Nick: ' + (handle ? '@' + handle : '—'),
-        'Coords: ' + payload.lat + ', ' + payload.lng,
-        'Mapa: https://www.openstreetmap.org/?mlat=' + payload.lat + '&mlon=' + payload.lng +
-          '#map=17/' + payload.lat + '/' + payload.lng,
-        '', 'Detalhes:', payload.notes || '—', '',
-        'Admin: ' + (location.origin || '') + '/admin-roles.html',
-        saved ? '(salvo no Supabase)' : '(rode STEP_V_role_requests.sql)'
-      ].join('\n')
-    );
-    var a = document.createElement('a');
-    a.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + subject + '&body=' + body;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () { try { a.remove(); } catch (_) {} }, 500);
-    return payload;
+    // Notifica admin via Edge Function (e-mail NUNCA no front)
+    var base = (window.FASC_CONFIG && window.FASC_CONFIG.supabaseUrl) || '';
+    var anon = (window.FASC_CONFIG && window.FASC_CONFIG.supabaseAnonKey) || '';
+    if (!base) {
+      console.warn('[role-request] supabaseUrl ausente — pedido salvo localmente, sem e-mail');
+      return;
+    }
+    var endpoint = base.replace(/\/$/, '') + '/functions/v1/role-request';
+    var headers = { 'Content-Type': 'application/json' };
+    if (anon) {
+      headers['Authorization'] = 'Bearer ' + anon;
+      headers['apikey'] = anon;
+    }
+    var notifyBody = {
+      title: payload.title,
+      kind: payload.kind,
+      when_text: payload.when_text || null,
+      notes: payload.notes || null,
+      contact: payload.contact || null,
+      lat: Number(payload.lat),
+      lng: Number(payload.lng),
+      handle: handle || null,
+      user_id: userId || null,
+      id: payload.id || null,
+      saved: !!saved,
+      website: '', // honeypot vazio
+      path: (location.pathname || '').slice(0, 120),
+      ua: (navigator.userAgent || '').slice(0, 200),
+      recaptchaToken: ''
+    };
+    try {
+      if (window.CricriRecaptcha && window.CricriRecaptcha.getToken) {
+        try {
+          notifyBody.recaptchaToken = await window.CricriRecaptcha.getToken('role_request');
+        } catch (_) {}
+      }
+      var resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(notifyBody)
+      });
+      if (!resp.ok) {
+        var errTxt = '';
+        try { errTxt = await resp.text(); } catch (_) {}
+        console.warn('[role-request] edge', resp.status, errTxt);
+        // pedido já pode estar no Supabase — não falha o fluxo do usuário
+      }
+    } catch (err) {
+      console.warn('[role-request] edge network', err);
+    }
   }
 
   function bind() {

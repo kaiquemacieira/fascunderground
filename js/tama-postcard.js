@@ -74,7 +74,7 @@
       name: sp ? sp.name : (s && s.speciesName) || 'CRICRI',
       emoji: sp ? sp.emoji : (s && s.speciesEmoji) || null,
       blurb: sp ? sp.blurb : 'Companheiro FASC+',
-      tint: sp ? sp.tint : '#E6BE49',
+      tint: sp ? sp.tint : '#C1523E',
       motif: sp ? sp.motif : '✦'
     };
   }
@@ -270,7 +270,7 @@
   }
 
   function hexAlpha(hex, a) {
-    if (!hex || hex[0] !== '#') return 'rgba(230,190,73,' + a + ')';
+    if (!hex || hex[0] !== '#') return 'rgba(193,82,62,' + a + ')';
     var h = hex.replace('#', '');
     if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
     var r = parseInt(h.slice(0, 2), 16);

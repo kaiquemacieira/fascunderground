@@ -2659,7 +2659,7 @@
         '<path class="sp-mane" d="M70,70 q-20,20 -8,50 q20,-10 30,-30" fill="#d48cff"/>' +
         eyes(95) +
         '<ellipse cx="100" cy="112" rx="6" ry="4" fill="#e33d6b"/>' +
-        '<path class="sp-spark s1" d="M40,60 l3,8 l8,3 l-8,3 l-3,8 l-3,-8 l-8,-3 l8,-3 z" fill="#E6BE49"/>' +
+        '<path class="sp-spark s1" d="M40,60 l3,8 l8,3 l-8,3 l-3,8 l-3,-8 l-8,-3 l8,-3 z" fill="#C1523E"/>' +
         '<path class="sp-spark s2" d="M160,50 l2,6 l6,2 l-6,2 l-2,6 l-2,-6 l-6,-2 l6,-2 z" fill="#fff"/>' +
         '</g>',
       grilo: '<g class="sp-body sp-grilo">' +
@@ -2673,8 +2673,8 @@
         eyes(100) +
         '<path class="sp-leg l1" d="M70,170 q-30,20 -20,40" stroke="#3d6b38" stroke-width="5" fill="none"/>' +
         '<path class="sp-leg l2" d="M130,170 q30,20 20,40" stroke="#3d6b38" stroke-width="5" fill="none"/>' +
-        '<path class="sp-note n1" d="M150,80 v-20 m0,0 q8,0 8,8" stroke="#E6BE49" stroke-width="2" fill="none"/>' +
-        '<path class="sp-note n2" d="M165,70 v-16 m0,0 q8,0 8,8" stroke="#E6BE49" stroke-width="2" fill="none"/>' +
+        '<path class="sp-note n1" d="M150,80 v-20 m0,0 q8,0 8,8" stroke="#C1523E" stroke-width="2" fill="none"/>' +
+        '<path class="sp-note n2" d="M165,70 v-16 m0,0 q8,0 8,8" stroke="#C1523E" stroke-width="2" fill="none"/>' +
         '</g>',
       caramelo: '<g class="sp-body sp-caramelo">' +
         '<ellipse class="sp-shadow" cx="100" cy="198" rx="44" ry="8" fill="rgba(0,0,0,.22)"/>' +
@@ -2728,10 +2728,10 @@
         '<ellipse cx="100" cy="150" rx="40" ry="38" fill="#f0e8d8"/>' +
         '<circle cx="100" cy="95" r="42" fill="#f0e8d8"/>' +
         '<circle cx="82" cy="92" r="16" fill="#1a120c"/><circle cx="118" cy="92" r="16" fill="#1a120c"/>' +
-        '<circle cx="82" cy="92" r="7" fill="#E6BE49"/><circle cx="118" cy="92" r="7" fill="#E6BE49"/>' +
+        '<circle cx="82" cy="92" r="7" fill="#C1523E"/><circle cx="118" cy="92" r="7" fill="#C1523E"/>' +
         '<circle cx="84" cy="90" r="2.5" fill="#fff"/><circle cx="120" cy="90" r="2.5" fill="#fff"/>' +
         '<path d="M95,112 Q100,120 105,112" fill="#c48a2a"/>' +
-        '<path class="sp-moon" d="M160,40 a12,12 0 1,0 0,0.1 a9,9 0 1,1 0,-0.1" fill="#E6BE49" opacity=".85"/>' +
+        '<path class="sp-moon" d="M160,40 a12,12 0 1,0 0,0.1 a9,9 0 1,1 0,-0.1" fill="#C1523E" opacity=".85"/>' +
         '</g>',
       prea: '<g class="sp-body sp-prea">' +
         '<ellipse class="sp-shadow" cx="100" cy="198" rx="38" ry="7" fill="rgba(0,0,0,.2)"/>' +
@@ -2748,7 +2748,7 @@
     };
     var body = bodies[id] || bodies.grilo;
     return '<svg class="sp-avatar-svg" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-      '<defs><linearGradient id="hornGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E6BE49"/><stop offset="100%" stop-color="#fff5c8"/></linearGradient></defs>' +
+      '<defs><linearGradient id="hornGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C1523E"/><stop offset="100%" stop-color="#fff5c8"/></linearGradient></defs>' +
       body + '</svg>';
   }
 
@@ -3448,7 +3448,7 @@
       'left:max(0.65rem, env(safe-area-inset-left))',
       'min-width:200px',
       'background:#1a1512',
-      'border:1.5px solid rgba(230,190,73,0.4)',
+      'border:1.5px solid rgba(193,82,62,0.4)',
       'border-radius:14px',
       'padding:0.45rem',
       'z-index:2147483647',

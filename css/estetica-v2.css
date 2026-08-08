@@ -4,7 +4,7 @@
  * Claro + Escuro · Inter · ouro
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@600;700;800&display=swap');
 
 /* ═══════════════════════════════════════════
    TOKENS — só cores do mock
@@ -15,29 +15,32 @@ html,
 html[data-theme="dark"],
 html[data-a11y-theme="dark"],
 html:not([data-theme="light"]):not([data-a11y-theme="light"]) {
-  --gold: #E6BE49;
-  --gold-deep: #C79A2E;
-  --gold-soft: rgba(230, 190, 73, 0.16);
-  --bg: #0A0A0A;
-  --bg-raised: #141414;
-  --bg-sunken: #000000;
-  --text: #FAFAF7;
-  --text-2: rgba(250, 250, 247, 0.62);
-  --text-3: rgba(250, 250, 247, 0.40);
-  --border: rgba(250, 250, 247, 0.12);
-  --border-strong: rgba(250, 250, 247, 0.22);
-  --border-subtle: rgba(250, 250, 247, 0.08);
+  --gold: #C1523E;
+  --gold-deep: #8F3A2A;
+  --gold-soft: rgba(193, 82, 62, 0.16);
+  --accent-2: #3E8F5F;
+  --accent-2-deep: #2E7D4E;
+  --accent-2-soft: rgba(62, 143, 95, 0.16);
+  --bg: #1A1210;
+  --bg-raised: #241A16;
+  --bg-sunken: #120C0A;
+  --text: #FAF4EA;
+  --text-2: rgba(250, 244, 234, 0.62);
+  --text-3: rgba(250, 244, 234, 0.40);
+  --border: rgba(250, 244, 234, 0.12);
+  --border-strong: rgba(250, 244, 234, 0.22);
+  --border-subtle: rgba(250, 244, 234, 0.08);
   --border-focus: var(--gold);
   --overlay: rgba(0, 0, 0, 0.7);
-  --icon: #FAFAF7;
-  --danger: #FAFAF7;
+  --icon: #FAF4EA;
+  --danger: #FAF4EA;
 
   /* sombras — dark */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.45);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.40);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
   --shadow-lg: 0 20px 48px -12px rgba(0, 0, 0, 0.65);
-  --shadow-gold: 0 8px 24px -8px rgba(230, 190, 73, 0.28);
+  --shadow-gold: 0 8px 24px -8px rgba(193, 82, 62, 0.28);
   --shadow-inset: inset 0 1px 0 rgba(250, 250, 247, 0.06);
 
   --theme-duration: 0.35s;
@@ -75,29 +78,32 @@ html:not([data-theme="light"]):not([data-a11y-theme="light"]) {
 
 html[data-theme="light"],
 html[data-a11y-theme="light"] {
-  --gold: #D4A72C;
-  --gold-deep: #A67418;
-  --gold-soft: rgba(212, 167, 44, 0.14);
-  --bg: #FFFFFF;
+  --gold: #A8452F;
+  --gold-deep: #7A2E1F;
+  --gold-soft: rgba(168, 69, 47, 0.14);
+  --accent-2: #2E7D4E;
+  --accent-2-deep: #1F5C38;
+  --accent-2-soft: rgba(46, 125, 78, 0.14);
+  --bg: #F5F1E8;
   --bg-raised: #FFFFFF;
-  --bg-sunken: #F7F6F3;
-  --text: #111111;
-  --text-2: rgba(17, 17, 17, 0.62);
-  --text-3: rgba(17, 17, 17, 0.40);
-  --border: rgba(17, 17, 17, 0.10);
-  --border-strong: rgba(17, 17, 17, 0.18);
-  --border-subtle: rgba(17, 17, 17, 0.06);
+  --bg-sunken: #EDE7D9;
+  --text: #17120F;
+  --text-2: rgba(23, 18, 15, 0.62);
+  --text-3: rgba(23, 18, 15, 0.40);
+  --border: rgba(23, 18, 15, 0.10);
+  --border-strong: rgba(23, 18, 15, 0.18);
+  --border-subtle: rgba(23, 18, 15, 0.06);
   --border-focus: var(--gold);
-  --overlay: rgba(17, 17, 17, 0.55);
-  --icon: #111111;
-  --danger: #111111;
+  --overlay: rgba(23, 18, 15, 0.55);
+  --icon: #17120F;
+  --danger: #17120F;
 
   /* sombras — light */
   --shadow-xs: 0 1px 2px rgba(17, 17, 17, 0.06);
   --shadow-sm: 0 2px 8px rgba(17, 17, 17, 0.08);
   --shadow-md: 0 8px 24px rgba(17, 17, 17, 0.10);
   --shadow-lg: 0 20px 48px -12px rgba(17, 17, 17, 0.16);
-  --shadow-gold: 0 8px 24px -8px rgba(212, 167, 44, 0.28);
+  --shadow-gold: 0 8px 24px -8px rgba(168, 69, 47, 0.28);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 
   --theme-duration: 0.35s;
@@ -289,7 +295,7 @@ button.btn-primary,
 .auth-submit,
 button[type="submit"].btn-primary {
   background: var(--gold) !important;
-  color: #1a1400 !important;
+  color: #FDF7F0 !important;
   border: none !important;
   box-shadow: var(--shadow-gold) !important;
   text-shadow: none !important;
@@ -310,16 +316,23 @@ button[type="submit"].btn-primary {
   filter: none !important;
 }
 
+/* pill outline — mesmo tratamento do botão "editar perfil" das referências */
 .btn-ghost,
 .home-cta-ghost,
 .aud-btn,
 .mural-aud-btn,
 .btn-secondary {
   background: transparent !important;
-  border: 1px solid var(--border-strong) !important;
-  color: var(--text-2) !important;
+  border: 1.5px solid var(--gold) !important;
+  color: var(--gold) !important;
   border-radius: 999px !important;
   box-shadow: none !important;
+  font-weight: 700 !important;
+}
+.btn-ghost:hover,
+.home-cta-ghost:hover,
+.btn-secondary:hover {
+  background: var(--gold-soft) !important;
 }
 .aud-btn.is-on,
 .mural-aud-btn.is-on {
@@ -327,11 +340,7 @@ button[type="submit"].btn-primary {
   border-color: var(--text) !important;
   color: var(--bg) !important;
 }
-.btn-ghost:hover,
-.home-cta-ghost:hover {
-  border-color: var(--text) !important;
-  color: var(--text) !important;
-}
+
 
 .icon-btn, .casas-open-btn, .header-search-btn {
   background: transparent !important;
@@ -411,6 +420,14 @@ input::placeholder, textarea::placeholder {
 .logo span, .brand em, .home-logo span, .brand-mark b em {
   color: var(--gold) !important;
   font-style: normal;
+}
+
+/* wordmark arredondado — mesma personalidade do print de referência ("livrim.") */
+.logo, .brand, .brandmark, .home-logo, .login-logo, .meow-brand, .meow-logo,
+.page-top .logo, .site-logo {
+  font-family: 'Baloo 2', 'Inter', system-ui, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
 }
 
 /* ═══════════════════════════════════════════

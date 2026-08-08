@@ -29,7 +29,7 @@ create policy "dono lê sua caixinha"
   on public.inbox_anon for select
   using (auth.uid() = to_profile_id);
 
--- Insert: qualquer usuário autenticado pode enviar (rate-limit fica app-side no MVP)
+-- Insert: autenticado; rate-limit no Postgres (STEP_X_rate_limits.sql) — obrigatório
 drop policy if exists "autenticado envia recado" on public.inbox_anon;
 create policy "autenticado envia recado"
   on public.inbox_anon for insert

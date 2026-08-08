@@ -35,6 +35,17 @@
     }
   }
 
+
+  function mapDbError(err) {
+    var msg = (err && (err.message || err.msg || err.error_description)) || '';
+    var code = (err && (err.code || err.errcode)) || '';
+    if (/RATE_LIMIT/i.test(msg) || code === 'P0001') {
+      var m = msg.match(/RATE_LIMIT:\s*(.+)/i);
+      return (m && m[1]) ? m[1].trim() : 'Muitas mensagens em pouco tempo. Tente de novo em alguns minutos.';
+    }
+    return msg || 'Falha ao enviar';
+  }
+
   async function sendAnon(toProfileId, body, isAnonymous) {
     if (typeof window.fascEventEnded === 'function' && window.fascEventEnded()) {
       throw new Error('O festival acabou — a caixinha Meow não recebe mais scraps.');
@@ -55,7 +66,7 @@
       window.CricriHostileFilter.assertClean(payload.body);
     }
     var res = await window.fascDb.from('inbox_anon').insert(payload).select('id').single();
-    if (res.error) throw res.error;
+    if (res.error) throw new Error(mapDbError(res.error));
     return res.data;
   }
 

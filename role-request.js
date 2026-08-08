@@ -9,8 +9,7 @@
   'use strict';
   if (window.CricriRoleRequest && window.CricriRoleRequest.__v3) return;
 
-  var ADMIN_EMAIL =
-    (window.FASC_CONFIG && window.FASC_CONFIG.adminEmail) || 'kaaiqq@gmail.com';
+  var ADMIN_EMAIL = null; // removido — Edge Function role-request
 
   var pickMode = false;
   var pickMarker = null;
@@ -637,7 +636,7 @@
       ].join('\n')
     );
     var a = document.createElement('a');
-    a.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + subject + '&body=' + body;
+    a.href = '#'; // legado: use js/role-request.js + Edge Function
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();

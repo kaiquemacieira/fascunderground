@@ -89,10 +89,10 @@
   <style>
     :root {
       --void: #0c0a08; --ink: #17120e; --paper: #ebe3cf; --cream: #f6efdc;
-      --rosa: #E6BE49; --rosa-deep: #C79A2E; --rosa-soft: rgba(230,190,73,0.16);
-      --ochre: #d49a2c; --ochre-deep: #a67418; --terra: #c4472a;
+      --rosa: #C1523E; --rosa-deep: #8F3A2A; --rosa-soft: rgba(193,82,62,0.16);
+      --ochre: #d49a2c; --ochre-deep: #7A2E1F; --terra: #c4472a;
       --azul: #1b4f5e; --stone: #8c8376;
-      --bezel: #E6BE49; --accent: #C79A2E; --shell-bg: #1a1210;
+      --bezel: #C1523E; --accent: #8F3A2A; --shell-bg: #1a1210;
       color-scheme: dark;
     }
     * { box-sizing: border-box; }
@@ -181,7 +181,7 @@
     .screen::before {
       content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
       background:
-        radial-gradient(circle at 22% 20%, rgba(230,190,73,0.16), transparent 42%),
+        radial-gradient(circle at 22% 20%, rgba(193,82,62,0.16), transparent 42%),
         radial-gradient(circle at 82% 78%, rgba(212,154,44,0.12), transparent 46%);
       animation: glow-drift 9s ease-in-out infinite;
     }
@@ -267,7 +267,7 @@
       background: rgba(212,47,98,0.12); color: var(--paper);
     }
     .life-chip.is-late { border-color: rgba(196,138,42,0.6); background: rgba(196,138,42,0.15); color: var(--ochre); }
-    .life-chip.is-dying { border-color: rgba(212,47,98,0.8); color: #C79A2E; }
+    .life-chip.is-dying { border-color: rgba(212,47,98,0.8); color: #8F3A2A; }
     .life-chip.is-ended { opacity: 0.6; }
 
     /* —— Evolução / Resonância —— */
@@ -453,9 +453,9 @@
       color: #d4c0ff;
     }
     .genome-chip.rarity-super {
-      border-color: rgba(230, 190, 73, 0.55);
-      color: #E6BE49;
-      box-shadow: 0 0 10px rgba(230, 190, 73, 0.25);
+      border-color: rgba(193, 82, 62, 0.55);
+      color: #C1523E;
+      box-shadow: 0 0 10px rgba(193, 82, 62, 0.25);
     }
     .mutation-toast {
       position: fixed; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom, 0px));
@@ -474,7 +474,7 @@
 
     /* Visual mutations on avatar stage */
     #tama-cat-stage.mut-gold-spot .sp-avatar-svg {
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35)) drop-shadow(0 0 8px rgba(230,190,73,0.45));
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35)) drop-shadow(0 0 8px rgba(193,82,62,0.45));
     }
     #tama-cat-stage.mut-eye-roda .sp-avatar-svg circle[fill="#1a120c"],
     #tama-cat-stage.mut-eye-roda .sp-avatar-svg ellipse[fill="#1a120c"] {
@@ -483,7 +483,7 @@
     #tama-cat-stage.mut-echo-notes::after {
       content: '♪';
       position: absolute; right: 12%; top: 18%;
-      font-size: 1.1rem; color: #E6BE49;
+      font-size: 1.1rem; color: #C1523E;
       animation: note-float 1.4s ease-in-out infinite;
       pointer-events: none;
     }
@@ -514,11 +514,11 @@
       animation-duration: 5.5s !important;
     }
     #tama-cat-stage.mut-prism-horn .sp-horn {
-      filter: brightness(1.35) drop-shadow(0 0 8px #E6BE49) !important;
+      filter: brightness(1.35) drop-shadow(0 0 8px #C1523E) !important;
       animation: horn-shimmer 1.2s ease-in-out infinite !important;
     }
     #tama-cat-stage.mut-total-chroma .sp-avatar-svg {
-      filter: drop-shadow(0 0 10px #e33d6b) drop-shadow(0 0 16px #5eb0d4) drop-shadow(0 0 8px #E6BE49);
+      filter: drop-shadow(0 0 10px #e33d6b) drop-shadow(0 0 16px #5eb0d4) drop-shadow(0 0 8px #C1523E);
       animation: total-chroma 3s linear infinite;
     }
     @keyframes total-chroma {
@@ -562,7 +562,7 @@
       background: rgba(94, 200, 160, 0.1);
       color: #9eebc8;
     }
-    #tama-cat-stage.epi-sun .sp-avatar-svg { filter: drop-shadow(0 0 8px rgba(230,190,73,0.4)); }
+    #tama-cat-stage.epi-sun .sp-avatar-svg { filter: drop-shadow(0 0 8px rgba(193,82,62,0.4)); }
     #tama-cat-stage.epi-night .sp-avatar-svg { filter: drop-shadow(0 0 10px rgba(100,120,200,0.45)); }
     #tama-cat-stage.epi-after .sp-body { animation-duration: 1s !important; }
     #tama-cat-stage.epi-heat::before {
@@ -671,7 +671,7 @@
       animation: note-float 1.3s ease-in-out infinite; pointer-events: none;
     }
     #tama-cat-stage.mut-hx-moon-prism .sp-avatar-svg {
-      filter: drop-shadow(0 0 12px rgba(180,140,255,0.55)) drop-shadow(0 0 6px #E6BE49);
+      filter: drop-shadow(0 0 12px rgba(180,140,255,0.55)) drop-shadow(0 0 6px #C1523E);
     }
     #tama-cat-stage.mut-hx-shell-soar .sp-shell {
       filter: drop-shadow(0 0 8px rgba(94,176,212,0.45));
@@ -802,7 +802,7 @@
     }
     @keyframes horn-shimmer {
       0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.45) drop-shadow(0 0 6px #E6BE49); }
+      50% { filter: brightness(1.45) drop-shadow(0 0 6px #C1523E); }
     }
     @keyframes mane-flow {
       0%, 100% { transform: translateX(0); }
@@ -930,8 +930,8 @@
       50% { transform: rotate(-8deg); }
     }
     @keyframes moon-glow {
-      0%, 100% { opacity: .7; filter: drop-shadow(0 0 2px #E6BE49); }
-      50% { opacity: 1; filter: drop-shadow(0 0 10px #E6BE49); }
+      0%, 100% { opacity: .7; filter: drop-shadow(0 0 2px #C1523E); }
+      50% { opacity: 1; filter: drop-shadow(0 0 10px #C1523E); }
     }
 
     /* Preá — nibble hop + whiskers */
@@ -1103,7 +1103,7 @@
     }
     .row-tools button:hover { color: var(--paper); border-color: var(--rosa); }
     .shell-dot { width: 1.35rem; height: 1.35rem; padding: 0; border-radius: 50%; }
-    .shell-dot[data-shell="rosa"] { background: #E6BE49; }
+    .shell-dot[data-shell="rosa"] { background: #C1523E; }
     .shell-dot[data-shell="ocre"] { background: #d49a2c; }
     .shell-dot[data-shell="azul"] { background: #2a5f8f; }
     .shell-dot[data-shell="stencil"] { background: #e6dcc4; }
@@ -1171,14 +1171,14 @@
 
     
     html[data-theme="light"], html[data-a11y-theme="light"] {
-      --void: #f3ecdc; --paper: #17120e; --stone: #5c564e; --rosa: #E6BE49; --ochre: #b8821a;
-      --bezel: #E6BE49; --accent: #c42a58; --shell-bg: #fffef8;
+      --void: #f3ecdc; --paper: #17120e; --stone: #5c564e; --rosa: #C1523E; --ochre: #b8821a;
+      --bezel: #C1523E; --accent: #c42a58; --shell-bg: #fffef8;
     }
     html[data-theme="light"] body {
       background: var(--void);
       color: var(--paper);
       background-image:
-        radial-gradient(ellipse 90% 55% at 50% -15%, rgba(230, 190, 73, 0.12), transparent),
+        radial-gradient(ellipse 90% 55% at 50% -15%, rgba(193, 82, 62, 0.12), transparent),
         radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212, 154, 44, 0.08), transparent);
     }
     html[data-theme="light"] .device { box-shadow: 5px 7px 0 rgba(23,18,14,0.15); }
@@ -1192,7 +1192,7 @@
 
     /* —— Device moderno CRICRI (combina com o site) —— */
     .device {
-      --fur: #E6BE49; --fur-light: #f7c9d6; --fur-ear: #ffe1ea;
+      --fur: #C1523E; --fur-light: #f7c9d6; --fur-ear: #ffe1ea;
       position: relative;
       max-width: 20.5rem;
       margin: 0 auto 1rem;
@@ -1236,13 +1236,13 @@
     }
     .shell-picker button:hover { transform: translateY(-2px) scale(1.06); }
     .shell-picker button[aria-pressed="true"] { outline: 2px solid #fff; outline-offset: 2px; }
-    .shell-picker [data-shell="rosa"] { background: linear-gradient(135deg, #C79A2E, #E6BE49); }
+    .shell-picker [data-shell="rosa"] { background: linear-gradient(135deg, #8F3A2A, #C1523E); }
     .shell-picker [data-shell="ocre"] { background: linear-gradient(135deg, #ffe066, #d49a2c); }
     .shell-picker [data-shell="azul"] { background: linear-gradient(135deg, #5ec4d6, #1b4f5e); }
     .shell-picker [data-shell="tuxedo"] { background: linear-gradient(135deg, #6a6258, #1a1512); }
     .tama-page-bg {
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(230,190,73,0.22), transparent 55%),
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(193,82,62,0.22), transparent 55%),
         radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212,154,44,0.1), transparent) !important;
     }
 
@@ -1294,8 +1294,8 @@
   min-height: 44px;
   padding: 0.55rem 1rem;
   border-radius: 999px;
-  border: 1.5px solid rgba(230, 190, 73, 0.55);
-  background: rgba(230, 190, 73, 0.14);
+  border: 1.5px solid rgba(193, 82, 62, 0.55);
+  background: rgba(193, 82, 62, 0.14);
   color: #f2e8d2;
   font-family: Oswald, system-ui, sans-serif;
   font-weight: 700;
@@ -1306,15 +1306,15 @@
   touch-action: manipulation;
 }
 .btn-share-cricri:hover {
-  background: rgba(230, 190, 73, 0.28);
-  border-color: #E6BE49;
+  background: rgba(193, 82, 62, 0.28);
+  border-color: #C1523E;
 }
 .btn-share-cricri:disabled {
   opacity: 0.65;
   cursor: wait;
 }
 .btn-share-cricri:focus-visible {
-  outline: 2px solid #E6BE49;
+  outline: 2px solid #C1523E;
   outline-offset: 2px;
 }
 
@@ -1333,9 +1333,9 @@
 .tama-card[hidden] { display: none !important; }
 .tama-card-inner {
   border-radius: 14px;
-  border: 1.5px solid rgba(230, 190, 73, 0.35);
+  border: 1.5px solid rgba(193, 82, 62, 0.35);
   background:
-    linear-gradient(145deg, rgba(230, 190, 73, 0.14), transparent 55%),
+    linear-gradient(145deg, rgba(193, 82, 62, 0.14), transparent 55%),
     rgba(28, 21, 17, 0.72);
   padding: 0.9rem 1rem;
   box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.3);
@@ -1352,8 +1352,8 @@
   display: grid;
   place-items: center;
   font-size: 1.75rem;
-  background: rgba(230, 190, 73, 0.15);
-  border: 1.5px solid rgba(230, 190, 73, 0.35);
+  background: rgba(193, 82, 62, 0.15);
+  border: 1.5px solid rgba(193, 82, 62, 0.35);
   flex-shrink: 0;
 }
 .tama-card-meta { min-width: 0; flex: 1; }
@@ -1363,7 +1363,7 @@
   font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #E6BE49;
+  color: #C1523E;
 }
 .tama-card-name {
   margin: 0.15rem 0 0;
@@ -1389,11 +1389,11 @@
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #E6BE49;
+  color: #C1523E;
   text-decoration: none;
-  border-bottom: 1px solid rgba(230, 190, 73, 0.4);
+  border-bottom: 1px solid rgba(193, 82, 62, 0.4);
 }
-.tama-card-link:hover { color: #C79A2E; }
+.tama-card-link:hover { color: #8F3A2A; }
 .tama-card-cta {
   text-align: center;
   padding: 0.35rem 0.25rem;
@@ -1411,7 +1411,7 @@
   min-height: 44px;
   padding: 0.55rem 1.1rem;
   border-radius: 999px;
-  background: #E6BE49;
+  background: #C1523E;
   color: #fff;
   font-family: Oswald, system-ui, sans-serif;
   font-weight: 700;
@@ -1423,7 +1423,7 @@
 }
 .tama-card-cta .btn:hover { filter: brightness(1.06); }
 html[data-theme="light"] .tama-card-inner {
-  background: linear-gradient(145deg, rgba(230, 190, 73, 0.1), transparent 55%), #f7f0e2;
+  background: linear-gradient(145deg, rgba(193, 82, 62, 0.1), transparent 55%), #f7f0e2;
   border-color: rgba(28, 21, 17, 0.2);
   box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.12);
 }
@@ -1486,8 +1486,8 @@ html[data-theme="light"] .tama-card-stats strong { color: #17120e; }
   min-height: 5.4rem;
 }
 .tama-album-item.is-owned {
-  border-color: rgba(230, 190, 73, 0.45);
-  background: rgba(230, 190, 73, 0.12);
+  border-color: rgba(193, 82, 62, 0.45);
+  background: rgba(193, 82, 62, 0.12);
   opacity: 1;
   filter: none;
 }
@@ -1529,8 +1529,8 @@ html[data-theme="light"] .tama-album-item {
 }
 html[data-theme="light"] .tama-album-name { color: #17120e; }
 html[data-theme="light"] .tama-album-item.is-owned {
-  background: rgba(230, 190, 73, 0.1);
-  border-color: rgba(230, 190, 73, 0.35);
+  background: rgba(193, 82, 62, 0.1);
+  border-color: rgba(193, 82, 62, 0.35);
 }
 .sr-only {
   position: absolute;
@@ -1554,8 +1554,8 @@ html[data-theme="light"] .tama-album-item.is-owned {
   100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
 }
 @keyframes tama-glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 190, 73, 0); }
-  50% { box-shadow: 0 0 14px 1px rgba(230, 190, 73, 0.35); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(193, 82, 62, 0); }
+  50% { box-shadow: 0 0 14px 1px rgba(193, 82, 62, 0.35); }
 }
 @keyframes tama-card-sheen {
   0% { background-position: 120% 0; }
@@ -1787,8 +1787,8 @@ html[data-theme="light"] .tama-album-rarity--super { color: #a67c00 !important; 
 
 /* cores por TIPO de item (tema) — base da figurinha */
 .tama-type--nascimento {
-  --type-accent: #E6BE49;
-  --type-bg: rgba(230, 190, 73, 0.14);
+  --type-accent: #C1523E;
+  --type-bg: rgba(193, 82, 62, 0.14);
 }
 .tama-type--comida {
   --type-accent: #d49a2c;
@@ -1943,10 +1943,10 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
     }
     .ladder-chip.is-current {
       opacity: 1;
-      border-color: rgba(230,190,73,0.55) !important;
-      color: #E6BE49 !important;
-      background: rgba(230,190,73,0.12) !important;
-      box-shadow: 0 0 10px rgba(230,190,73,0.2);
+      border-color: rgba(193,82,62,0.55) !important;
+      color: #C1523E !important;
+      background: rgba(193,82,62,0.12) !important;
+      box-shadow: 0 0 10px rgba(193,82,62,0.2);
     }
     .ladder-chip.is-pending {
       opacity: 1;
@@ -1977,10 +1977,10 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       border: 1.5px solid transparent;
     }
     .evo-cta-ready {
-      background: linear-gradient(135deg, #E6BE49, #c4472a);
+      background: linear-gradient(135deg, #C1523E, #c4472a);
       color: #1a120c;
-      border-color: rgba(230,190,73,0.6);
-      box-shadow: 0 4px 20px rgba(230,190,73,0.35);
+      border-color: rgba(193,82,62,0.6);
+      box-shadow: 0 4px 20px rgba(193,82,62,0.35);
       animation: hx-pulse 2s ease-in-out infinite;
     }
     .evo-cta-wait {
@@ -2031,10 +2031,10 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       cursor: pointer;
     }
     .family-pet-btn.is-active {
-      border-color: rgba(230,190,73,0.55);
-      background: rgba(230,190,73,0.15);
-      color: #E6BE49;
-      box-shadow: 0 0 12px rgba(230,190,73,0.2);
+      border-color: rgba(193,82,62,0.55);
+      background: rgba(193,82,62,0.15);
+      color: #C1523E;
+      box-shadow: 0 0 12px rgba(193,82,62,0.2);
     }
 
     /* Roda genética — botão principal */
@@ -2115,12 +2115,12 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       color: #9edfff;
     }
     .hx-act-mate {
-      border: 1.5px solid rgba(230,190,73,0.5);
-      background: linear-gradient(135deg, rgba(230,190,73,0.25), rgba(227,61,107,0.15));
+      border: 1.5px solid rgba(193,82,62,0.5);
+      background: linear-gradient(135deg, rgba(193,82,62,0.25), rgba(227,61,107,0.15));
       color: #f2e8d2;
     }
     .hx-act-mate:hover {
-      box-shadow: 0 0 14px rgba(230,190,73,0.25);
+      box-shadow: 0 0 14px rgba(193,82,62,0.25);
     }
 
 
@@ -2129,9 +2129,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       width: 100%;
       margin-top: 0.45rem;
       appearance: none;
-      border: 1.5px solid rgba(230,190,73,0.4);
-      background: rgba(230,190,73,0.1);
-      color: #E6BE49;
+      border: 1.5px solid rgba(193,82,62,0.4);
+      background: rgba(193,82,62,0.1);
+      color: #C1523E;
       border-radius: 10px;
       padding: 0.5rem 0.65rem;
       font: 700 0.68rem/1 Oswald, system-ui, sans-serif;
@@ -2140,7 +2140,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       cursor: pointer;
     }
     .family-tree-btn:hover {
-      background: rgba(230,190,73,0.2);
+      background: rgba(193,82,62,0.2);
     }
 
     .genealogy-sheet {
@@ -2159,9 +2159,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
       background:
-        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(230,190,73,0.1), transparent 55%),
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(193,82,62,0.1), transparent 55%),
         linear-gradient(165deg, #221c18, #0e0c0a);
-      border: 1.5px solid rgba(230,190,73,0.4);
+      border: 1.5px solid rgba(193,82,62,0.4);
       border-radius: 22px 22px 0 0;
       padding: 0.5rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
       color: #ebe3cf;
@@ -2186,9 +2186,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       max-width: 9.5rem;
     }
     .gen-root-node {
-      border-color: rgba(230,190,73,0.5);
-      background: rgba(230,190,73,0.1);
-      box-shadow: 0 0 20px rgba(230,190,73,0.15);
+      border-color: rgba(193,82,62,0.5);
+      background: rgba(193,82,62,0.1);
+      box-shadow: 0 0 20px rgba(193,82,62,0.15);
     }
     .gen-emoji { font-size: 1.6rem; line-height: 1.2; margin-bottom: 0.25rem; }
     .gen-node strong {
@@ -2202,7 +2202,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       color: rgba(250,250,247,0.45);
       margin-top: 0.15rem;
     }
-    .gen-form { color: #E6BE49 !important; }
+    .gen-form { color: #C1523E !important; }
     .gen-count {
       text-align: center;
       font-size: 0.72rem;
@@ -2241,7 +2241,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       width: 2px;
       height: 18px;
       margin: 0.35rem auto;
-      background: linear-gradient(180deg, rgba(230,190,73,0.5), rgba(94,176,212,0.5));
+      background: linear-gradient(180deg, rgba(193,82,62,0.5), rgba(94,176,212,0.5));
       border-radius: 2px;
     }
     .gen-child {
@@ -2460,9 +2460,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       min-height: 42px;
       padding: 0.5rem 0.85rem;
       border-radius: 999px;
-      border: 1.5px solid rgba(230,190,73,0.4);
-      background: rgba(230,190,73,0.1);
-      color: #E6BE49;
+      border: 1.5px solid rgba(193,82,62,0.4);
+      background: rgba(193,82,62,0.1);
+      color: #C1523E;
       font: 700 0.72rem/1 Oswald, system-ui, sans-serif;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -2470,8 +2470,8 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       box-sizing: border-box;
     }
     .tama-tutorial-btn:hover {
-      background: rgba(230,190,73,0.2);
-      border-color: rgba(230,190,73,0.65);
+      background: rgba(193,82,62,0.2);
+      border-color: rgba(193,82,62,0.65);
     }
 
     /* Tutorial sheet */
@@ -2491,9 +2491,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
       background:
-        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(230,190,73,0.12), transparent 55%),
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(193,82,62,0.12), transparent 55%),
         linear-gradient(165deg, #2a221c, #120e0c);
-      border: 1.5px solid rgba(230,190,73,0.4);
+      border: 1.5px solid rgba(193,82,62,0.4);
       border-radius: 22px 22px 0 0;
       padding: 0.5rem 1.1rem calc(1.3rem + env(safe-area-inset-bottom, 0px));
       color: #ebe3cf;
@@ -2531,7 +2531,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
     .tt-step strong {
       display: block;
       font-size: 0.82rem;
-      color: #E6BE49;
+      color: #C1523E;
       margin-bottom: 0.15rem;
     }
     .tt-step p {
@@ -2551,9 +2551,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       font-size: 0.65rem;
       padding: 0.25rem 0.5rem;
       border-radius: 999px;
-      border: 1px solid rgba(230,190,73,0.3);
+      border: 1px solid rgba(193,82,62,0.3);
       color: #ebe3cf;
-      background: rgba(230,190,73,0.08);
+      background: rgba(193,82,62,0.08);
     }
     .tt-close {
       width: 100%;
@@ -2570,7 +2570,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
     }
     @media (min-width: 480px) {
       .tama-tutorial-sheet { align-items: center; padding: 1.25rem; }
-      .tama-tutorial-card { border-radius: 20px; border: 1.5px solid rgba(230,190,73,0.4); }
+      .tama-tutorial-card { border-radius: 20px; border: 1.5px solid rgba(193,82,62,0.4); }
     }
 
     /* Top tools (gear) no tamagotchi */
@@ -2593,7 +2593,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       border-radius: 12px !important;
       border: 1.5px solid rgba(250,250,247,0.25) !important;
       background: rgba(20,20,20,0.92) !important;
-      color: #E6BE49 !important;
+      color: #C1523E !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -2603,14 +2603,14 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
     #cricri-gear-btn:hover {
-      border-color: rgba(230,190,73,0.55) !important;
+      border-color: rgba(193,82,62,0.55) !important;
       background: rgba(40,32,24,0.95) !important;
     }
     #cricri-gear-panel {
       pointer-events: auto !important;
     }
     #cricri-gear-panel .gear-link:hover {
-      background: rgba(230,190,73,0.12) !important;
+      background: rgba(193,82,62,0.12) !important;
     }
 
     /* —— Layout fix CRICRI pet (anti-overflow) —— */
@@ -2701,9 +2701,9 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
       background:
-        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(230,190,73,0.12), transparent 55%),
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(193,82,62,0.12), transparent 55%),
         linear-gradient(165deg, #2a221c 0%, #14110e 55%, #0c0a08 100%);
-      border: 1.5px solid rgba(230,190,73,0.4);
+      border: 1.5px solid rgba(193,82,62,0.4);
       border-bottom: none;
       border-radius: 22px 22px 0 0;
       padding: 0.55rem 1rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
@@ -2711,7 +2711,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       box-sizing: border-box;
       box-shadow:
         0 -12px 40px rgba(0,0,0,0.5),
-        0 0 0 1px rgba(230,190,73,0.08);
+        0 0 0 1px rgba(193,82,62,0.08);
       animation: tama-sp-up 0.32s cubic-bezier(0.2, 0.85, 0.25, 1);
     }
     @keyframes tama-sp-up {
@@ -2730,7 +2730,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       font: 700 0.68rem/1 Oswald, system-ui, sans-serif;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #E6BE49;
+      color: #C1523E;
       text-align: center;
     }
     .tama-sp-title {
@@ -2773,17 +2773,17 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       justify-content: center;
     }
     #tama-species-grid button:hover {
-      border-color: rgba(230,190,73,0.45);
-      background: rgba(230,190,73,0.08);
-      box-shadow: 0 0 18px rgba(230,190,73,0.12);
+      border-color: rgba(193,82,62,0.45);
+      background: rgba(193,82,62,0.08);
+      box-shadow: 0 0 18px rgba(193,82,62,0.12);
     }
     #tama-species-grid button:active {
-      border-color: rgba(230,190,73,0.7);
-      background: rgba(230,190,73,0.14);
+      border-color: rgba(193,82,62,0.7);
+      background: rgba(193,82,62,0.14);
       transform: scale(0.97);
     }
     #tama-species-grid button:focus-visible {
-      outline: 2px solid #E6BE49;
+      outline: 2px solid #C1523E;
       outline-offset: 2px;
     }
     #tama-species-grid .tama-sp-emoji {
@@ -2814,7 +2814,7 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
       }
       #tama-species-picker .tama-sp-card {
         border-radius: 20px;
-        border: 1.5px solid rgba(230,190,73,0.4);
+        border: 1.5px solid rgba(193,82,62,0.4);
         max-height: min(85vh, 620px);
         padding: 1.25rem 1.15rem 1.35rem;
       }
@@ -2862,15 +2862,15 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
 .tama-confirm-card {
   width: min(380px, 100%);
   background:
-    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(230,190,73,0.16), transparent 55%),
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(193,82,62,0.16), transparent 55%),
     linear-gradient(165deg, #2e241c 0%, #1a1512 55%, #120e0c 100%);
-  border: 1.5px solid rgba(230, 190, 73, 0.5);
+  border: 1.5px solid rgba(193, 82, 62, 0.5);
   border-radius: 20px;
   padding: 1.5rem 1.3rem 1.25rem;
   box-shadow:
-    0 0 0 1px rgba(230,190,73,0.1),
+    0 0 0 1px rgba(193,82,62,0.1),
     0 20px 48px rgba(0,0,0,0.55),
-    0 0 40px rgba(230,190,73,0.1);
+    0 0 40px rgba(193,82,62,0.1);
   text-align: center;
   animation: tama-card-in 0.28s cubic-bezier(0.2, 0.85, 0.25, 1);
 }
@@ -2882,10 +2882,10 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
   display: grid;
   place-items: center;
   font-size: 1.5rem;
-  background: rgba(230,190,73,0.14);
-  border: 2px solid rgba(230,190,73,0.45);
-  color: #E6BE49;
-  box-shadow: 0 0 24px rgba(230,190,73,0.28);
+  background: rgba(193,82,62,0.14);
+  border: 2px solid rgba(193,82,62,0.45);
+  color: #C1523E;
+  box-shadow: 0 0 24px rgba(193,82,62,0.28);
 }
 .tama-confirm-card h2 {
   margin: 0 0 0.5rem;
@@ -2935,31 +2935,31 @@ html[data-theme="light"] .tama-album-item.is-owned[class*="tama-type--"] {
 }
 .tama-btn-cancel:active { transform: scale(0.98); }
 .tama-btn-danger {
-  background: linear-gradient(135deg, #E6BE49 0%, #d49a2c 45%, #c4472a 100%);
+  background: linear-gradient(135deg, #C1523E 0%, #d49a2c 45%, #c4472a 100%);
   border: none;
   color: #1a120c;
   font-weight: 700;
-  box-shadow: 0 4px 18px rgba(230,190,73,0.35);
+  box-shadow: 0 4px 18px rgba(193,82,62,0.35);
 }
 .tama-btn-danger:hover {
   filter: brightness(1.06);
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(230,190,73,0.42);
+  box-shadow: 0 6px 22px rgba(193,82,62,0.42);
 }
 .tama-btn-danger:active { transform: scale(0.98); }
 .tama-btn-danger:focus-visible,
 .tama-btn-cancel:focus-visible {
-  outline: 2px solid #E6BE49;
+  outline: 2px solid #C1523E;
   outline-offset: 3px;
 }
 button[data-action="reset"] {
-  border-color: rgba(230,190,73,0.45) !important;
-  color: #E6BE49 !important;
-  background: rgba(230,190,73,0.12) !important;
+  border-color: rgba(193,82,62,0.45) !important;
+  color: #C1523E !important;
+  background: rgba(193,82,62,0.12) !important;
 }
 button[data-action="reset"]:hover {
-  background: rgba(230,190,73,0.22) !important;
-  box-shadow: 0 0 12px rgba(230,190,73,0.22);
+  background: rgba(193,82,62,0.22) !important;
+  box-shadow: 0 0 12px rgba(193,82,62,0.22);
 }
 @media (prefers-reduced-motion: reduce) {
   .tama-confirm-overlay,
@@ -3007,18 +3007,18 @@ nav.bottom-nav[data-cricri-nav="1"] .bn-label{
   display:block!important;font-size:0.58rem!important;line-height:1!important;
   color:inherit!important;opacity:1!important;visibility:visible!important;
 }
-nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#E6BE49!important}
+nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#C1523E!important}
 nav.bottom-nav[data-cricri-nav="1"] .bn-ico{display:flex;width:24px;height:24px;align-items:center;justify-content:center}
 nav.bottom-nav[data-cricri-nav="1"] .bn-ico svg{width:22px;height:22px}
 nav.bottom-nav[data-cricri-nav="1"] .bn-create-wrap{display:flex;align-items:center;justify-content:center}
 nav.bottom-nav[data-cricri-nav="1"] button.bn-create{
   width:48px;height:48px;margin-top:-12px;border-radius:14px;border:1.5px solid rgba(250,250,247,0.22);
-  background:#141414;color:#E6BE49;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:#141414;color:#C1523E;display:flex;align-items:center;justify-content:center;cursor:pointer;
 }
 nav.bottom-nav[data-cricri-nav="1"] button.bn-create .bn-plus{width:18px;height:18px}
 html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"]{background:rgba(255,255,255,0.97)!important;border-top-color:rgba(17,17,17,0.12)!important}
 html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item{color:rgba(17,17,17,0.45)!important}
-html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#D4A72C!important}
+html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] a.bn-item.active{color:#A8452F!important}
 html[data-theme="light"] nav.bottom-nav[data-cricri-nav="1"] button.bn-create{background:#fff;border-color:rgba(17,17,17,0.15)}
 body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
 </style>
@@ -3122,7 +3122,7 @@ body {
     <button type="button" id="cricri-gear-btn" aria-label="Menu" aria-expanded="false" aria-controls="cricri-gear-panel">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="6" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18" r="1.8"/></svg>
     </button>
-    <div id="cricri-gear-panel" hidden style="display:none;position:absolute;top:48px;left:0;min-width:180px;background:#1a1512;border:1px solid rgba(230,190,73,.35);border-radius:12px;padding:.5rem;z-index:2147483006">
+    <div id="cricri-gear-panel" hidden style="display:none;position:absolute;top:48px;left:0;min-width:180px;background:#1a1512;border:1px solid rgba(193,82,62,.35);border-radius:12px;padding:.5rem;z-index:2147483006">
       <button type="button" class="gear-link" id="cricri-gear-a11y" style="display:flex;width:100%;gap:.5rem;padding:.55rem .65rem;background:transparent;border:none;color:#ebe3cf;cursor:pointer;border-radius:8px;font:600 .8rem Inter,system-ui;text-align:left">♿ Acessibilidade</button>
       <button type="button" class="gear-link" id="cricri-gear-theme" style="display:flex;width:100%;gap:.5rem;padding:.55rem .65rem;background:transparent;border:none;color:#ebe3cf;cursor:pointer;border-radius:8px;font:600 .8rem Inter,system-ui;text-align:left">🌓 Alternar tema</button>
       <a href="index.html" style="display:flex;width:100%;gap:.5rem;padding:.55rem .65rem;color:#ebe3cf;text-decoration:none;border-radius:8px;font:600 .8rem Inter,system-ui">← Home</a>
@@ -3136,7 +3136,7 @@ body {
     var panel = document.getElementById('cricri-gear-panel');
     if (!btn || !panel || btn.getAttribute('data-wired') === '1') return;
     btn.setAttribute('data-wired', '1');
-    panel.style.cssText = 'position:fixed;top:52px;left:max(0.55rem,env(safe-area-inset-left));min-width:200px;background:#1a1512;border:1.5px solid rgba(230,190,73,0.45);border-radius:14px;padding:0.45rem;z-index:2147483647;box-shadow:0 12px 32px rgba(0,0,0,0.55);display:none;';
+    panel.style.cssText = 'position:fixed;top:52px;left:max(0.55rem,env(safe-area-inset-left));min-width:200px;background:#1a1512;border:1.5px solid rgba(193,82,62,0.45);border-radius:14px;padding:0.45rem;z-index:2147483647;box-shadow:0 12px 32px rgba(0,0,0,0.55);display:none;';
     function open() { panel.removeAttribute('hidden'); panel.style.display = 'block'; btn.setAttribute('aria-expanded', 'true'); }
     function close() { panel.style.display = 'none'; panel.setAttribute('hidden', ''); btn.setAttribute('aria-expanded', 'false'); }
     btn.addEventListener('click', function (e) {
@@ -3334,9 +3334,9 @@ body {
                   </g>
                   <g class="acc-crown">
                     <!-- coroa-frontão anciã -->
-                    <path d="M76,28 L84,44 L100,28 L116,44 L124,28 L124,46 L76,46 Z" fill="var(--ochre)" stroke="var(--ochre-deep, #a67418)" stroke-width="1.5"/>
+                    <path d="M76,28 L84,44 L100,28 L116,44 L124,28 L124,46 L76,46 Z" fill="var(--ochre)" stroke="var(--ochre-deep, #7A2E1F)" stroke-width="1.5"/>
                     <circle cx="100" cy="26" r="3.4" fill="var(--rosa)"/>
-                    <path d="M88,40 Q100,34 112,40" fill="none" stroke="var(--rosa-deep, #C79A2E)" stroke-width="1.2" opacity="0.7"/>
+                    <path d="M88,40 Q100,34 112,40" fill="none" stroke="var(--rosa-deep, #8F3A2A)" stroke-width="1.2" opacity="0.7"/>
                   </g>
                   <g class="acc-sparkle" fill="var(--ochre)">
                     <path d="M28,90 l2,7 7,2 -7,2 -2,7 -2,-7 -7,-2 7,-2 Z"/>

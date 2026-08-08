@@ -20,7 +20,7 @@ import { SPOTS_FALLBACK, POIS } from '../data/spotsFallback';
 import { fetchSpots, submitRoleRequest } from '../lib/supabase';
 import { buildMapHtml } from '../lib/leafletMapHtml';
 
-const ADMIN_EMAIL = 'kaaiqq@gmail.com';
+/* ADMIN_EMAIL removido — notifica via Edge Function */
 
 export default function MapScreen() {
   const webRef = useRef(null);
@@ -175,9 +175,7 @@ export default function MapScreen() {
       ].join('\n')
     );
     try {
-      await Linking.openURL(
-        `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent('[CRICRI] ' + payload.title)}&body=${body}`
-      );
+      /* notifica admin via Edge Function role-request */ await (async function(){ try { var base = process.env.EXPO_PUBLIC_SUPABASE_URL || ''; var anon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''; if (!base) return; await fetch(String(base).replace(/\/$/, '') + '/functions/v1/role-request', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + anon, apikey: anon }, body: JSON.stringify(payload) }); } catch(e) {} })();
     } catch (_) {}
     setSending(false);
     setStatusMsg('Solicitação enviada!');
